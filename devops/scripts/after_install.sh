@@ -29,6 +29,26 @@ nginx -t
 systemctl reload nginx
 echo "[deploy] Nginx config deployed and reloaded"
 
+# Ensure serve is installed globally
+if ! command -v serve &>/dev/null; then
+  echo "[deploy] serve not found. Installing globally..."
+  npm install -g serve
+fi
+
+# Ensure node is available at both /usr/bin/node and /usr/local/bin/node
+NODE_PATH=$(which node 2>/dev/null || true)
+if [ -n "$NODE_PATH" ]; then
+  [ -f /usr/bin/node ] || ln -sf "$NODE_PATH" /usr/bin/node
+  [ -f /usr/local/bin/node ] || ln -sf "$NODE_PATH" /usr/local/bin/node
+fi
+
+# Ensure serve is available at both /usr/bin/serve and /usr/local/bin/serve
+SERVE_PATH=$(which serve 2>/dev/null || true)
+if [ -n "$SERVE_PATH" ]; then
+  [ -f /usr/bin/serve ] || ln -sf "$SERVE_PATH" /usr/bin/serve
+  [ -f /usr/local/bin/serve ] || ln -sf "$SERVE_PATH" /usr/local/bin/serve
+fi
+
 # 4. Deploy and enable systemd service files from repo
 for SVC in welllabs-backend.service welllabs-frontend.service; do
   [ -f "${DEPLOY_DIR}/devops/systemd/${SVC}" ] || { echo "[deploy] ERROR: ${SVC} missing"; exit 1; }
