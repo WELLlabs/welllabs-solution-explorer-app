@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import './Dashboard.css';
 import Analytics from './Analytics';
 
@@ -47,7 +47,7 @@ const Dashboard = () => {
   const fetchUsers = async () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem('user'));
-      const res = await axios.get('http://localhost:5000/api/auth/users', {
+      const res = await api.get('/auth/users', {
         headers: { Authorization: `Bearer ${storedUser.token}` }
       });
       setAllUsers(res.data);
@@ -62,7 +62,7 @@ const Dashboard = () => {
     setUpdatingUserId(userId);
     try {
       const storedUser = JSON.parse(localStorage.getItem('user'));
-      await axios.put(`http://localhost:5000/api/auth/users/${userId}/role`, 
+      await api.put(`/auth/users/${userId}/role`, 
         { role: newRole },
         { headers: { Authorization: `Bearer ${storedUser.token}` } }
       );

@@ -1,0 +1,48 @@
+version: 0.0
+os: linux
+
+# ============================================================
+#  WellLabs Solution Explorer — CodeDeploy AppSpec
+#  Must be at the REPOSITORY ROOT (required by CodeDeploy).
+#
+#  CodeDeploy copies all files to /opt/welllabs/deployment
+#  then runs 4 lifecycle hooks:
+#
+#  BeforeInstall    → clean staging dir
+#  AfterInstall     → npm ci + deploy nginx.conf + systemd units
+#  ApplicationStart → ★ zero-downtime port-swap (frontend + backend)
+#  ValidateService  → 6-point health check
+# ============================================================
+
+files:
+  - source: /
+    destination: /opt/welllabs/deployment
+file_exists_behavior: OVERWRITE
+
+permissions:
+  - object: /opt/welllabs/deployment/devops/scripts
+    pattern: '**'
+    mode: '755'
+    type:
+      - file
+
+hooks:
+  BeforeInstall:
+    - location: devops/scripts/before_install.sh
+      timeout: 60
+      runas: root
+
+  AfterInstall:
+    - location: devops/scripts/after_install.sh
+      timeout: 300
+      runas: root
+
+  ApplicationStart:
+    - location: devops/scripts/application_start.sh
+      timeout: 360
+      runas: root
+
+  ValidateService:
+    - location: devops/scripts/validate_service.sh
+      timeout: 60
+      runas: root

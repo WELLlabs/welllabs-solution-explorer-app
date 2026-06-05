@@ -1,0 +1,38 @@
+[Unit]
+Description=WellLabs Backend — Express API (port 8000)
+Documentation=https://expressjs.com/
+After=network.target mongod.service
+Wants=mongod.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/welllabs/backend/current
+
+# Load shared secrets (.env)
+EnvironmentFile=/opt/welllabs/shared/.env
+
+# Ensure backend always runs on the active port
+Environment=NODE_ENV=production
+Environment=PORT=5000
+
+# Start Express app
+ExecStart=/usr/bin/node server.js
+
+# Auto-restart on crash
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Log to files (shipped to CloudWatch)
+StandardOutput=append:/opt/welllabs/logs/backend.log
+StandardError=append:/opt/welllabs/logs/backend-error.log
+
+# Clean shutdown — allow 15s for Express to drain connections
+TimeoutStopSec=15
+KillMode=mixed
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target

@@ -1,17 +1,12 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-
-  // Configure base URL for Axios
-  const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
-  });
 
   useEffect(() => {
     // Check if user is logged in on load

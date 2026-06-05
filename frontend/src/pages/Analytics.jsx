@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import './Analytics.css';
 
 const Analytics = () => {
@@ -23,13 +23,12 @@ const Analytics = () => {
         const token = storedUser?.token;
         
         const headers = { Authorization: `Bearer ${token}` };
-        const apiBase = 'http://localhost:5000/api/analytics';
 
         // Fetch all three endpoints in parallel
         const [overviewRes, corpRes, wardRes] = await Promise.all([
-          axios.get(`${apiBase}/overview`, { headers }),
-          axios.get(`${apiBase}/corporation`, { headers }),
-          axios.get(`${apiBase}/ward`, { headers })
+          api.get('/analytics/overview', { headers }),
+          api.get('/analytics/corporation', { headers }),
+          api.get('/analytics/ward', { headers })
         ]);
 
         setOverview(overviewRes.data);

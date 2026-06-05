@@ -1,0 +1,32 @@
+[Unit]
+Description=WellLabs Frontend — React SPA via serve (port 3000)
+Documentation=https://github.com/vercel/serve
+After=network.target
+
+[Service]
+Type=simple
+User=root
+
+# Serve React build in SPA mode (-s = single-page app, serves index.html for all 404s)
+ExecStart=/usr/local/bin/serve -s /opt/welllabs/frontend/current -l 3000
+
+# Environment
+Environment=NODE_ENV=production
+
+# Auto-restart on crash
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Log to files (shipped to CloudWatch)
+StandardOutput=append:/opt/welllabs/logs/frontend.log
+StandardError=append:/opt/welllabs/logs/frontend-error.log
+
+# Clean shutdown
+TimeoutStopSec=10
+KillMode=mixed
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target
