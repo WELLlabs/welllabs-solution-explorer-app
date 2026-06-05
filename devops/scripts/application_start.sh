@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
-exec >> /var/log/welllabs-deploy.log 2>&1
 
 echo "[deploy] ApplicationStart — $(date)"
+
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 DEPLOY_DIR="/opt/welllabs/deployment"

@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
-exec >> /var/log/welllabs-deploy.log 2>&1
 
 echo "[deploy] BeforeInstall — $(date)"
+
 
 # Clean and recreate staging area
 rm -rf /opt/welllabs/deployment
