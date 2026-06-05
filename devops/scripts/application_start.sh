@@ -20,7 +20,10 @@ check() {
   local PORT="$1" URL="$2"
   for i in $(seq 1 30); do
     CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$URL" 2>/dev/null || echo "000")
-    [ "$CODE" = "200" ] && { echo "[deploy] OK :${PORT} (attempt $i)"; return 0; }
+    if [ "$CODE" = "200" ]; then
+      echo "[deploy] OK :${PORT} (attempt $i)"
+      return 0
+    fi
     echo "[deploy] :${PORT} → $CODE, retry $i/30..."
     sleep 3
   done
@@ -54,11 +57,23 @@ sleep 1
 
 # ── STEP 4: Start test processes (invisible to Nginx) ─────────
 cd "$BACKEND_REL"
+
+# Normalize line endings of shared .env in case they have carriage returns (\r)
+if [ -f "$SHARED_ENV" ]; then
+  sed -i 's/\r$//' "$SHARED_ENV"
+fi
+
 set -a; source "$SHARED_ENV"; set +a
 PORT=${BACKEND_TEST_PORT} node server.js >> /opt/welllabs/logs/backend-test.log 2>&1 &
 BACKEND_TEST_PID=$!
 
-/usr/local/bin/serve -s "$FRONTEND_REL" -l ${FRONTEND_TEST_PORT} \
+# Dynamically find the serve binary to be highly robust, falling back to /usr/local/bin/serve
+SERVE_BIN="/usr/local/bin/serve"
+if [ ! -x "$SERVE_BIN" ]; then
+  SERVE_BIN=$(which serve 2>/dev/null || echo "/usr/bin/serve")
+fi
+
+"$SERVE_BIN" -s "$FRONTEND_REL" -l ${FRONTEND_TEST_PORT} \
   >> /opt/welllabs/logs/frontend-test.log 2>&1 &
 FRONTEND_TEST_PID=$!
 
@@ -91,6 +106,13 @@ if [ "$BACKEND_OK" = "true" ] && [ "$FRONTEND_OK" = "true" ]; then
   echo "[deploy] SUCCESS — $(date)"
 else
   echo "[deploy] ABORTED (backend=$BACKEND_OK frontend=$FRONTEND_OK) — live services untouched"
+  
+  echo "=== Backend Test Logs ==="
+  cat /opt/welllabs/logs/backend-test.log 2>/dev/null || echo "No backend test log found."
+  
+  echo "=== Frontend Test Logs ==="
+  cat /opt/welllabs/logs/frontend-test.log 2>/dev/null || echo "No frontend test log found."
+  
   cleanup
   rm -rf "$BACKEND_REL" "$FRONTEND_REL" 2>/dev/null || true
   exit 1

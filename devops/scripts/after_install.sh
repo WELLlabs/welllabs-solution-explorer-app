@@ -6,6 +6,10 @@ echo "[deploy] AfterInstall — $(date)"
 
 DEPLOY_DIR="/opt/welllabs/deployment"
 
+# Normalize all deployment scripts to have Unix (LF) line endings to prevent bad interpreter errors
+find "${DEPLOY_DIR}/devops/scripts" -type f -name "*.sh" -exec sed -i 's/\r$//' {} +
+
+
 # 1. Install backend production dependencies
 [ -f "${DEPLOY_DIR}/backend/package.json" ] || { echo "[deploy] ERROR: backend/package.json missing"; exit 1; }
 cd "${DEPLOY_DIR}/backend"
