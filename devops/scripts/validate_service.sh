@@ -1,20 +1,29 @@
 #!/bin/bash
-set -e
 
 echo "[deploy] ValidateService — $(date)"
+
 
 
 FAIL=0
 
 check_http() {
   local LABEL="$1" URL="$2" EXPECT="${3:-200}"
-  CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" 2>/dev/null || echo "000")
-  if [ "$CODE" = "$EXPECT" ]; then
-    echo "[deploy] OK   $LABEL → HTTP $CODE"
-  else
-    echo "[deploy] FAIL $LABEL → HTTP $CODE (expected $EXPECT)"
-    FAIL=$((FAIL + 1))
-  fi
+  local MAX_RETRIES=10
+  local RETRY_DELAY=3
+  
+  for i in $(seq 1 $MAX_RETRIES); do
+    CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$URL" 2>/dev/null || echo "000")
+    if [ "$CODE" = "$EXPECT" ]; then
+      echo "[deploy] OK   $LABEL → HTTP $CODE (attempt $i)"
+      return 0
+    fi
+    echo "[deploy] RETRY $LABEL → HTTP $CODE (expected $EXPECT), attempt $i/$MAX_RETRIES..."
+    sleep $RETRY_DELAY
+  done
+
+  echo "[deploy] FAIL $LABEL → HTTP $CODE (expected $EXPECT) after $MAX_RETRIES attempts"
+  FAIL=$((FAIL + 1))
+  return 1
 }
 
 check_svc() {
