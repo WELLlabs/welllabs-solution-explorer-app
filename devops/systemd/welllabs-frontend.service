@@ -8,7 +8,8 @@ Type=simple
 User=root
 
 # Serve React build in SPA mode (-s = single-page app, serves index.html for all 404s)
-ExecStart=/usr/local/bin/serve -s /opt/welllabs/frontend/current -l 3000
+ExecStart=/usr/local/bin/serve -s /opt/welllabs/frontend/current -l 127.0.0.1:3000
+
 
 # Environment
 Environment=NODE_ENV=production
