@@ -26,8 +26,8 @@ cp "${DEPLOY_DIR}/devops/nginx/welllabs.conf" /etc/nginx/sites-available/welllab
 rm -f /etc/nginx/sites-enabled/default
 ln -sf /etc/nginx/sites-available/welllabs.conf /etc/nginx/sites-enabled/welllabs.conf
 nginx -t
-systemctl reload nginx
-echo "[deploy] Nginx config deployed and reloaded"
+systemctl restart nginx
+echo "[deploy] Nginx config deployed and restarted"
 
 # Ensure node is available at both /usr/bin/node and /usr/local/bin/node
 NODE_PATH=$(which node 2>/dev/null || true)
