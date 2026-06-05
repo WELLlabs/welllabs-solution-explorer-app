@@ -47,6 +47,28 @@ if [ "$FAIL" -eq 0 ]; then
   echo "[deploy] ValidateService PASSED ($FAIL failures) — $(date)"
   exit 0
 else
-  echo "[deploy] ValidateService FAILED ($FAIL checks) — triggering rollback"
+  echo "[deploy] ValidateService FAILED ($FAIL checks) — dumping diagnostics"
+
+  echo "=== systemd Status ==="
+  for SVC in welllabs-backend welllabs-frontend nginx mongod; do
+    echo "--- systemctl status $SVC ---"
+    systemctl status "$SVC" --no-pager -n 20 || true
+  done
+
+  echo "=== Backend Production Logs ==="
+  tail -n 50 /opt/welllabs/logs/backend.log 2>/dev/null || echo "No backend log found."
+  echo "=== Backend Production Error Logs ==="
+  tail -n 50 /opt/welllabs/logs/backend-error.log 2>/dev/null || echo "No backend error log found."
+
+  echo "=== Frontend Production Logs ==="
+  tail -n 50 /opt/welllabs/logs/frontend.log 2>/dev/null || echo "No frontend log found."
+  echo "=== Frontend Production Error Logs ==="
+  tail -n 50 /opt/welllabs/logs/frontend-error.log 2>/dev/null || echo "No frontend error log found."
+
+  echo "=== Nginx Error Logs ==="
+  tail -n 30 /var/log/nginx/error.log 2>/dev/null || echo "No nginx error log found."
+  tail -n 30 /var/log/nginx/welllabs-error.log 2>/dev/null || echo "No welllabs nginx error log found."
+
   exit 1
 fi
+
