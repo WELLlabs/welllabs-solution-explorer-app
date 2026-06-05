@@ -7,16 +7,9 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/welllabs/frontend/current
-
-# Serve React build in SPA mode (-s = single-page app, serves index.html for all 404s)
-ExecStart=/usr/local/bin/serve -s /opt/welllabs/frontend/current -l 127.0.0.1:3000
-
-# Environment
-Environment=NODE_ENV=production
-
+ExecStart=/bin/bash -c 'exec $(npm bin -g 2>/dev/null || npm prefix -g)/bin/serve -s /opt/welllabs/frontend/current -l 3000'
 Restart=always
 RestartSec=5
-
 StandardOutput=append:/opt/welllabs/logs/frontend.log
 StandardError=append:/opt/welllabs/logs/frontend-error.log
 
