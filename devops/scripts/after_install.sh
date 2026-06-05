@@ -29,12 +29,6 @@ nginx -t
 systemctl reload nginx
 echo "[deploy] Nginx config deployed and reloaded"
 
-# Ensure serve is installed globally
-if ! command -v serve &>/dev/null; then
-  echo "[deploy] serve not found. Installing globally..."
-  npm install -g serve
-fi
-
 # Ensure node is available at both /usr/bin/node and /usr/local/bin/node
 NODE_PATH=$(which node 2>/dev/null || true)
 if [ -n "$NODE_PATH" ]; then
@@ -42,11 +36,32 @@ if [ -n "$NODE_PATH" ]; then
   [ -f /usr/local/bin/node ] || ln -sf "$NODE_PATH" /usr/local/bin/node
 fi
 
-# Ensure serve is available at both /usr/bin/serve and /usr/local/bin/serve
-SERVE_PATH=$(which serve 2>/dev/null || true)
-if [ -n "$SERVE_PATH" ]; then
-  [ -f /usr/bin/serve ] || ln -sf "$SERVE_PATH" /usr/bin/serve
-  [ -f /usr/local/bin/serve ] || ln -sf "$SERVE_PATH" /usr/local/bin/serve
+# Ensure serve is installed globally
+if ! command -v serve &>/dev/null; then
+  echo "[deploy] serve not found. Installing globally..."
+  npm install -g serve
+fi
+
+# Create a robust bash wrapper for serve to bypass the Node 20+ ESM require bug
+SERVE_MAIN="$(npm root -g)/serve/build/main.js"
+if [ -f "$SERVE_MAIN" ]; then
+  echo "[deploy] Creating robust wrapper script for serve at /usr/bin/serve and /usr/local/bin/serve"
+  rm -f /usr/bin/serve /usr/local/bin/serve
+  cat << EOF > /tmp/serve_wrapper
+#!/bin/bash
+exec /usr/bin/node "$SERVE_MAIN" "\$@"
+EOF
+  chmod +x /tmp/serve_wrapper
+  mv /tmp/serve_wrapper /usr/bin/serve
+  ln -sf /usr/bin/serve /usr/local/bin/serve
+else
+  echo "[deploy] WARNING: serve main.js not found at $SERVE_MAIN. Attempting fallback symlink..."
+  SERVE_PATH=$(which serve 2>/dev/null || true)
+  if [ -n "$SERVE_PATH" ]; then
+    rm -f /usr/bin/serve /usr/local/bin/serve
+    ln -sf "$SERVE_PATH" /usr/bin/serve
+    ln -sf "$SERVE_PATH" /usr/local/bin/serve
+  fi
 fi
 
 # 4. Deploy and enable systemd service files from repo
