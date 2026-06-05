@@ -15,10 +15,10 @@ phases:
 
   build:
     commands:
-      - echo "[BUILD] Setting VITE_API_URL from ALLOWED_HOSTS=$ALLOWED_HOSTS..."
-      - echo "[BUILD] VITE_API_URL=http://$ALLOWED_HOSTS:5000/api"
+      - echo "[BUILD] Setting VITE_API_URL to /api..."
+      - echo "[BUILD] VITE_API_URL=/api"
       - echo "[BUILD] Building React frontend with Vite..."
-      - cd frontend && VITE_API_URL="http://$ALLOWED_HOSTS:5000/api" npm run build && cd ..
+      - cd frontend && VITE_API_URL="/api" npm run build && cd ..
       - echo "[BUILD] Build complete. Output in frontend/dist/"
 
   post_build:
