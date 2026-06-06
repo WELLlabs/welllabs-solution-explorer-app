@@ -207,7 +207,7 @@ Map.addLayer(s1.median(), {min: -25, max: 0}, 'Radar Backscatter');`
             </div>
             <div>
               <h1 className="logo-text">Solution Explorer</h1>
-              <p className="logo-subtitle">WELL Labs & Citizen Hydrology Hub 1</p>
+              <p className="logo-subtitle">WELL Labs & Citizen Hydrology Hub</p>
             </div>
           </div>
           
