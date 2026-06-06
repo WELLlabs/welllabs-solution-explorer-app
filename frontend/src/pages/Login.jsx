@@ -21,7 +21,7 @@ const Login = () => {
     <div className="auth-wrapper">
       <div className="auth-card">
         <h1 className="auth-brand">Solution Explorer</h1>
-        <p className="auth-subtitle">Sign in to your account 1</p>
+        <p className="auth-subtitle">Sign in to your account 12</p>
 
         {error && <div className="auth-error">{error}</div>}
 
