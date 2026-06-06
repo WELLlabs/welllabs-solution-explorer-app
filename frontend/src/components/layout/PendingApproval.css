@@ -1,0 +1,51 @@
+.pending-card {
+  background: white;
+  border-radius: 24px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  max-width: 600px;
+  margin: 60px auto;
+}
+
+.pending-icon {
+  width: 80px;
+  height: 80px;
+  background: #fef3c7;
+  border-radius: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: #d97706;
+  animation: pendingPulse 2s infinite ease-in-out;
+}
+
+.pending-card h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.pending-card p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@keyframes pendingPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.2);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 10px rgba(217, 119, 6, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+  }
+}
