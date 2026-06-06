@@ -1,0 +1,374 @@
+/* FloodRiskMap.css */
+
+.flood-risk-map-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Sub Navigation Mimicking the Screenshot */
+.risk-sub-navigation {
+  display: flex;
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 12px;
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+
+.sub-nav-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sub-nav-btn:hover {
+  color: #0f172a;
+}
+
+.sub-nav-btn.active {
+  background: #1e3a1e; /* Dark forest green matching BGG styling */
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Workspace Layout */
+.risk-map-workspace {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* Left Map Card */
+.map-view-card {
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.map-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.map-card-header h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.last-updated {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.interactive-map-wrapper {
+  background: #f0fdf4; /* Pale green backdrop representing vegetation */
+  border-radius: 16px;
+  padding: 12px;
+  border: 1px solid #dcfce7;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.02);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.risk-svg-map {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  display: block;
+}
+
+/* SVG Elements */
+.bangalore-outer-poly {
+  fill: #dcfce7;
+  stroke: #bbf7d0;
+  stroke-width: 1.5;
+  transition: all 0.3s ease;
+}
+
+.lake-node {
+  fill: #3b82f6;
+  stroke: #2563eb;
+  stroke-width: 1;
+  fill-opacity: 0.85;
+  animation: lakePulse 3s infinite ease-in-out;
+}
+
+@keyframes lakePulse {
+  0% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.85; }
+}
+
+.map-zone-group {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.map-zone-group.dimmed {
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.zone-circle {
+  fill-opacity: 0.3;
+  stroke-width: 2;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zone-circle.high {
+  fill: #ef4444;
+  stroke: #ef4444;
+}
+
+.zone-circle.medium {
+  fill: #f97316;
+  stroke: #f97316;
+}
+
+.zone-circle.low {
+  fill: #eab308;
+  stroke: #eab308;
+}
+
+/* Hover and active states */
+.map-zone-group:hover .zone-circle {
+  fill-opacity: 0.5;
+  stroke-width: 3.5;
+}
+
+.map-zone-group.selected .zone-circle {
+  fill-opacity: 0.6;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.1));
+}
+
+.zone-svg-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 7px;
+  font-weight: 750;
+  fill: #334155;
+  pointer-events: none;
+  letter-spacing: -0.1px;
+}
+
+.compass-rose {
+  pointer-events: none;
+}
+.compass-n {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  fill: #ef4444;
+}
+
+/* Right Details Pane */
+.risk-details-pane {
+  position: sticky;
+  top: 100px;
+}
+
+.risk-detail-card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  border: 1.5px solid #f1f5f9;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.risk-detail-card.high { border-top: 6px solid #ef4444; }
+.risk-detail-card.medium { border-top: 6px solid #f97316; }
+.risk-detail-card.low { border-top: 6px solid #eab308; }
+
+.risk-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 16px;
+}
+
+.risk-detail-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.risk-badge-pill {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.risk-badge-pill.high { background: #fee2e2; color: #ef4444; }
+.risk-badge-pill.medium { background: #ffedd5; color: #f97316; }
+.risk-badge-pill.low { background: #fef9c3; color: #ca8a04; }
+
+.risk-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.risk-desc-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+}
+
+.risk-detail-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.stat-entry .label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-entry .value {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.risk-strategy-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.risk-strategy-block h5 {
+  font-size: 12px;
+  font-weight: 750;
+  color: #475569;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.strategy-bullets {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.strategy-bullets li {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.select-zone-prompt {
+  background: white;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 24px;
+  padding: 32px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* KPI stats row matching the numbers at the bottom of mockup */
+.risk-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 12px;
+}
+
+.metric-kpi-card {
+  background: white;
+  border: 1.5px solid #f1f5f9;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.metric-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
+}
+
+.metric-kpi-card.high-risk { border-bottom: 4px solid #ef4444; }
+.metric-kpi-card.medium-risk { border-bottom: 4px solid #f97316; }
+.metric-kpi-card.active-interventions { border-bottom: 4px solid #4f46e5; }
+
+.metric-kpi-card .kpi-num {
+  font-size: 32px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.metric-kpi-card.high-risk .kpi-num { color: #ef4444; }
+.metric-kpi-card.medium-risk .kpi-num { color: #f97316; }
+.metric-kpi-card.active-interventions .kpi-num { color: #4f46e5; }
+
+.metric-kpi-card .kpi-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Responsive grid */
+@media (max-width: 900px) {
+  .risk-map-workspace {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .risk-details-pane {
+    position: static;
+  }
+  .risk-metrics-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
