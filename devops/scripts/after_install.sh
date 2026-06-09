@@ -76,5 +76,4 @@ echo "[deploy] systemd units deployed and enabled"
 
 echo "[deploy] AfterInstall done"
 echo "testing"
-echo "testing4"
-echo "testing3"
+echo "testing 1"
