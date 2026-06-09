@@ -75,3 +75,4 @@ systemctl enable welllabs-frontend 2>/dev/null || true
 echo "[deploy] systemd units deployed and enabled"
 
 echo "[deploy] AfterInstall done"
+echo "testing"
