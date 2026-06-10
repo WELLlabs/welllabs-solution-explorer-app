@@ -19,17 +19,13 @@ const Analytics = () => {
     const fetchAnalyticsData = async () => {
       try {
         setLoading(true);
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        const token = storedUser?.token;
-        
-        const headers = { Authorization: `Bearer ${token}` };
         const apiBase = 'http://localhost:5000/api/analytics';
 
         // Fetch all three endpoints in parallel
         const [overviewRes, corpRes, wardRes] = await Promise.all([
-          axios.get(`${apiBase}/overview`, { headers }),
-          axios.get(`${apiBase}/corporation`, { headers }),
-          axios.get(`${apiBase}/ward`, { headers })
+          axios.get(`${apiBase}/overview`),
+          axios.get(`${apiBase}/corporation`),
+          axios.get(`${apiBase}/ward`)
         ]);
 
         setOverview(overviewRes.data);
