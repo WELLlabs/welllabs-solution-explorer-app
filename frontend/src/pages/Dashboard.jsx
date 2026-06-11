@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import api from '../config/api';
 
 // Styling
@@ -28,15 +28,17 @@ export const FIELD_PERMISSIONS = {
 };
 
 const Dashboard = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, loading: authLoading, logout } = useContext(AuthContext);
 
   const SHOW_PLATFORM_TAB = true;
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState(null);
   
-  // Custom Workspace Tabs System
-  const [activeTab, setActiveTab] = useState('home'); // 'home', 'dashboard', 'casestudy', 'interventions', 'floodriskmap', 'datalayers', 'platform', 'usermanagement'
+  // Custom Workspace Tabs System driven by URL path name
+  const { activeTab: urlActiveTab } = useParams();
+  const navigate = useNavigate();
+  const activeTab = urlActiveTab || 'home';
   
   // Shocking news linking state
   const [highlightedCaseTitle, setHighlightedCaseTitle] = useState(null);
@@ -85,11 +87,22 @@ const Dashboard = () => {
 
   const handleNavigateToCase = (title) => {
     setHighlightedCaseTitle(title);
-    setActiveTab('casestudy');
+    navigate('/casestudy');
   };
 
+  if (authLoading) {
+    return (
+      <div className="dashboard-loading-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading session...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -108,7 +121,7 @@ const Dashboard = () => {
           <div className="dashboard-navigation-tabs">
             <button 
               className={`tab-btn ${activeTab === 'home' ? 'active' : ''}`}
-              onClick={() => setActiveTab('home')}
+              onClick={() => navigate('/home')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -119,7 +132,7 @@ const Dashboard = () => {
 
             <button 
               className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => navigate('/dashboard')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="7" height="9" />
@@ -132,7 +145,7 @@ const Dashboard = () => {
 
             <button 
               className={`tab-btn ${activeTab === 'casestudy' ? 'active' : ''}`}
-              onClick={() => setActiveTab('casestudy')}
+              onClick={() => navigate('/casestudy')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -143,7 +156,7 @@ const Dashboard = () => {
 
             <button 
               className={`tab-btn ${activeTab === 'interventions' ? 'active' : ''}`}
-              onClick={() => setActiveTab('interventions')}
+              onClick={() => navigate('/interventions')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 8v4l3 3" />
@@ -154,7 +167,7 @@ const Dashboard = () => {
 
             <button 
               className={`tab-btn ${activeTab === 'floodriskmap' ? 'active' : ''}`}
-              onClick={() => setActiveTab('floodriskmap')}
+              onClick={() => navigate('/floodriskmap')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
@@ -166,7 +179,7 @@ const Dashboard = () => {
 
             <button 
               className={`tab-btn ${activeTab === 'datalayers' ? 'active' : ''}`}
-              onClick={() => setActiveTab('datalayers')}
+              onClick={() => navigate('/datalayers')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="12 2 2 7 12 12 22 7 12 2" />
@@ -179,7 +192,7 @@ const Dashboard = () => {
             {SHOW_PLATFORM_TAB && (
               <button 
                 className={`tab-btn ${activeTab === 'platform' ? 'active' : ''}`}
-                onClick={() => setActiveTab('platform')}
+                onClick={() => navigate('/platform')}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -193,7 +206,7 @@ const Dashboard = () => {
             {user.role === 'Admin' && (
               <button 
                 className={`tab-btn ${activeTab === 'usermanagement' ? 'active' : ''}`}
-                onClick={() => setActiveTab('usermanagement')}
+                onClick={() => navigate('/usermanagement')}
                 style={{ marginLeft: 'auto', borderLeft: '1px solid #e2e8f0', paddingLeft: '20px' }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -212,7 +225,7 @@ const Dashboard = () => {
         {user.role !== 'Pending' && activeTab === 'home' && (
           <BggIntroduction 
             onNavigateToCase={handleNavigateToCase} 
-            onSetActiveTab={setActiveTab} 
+            onSetActiveTab={(tab) => navigate('/' + tab)} 
           />
         )}
 

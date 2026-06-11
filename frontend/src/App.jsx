@@ -11,7 +11,6 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/:activeTab?" element={<Dashboard />} />
