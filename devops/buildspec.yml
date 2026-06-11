@@ -1,0 +1,32 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo "[BUILD] Node.js version $(node -v) | npm $(npm -v)"
+      - npm install -g serve   # serve package — used by PM2 on EC2
+
+  pre_build:
+    commands:
+      - echo "[PRE-BUILD] Installing frontend dependencies..."
+      - cd frontend && npm ci && cd ..
+      - echo "[PRE-BUILD] Frontend deps done."
+
+  build:
+    commands:
+      - echo "[BUILD] Setting VITE_API_URL to /api..."
+      - echo "[BUILD] VITE_API_URL=/api"
+      - echo "[BUILD] Building React frontend with Vite..."
+      - cd frontend && VITE_API_URL="/api" npm run build && cd ..
+      - echo "[BUILD] Build complete. Output in frontend/dist/"
+
+  post_build:
+    commands:
+      - echo "[POST-BUILD] Finished at $(date)"
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
+  base-directory: '.'

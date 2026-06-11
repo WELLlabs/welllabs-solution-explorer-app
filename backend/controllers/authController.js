@@ -33,12 +33,19 @@ const register = async (req, res) => {
     });
 
     if (user) {
+      const token = generateToken(user._id, user.role);
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id, user.role),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -56,12 +63,19 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
+      const token = generateToken(user._id, user.role);
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id, user.role),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -107,9 +121,36 @@ const updateUserRole = async (req, res) => {
   }
 };
 
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (user) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error retrieving profile' });
+  }
+};
+
+const logout = async (req, res) => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+    sameSite: 'lax'
+  });
+  res.json({ message: 'Logged out successfully' });
+};
+
 const generateToken = (id, role) => {
   const secret = process.env.JWT_SECRET || 'fallback_secret_key_change_me_later';
   return jwt.sign({ id, role }, secret, { expiresIn: '30d' });
 };
 
-module.exports = { register, login, getAllUsers, updateUserRole };
+module.exports = { register, login, getAllUsers, updateUserRole, getMe, logout };
