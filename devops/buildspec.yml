@@ -15,9 +15,22 @@ phases:
 
   build:
     commands:
-      - echo "[BUILD] Writing frontend .env with VITE_API_URL=/api ..."
-      - echo "VITE_API_URL=/api" > frontend/.env
-      - cat frontend/.env
+      - echo "[BUILD] Packaging application for CodeDeploy..."
+      - echo "$ALLOWED_HOSTS" > allowed_hosts.txt
+
+      # Read EC2 IP and set VITE_API_URL for static env replacement during build
+      - |
+        EC2_IP=$(cat allowed_hosts.txt | tr -d '\r' | xargs)
+        if [ -n "$EC2_IP" ]; then
+          export VITE_API_URL="http://$EC2_IP/api"
+          echo "VITE_API_URL=$VITE_API_URL" > frontend/.env
+          echo "[BUILD] VITE_API_URL set to: $VITE_API_URL"
+        else
+          echo "VITE_API_URL=/api" > frontend/.env
+          echo "[BUILD] WARNING: ALLOWED_HOSTS empty, falling back to /api"
+        fi
+
+      - echo "[BUILD] frontend/.env content: $(cat frontend/.env)"
       - echo "[BUILD] Building React frontend with Vite..."
       - cd frontend && npm run build && cd ..
       - echo "[BUILD] Build complete. Output in frontend/dist/"
