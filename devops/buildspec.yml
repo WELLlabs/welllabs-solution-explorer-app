@@ -15,8 +15,8 @@ phases:
 
   build:
     commands:
-      - echo "[BUILD] Setting VITE_API_URL to http://$EC2_IP/api..."
-      - export VITE_API_URL="http://$EC2_IP/api"
+      - echo "[BUILD] Setting VITE_API_URL..."
+      - export VITE_API_URL="https://api.climatesolutions.ai/api"
       - echo "  VITE_API_URL=$VITE_API_URL"
       - cd frontend && npm run build && cd ..
       - echo "[BUILD] Build complete."
