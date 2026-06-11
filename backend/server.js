@@ -7,9 +7,17 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+
+const allowedOrigins = [
+  'http://localhost:5173',             // For local development
+  'https://climatesolutions.ai',       // Production frontend
+  'https://blr.climatesolutions.ai',   // Bangalore frontend
+  'https://api.climatesolutions.ai'
+];
+
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(cookieParser());
