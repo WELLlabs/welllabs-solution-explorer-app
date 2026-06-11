@@ -127,16 +127,16 @@ echo "[deploy] Backend deps installed"
 echo "[deploy] frontend/dist OK ($(ls "${DEPLOY_DIR}/frontend/dist" | wc -l) files)"
 
 # Deploy Nginx config
-[ -f "${DEPLOY_DIR}/devops/nginx/welllabs.conf" ] || {
-  echo "ERROR: devops/nginx/welllabs.conf missing"
-  exit 1
-}
-cp "${DEPLOY_DIR}/devops/nginx/welllabs.conf" /etc/nginx/sites-available/welllabs.conf
-rm -f /etc/nginx/sites-enabled/default
-ln -sf /etc/nginx/sites-available/welllabs.conf /etc/nginx/sites-enabled/welllabs.conf
-nginx -t
-systemctl restart nginx
-echo "[deploy] Nginx config deployed and restarted"
+# [ -f "${DEPLOY_DIR}/devops/nginx/welllabs.conf" ] || {
+#   echo "ERROR: devops/nginx/welllabs.conf missing"
+#   exit 1
+# }
+# cp "${DEPLOY_DIR}/devops/nginx/welllabs.conf" /etc/nginx/sites-available/welllabs.conf
+# rm -f /etc/nginx/sites-enabled/default
+# ln -sf /etc/nginx/sites-available/welllabs.conf /etc/nginx/sites-enabled/welllabs.conf
+# nginx -t
+# systemctl restart nginx
+# echo "[deploy] Nginx config deployed and restarted"
 
 # Ensure node symlinks
 NODE_PATH=$(which node 2>/dev/null || true)
