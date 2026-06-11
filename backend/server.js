@@ -25,9 +25,9 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // Routes
-app.use('/auth', require('./routes/authRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 console.log('🔐 Auth routes mounted');
-app.use('/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
 console.log('📊 Analytics routes mounted');
 
 // Basic Route
