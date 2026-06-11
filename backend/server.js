@@ -26,7 +26,9 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
+console.log('🔐 Auth routes mounted');
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
+console.log('📊 Analytics routes mounted');
 
 // Basic Route
 app.get('/', (req, res) => {

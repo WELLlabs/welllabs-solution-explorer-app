@@ -19,13 +19,14 @@ const Analytics = () => {
     const fetchAnalyticsData = async () => {
       try {
         setLoading(true);
-        const apiBase = 'http://localhost:5000/api/analytics';
-
-        // Fetch all three endpoints in parallel
+        // Use the const api = axios.create({
+        //   baseURL: import.meta.env.VITE_API_URL || '/api',
+        //   withCredentials: true,
+        // });
         const [overviewRes, corpRes, wardRes] = await Promise.all([
-          axios.get(`${apiBase}/overview`),
-          axios.get(`${apiBase}/corporation`),
-          axios.get(`${apiBase}/ward`)
+          api.get('/analytics/overview'),
+          api.get('/analytics/corporation'),
+          api.get('/analytics/ward')
         ]);
 
         setOverview(overviewRes.data);

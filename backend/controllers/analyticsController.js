@@ -4,6 +4,7 @@ const Well = require('../models/Well');
 // 1. GET /api/analytics/summary
 // Returns high-level counters and distributions
 const getOverviewSummary = async (req, res) => {
+  console.log('📈 getOverviewSummary called');
   try {
     const totalProjects = await Project.countDocuments();
     const totalWells = await Well.countDocuments();
@@ -49,6 +50,7 @@ const getOverviewSummary = async (req, res) => {
 // 2. GET /api/analytics/corporation-summary
 // Replicates the "Count by GBA Region/Corporation" chart
 const getCorporationSummary = async (req, res) => {
+  console.log('🏢 getCorporationSummary called');
   try {
     // Aggregate projects per Corporation
     const projectCounts = await Project.aggregate([
@@ -97,6 +99,7 @@ const getCorporationSummary = async (req, res) => {
 // 3. GET /api/analytics/ward-summary
 // Group by wardName for detailed table and bar chart views
 const getWardSummary = async (req, res) => {
+  console.log('🗺️ getWardSummary called');
   try {
     const projectWards = await Project.aggregate([
       { $match: { wardName: { $ne: '' } } },

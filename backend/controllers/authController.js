@@ -36,9 +36,9 @@ const register = async (req, res) => {
       const token = generateToken(user._id, user.role);
       res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000
+        secure: process.env.NODE_ENV === 'production', // false locally, true in prod
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 1 day
       });
 
       res.status(201).json({
@@ -64,12 +64,12 @@ const login = async (req, res) => {
 
     if (user && (await bcrypt.compare(password, user.password))) {
       const token = generateToken(user._id, user.role);
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000
-      });
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production', // false locally, true in prod
+          sameSite: 'strict',
+          maxAge: 24 * 60 * 60 * 1000 // 1 day
+        });
 
       res.json({
         _id: user._id,
@@ -143,7 +143,9 @@ const logout = async (req, res) => {
   res.cookie('token', '', {
     httpOnly: true,
     expires: new Date(0),
-    sameSite: 'lax'
+    secure: process.env.NODE_ENV === 'production', // false locally, true in prod
+    sameSite: 'strict',
+    maxAge: 0
   });
   res.json({ message: 'Logged out successfully' });
 };
