@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Navigate, useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { Navigate } from 'react-router-dom';
+import api from '../config/api';
 
 // Styling
 import './Dashboard.css';
@@ -28,21 +28,15 @@ export const FIELD_PERMISSIONS = {
 };
 
 const Dashboard = () => {
-  const { user, loading: authLoading, logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
 
   const SHOW_PLATFORM_TAB = true;
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState(null);
   
-  // Custom Workspace Tabs System (Route-based)
-  const { activeTab: pathTab } = useParams();
-  const activeTab = pathTab || 'home';
-  const navigate = useNavigate();
-
-  const setActiveTab = (tabName) => {
-    navigate(`/${tabName}`);
-  };
+  // Custom Workspace Tabs System
+  const [activeTab, setActiveTab] = useState('home'); // 'home', 'dashboard', 'casestudy', 'interventions', 'floodriskmap', 'datalayers', 'platform', 'usermanagement'
   
   // Shocking news linking state
   const [highlightedCaseTitle, setHighlightedCaseTitle] = useState(null);
@@ -60,7 +54,10 @@ const Dashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/users');
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const res = await api.get('/auth/users', {
+        headers: { Authorization: `Bearer ${storedUser.token}` }
+      });
       setAllUsers(res.data);
     } catch (error) {
       console.error('Error fetching users', error);
@@ -72,8 +69,10 @@ const Dashboard = () => {
   const handleRoleChange = async (userId, newRole) => {
     setUpdatingUserId(userId);
     try {
-      await axios.put(`http://localhost:5000/api/auth/users/${userId}/role`, 
-        { role: newRole }
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      await api.put(`/auth/users/${userId}/role`, 
+        { role: newRole },
+        { headers: { Authorization: `Bearer ${storedUser.token}` } }
       );
       await fetchUsers();
     } catch (error) {
@@ -88,15 +87,6 @@ const Dashboard = () => {
     setHighlightedCaseTitle(title);
     setActiveTab('casestudy');
   };
-
-  if (authLoading) {
-    return (
-      <div className="dashboard-loading">
-        <div className="spinner"></div>
-        <p>Loading application session...</p>
-      </div>
-    );
-  }
 
   if (!user) {
     return <Navigate to="/login" />;

@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import api from '../config/api';
+import axios from 'axios';
+const api = axios.create({
+  baseURL: 'http://localhost:5000',
+  withCredentials: true,
+});
 import './Analytics.css';
 
 const Analytics = () => {
@@ -19,10 +23,8 @@ const Analytics = () => {
     const fetchAnalyticsData = async () => {
       try {
         setLoading(true);
-        // Use the const api = axios.create({
-        //   baseURL: import.meta.env.VITE_API_URL || '/api',
-        //   withCredentials: true,
-        // });
+
+        // Fetch all three endpoints in parallel using the shared api instance
         const [overviewRes, corpRes, wardRes] = await Promise.all([
           api.get('/analytics/overview'),
           api.get('/analytics/corporation'),

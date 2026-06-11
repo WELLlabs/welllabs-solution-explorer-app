@@ -25,9 +25,9 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // Routes
-app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/auth', require('./routes/authRoutes'));
 console.log('🔐 Auth routes mounted');
-app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/analytics', require('./routes/analyticsRoutes'));
 console.log('📊 Analytics routes mounted');
 
 // Basic Route
@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 });
 
 // Health Check Route
-app.get('/api/health', (req, res) => {
+app.get('health', (req, res) => {
     res.json({ 
         status: 'ok', 
         message: 'Backend is connected to frontend!',

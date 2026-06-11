@@ -9,9 +9,11 @@ const Login = () => {
   const { user, loading: authLoading, login } = useContext(AuthContext);
 
   if (!authLoading && user) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
-
+  if (authLoading) {
+    return <div className="auth-loading">Loading...</div>;
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

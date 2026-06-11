@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5000',
   withCredentials: true,
 });
 
@@ -12,12 +12,15 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Verify session on mount
   useEffect(() => {
     const fetchMe = async () => {
       try {
         const { data } = await api.get('/auth/me');
-        setUser(data.user);
+        if (data && data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
       } catch (err) {
         setUser(null);
       } finally {
@@ -30,7 +33,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      setUser(data);
+      const userData = data.user || data;
+      if (userData) {
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || 'Login failed';
