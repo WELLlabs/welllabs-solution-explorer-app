@@ -9,7 +9,7 @@ const Login = () => {
   const { user, loading: authLoading, login } = useContext(AuthContext);
 
   if (!authLoading && user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/home" replace />;
   }
   if (authLoading) {
     return <div className="auth-loading">Loading...</div>;

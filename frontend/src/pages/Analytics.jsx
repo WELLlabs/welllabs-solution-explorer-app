@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-const api = axios.create({
-  baseURL: 'http://localhost:5000',
-  withCredentials: true,
-});
+import api from '../config/api';
 import './Analytics.css';
 
 const Analytics = () => {
@@ -19,12 +15,14 @@ const Analytics = () => {
   const [hoveredBar, setHoveredBar] = useState(null); // { type, index, value }
   const [hoveredSlice, setHoveredSlice] = useState(null);
 
+  // EFFECT: Fetching Projects and Wells data metrics from the backend API
   useEffect(() => {
     const fetchAnalyticsData = async () => {
       try {
         setLoading(true);
 
-        // Fetch all three endpoints in parallel using the shared api instance
+        // Fetch overview counts, corporation aggregates, and ward lists in parallel
+        // This includes total counts for Projects (rainwater/lake assets) and Wells (groundwater telemetry)
         const [overviewRes, corpRes, wardRes] = await Promise.all([
           api.get('/analytics/overview'),
           api.get('/analytics/corporation'),
@@ -194,6 +192,7 @@ const Analytics = () => {
               <path d="M2 12L17.5 14.8" />
             </svg>
           </div>
+          {/* KPI CARD: Rainwater & Lake Projects Count Display */}
           <div className="kpi-info">
             <span className="kpi-label">Rainwater & Lake Projects</span>
             <h3 className="kpi-value">{overview?.totalProjects || 0}</h3>
@@ -209,6 +208,7 @@ const Analytics = () => {
               <path d="M8 12h8" />
             </svg>
           </div>
+          {/* KPI CARD: Monitored Ground Wells Count Display */}
           <div className="kpi-info">
             <span className="kpi-label">Monitored Ground Wells</span>
             <h3 className="kpi-value">{overview?.totalWells || 0}</h3>

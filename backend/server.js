@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 });
 
 // Health Check Route
-app.get('health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok', 
         message: 'Backend is connected to frontend!',
