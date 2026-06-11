@@ -15,10 +15,11 @@ phases:
 
   build:
     commands:
-      - echo "[BUILD] Setting VITE_API_URL to /api..."
-      - echo "[BUILD] VITE_API_URL=/api"
+      - echo "[BUILD] Writing frontend .env with VITE_API_URL=/api ..."
+      - echo "VITE_API_URL=/api" > frontend/.env
+      - cat frontend/.env
       - echo "[BUILD] Building React frontend with Vite..."
-      - cd frontend && VITE_API_URL="/api" npm run build && cd ..
+      - cd frontend && npm run build && cd ..
       - echo "[BUILD] Build complete. Output in frontend/dist/"
 
   post_build:
