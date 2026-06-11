@@ -1,11 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../config/api';
-import axios from 'axios';
-
-
-// Enable sending cookies in all cross-origin requests
-axios.defaults.withCredentials = true;
 
 export const AuthContext = createContext();
 
@@ -13,12 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  // Configure base URL for Axios
-  const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
-    withCredentials: true
-  });
 
   useEffect(() => {
     const checkAuth = async () => {
