@@ -1,0 +1,50 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo "[BUILD] Node.js version $(node -v) | npm $(npm -v)"
+      - npm install -g serve
+
+  pre_build:
+    commands:
+      - echo "[PRE-BUILD] Installing frontend dependencies..."
+      - cd frontend && npm ci && cd ..
+
+  build:
+    commands:
+      - echo "[BUILD] Setting VITE_API_URL to http://$EC2_IP/api..."
+      - export VITE_API_URL="http://$EC2_IP/api"
+      - echo "  VITE_API_URL=$VITE_API_URL"
+      - cd frontend && npm run build && cd ..
+      - echo "[BUILD] Build complete."
+
+  post_build:
+    commands:
+      - echo "[POST-BUILD] Writing deploy-env with Secrets Manager ARN pointer..."
+      - |
+        # Validate required env vars were injected by Terraform/CodeBuild
+        for var in APP_CONFIG_SECRET_ARN PROJECT_NAME; do
+          if [ -z "${!var}" ]; then
+            echo "ERROR: CodeBuild env var '${var}' is not set."
+            echo "Check: Terraform pipeline module has app_secret_arn wired correctly."
+            exit 1
+          fi
+        done
+      - |
+        # Write the ARN pointer file — EC2 AfterInstall will read this and fetch the real secret
+        cat > deploy-env << EOF
+        APP_CONFIG_SECRET_ARN=${APP_CONFIG_SECRET_ARN}
+        PROJECT_NAME=${PROJECT_NAME}
+        EOF
+      - echo "[POST-BUILD] deploy-env written:"
+      - cat deploy-env
+      - echo "[POST-BUILD] Finished at $(date)"
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
+  base-directory: '.'
