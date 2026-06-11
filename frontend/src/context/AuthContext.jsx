@@ -1,90 +1,72 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../config/api';
+import React, { createContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
-
-// Enable sending cookies in all cross-origin requests
-axios.defaults.withCredentials = true;
+const api = axios.create({
+  baseURL: 'http://localhost:5000',
+  withCredentials: true,
+});
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  // Configure base URL for Axios
-  const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
-    withCredentials: true
-  });
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const fetchMe = async () => {
       try {
-        const response = await api.get('/auth/me');
-        setUser(response.data);
-      } catch (error) {
+        const { data } = await api.get('/auth/me');
+        if (data && data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
-    checkAuth();
+    fetchMe();
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      
-      setUser(response.data);
-      navigate('/home');
+      const { data } = await api.post('/auth/login', { email, password });
+      const userData = data.user || data;
+      if (userData) {
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
       return { success: true };
-    } catch (error) {
-      console.error('Login error', error.response?.data || error.message);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Server error during login' 
-      };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Login failed';
+      return { success: false, message };
     }
   };
 
-  const register = async (name, email, password, secretKey) => {
+  const register = async (name, email, password) => {
     try {
-      const response = await api.post('/auth/register', { 
-        name, 
-        email, 
-        password, 
-        secretKey 
-      });
-      
-      setUser(response.data);
-      navigate('/home');
+      const { data } = await api.post('/auth/register', { name, email, password });
+      setUser(data);
       return { success: true };
-    } catch (error) {
-      console.error('Register error', error.response?.data || error.message);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Server error during registration' 
-      };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Registration failed';
+      return { success: false, message };
     }
   };
 
   const logout = async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch (error) {
-      console.error('Logout error', error);
-    } finally {
-      setUser(null);
-      navigate('/login');
-    }
+    await api.post('/auth/logout');
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;
