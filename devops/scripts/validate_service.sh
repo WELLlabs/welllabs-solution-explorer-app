@@ -37,9 +37,9 @@ check_svc() {
   fi
 }
 
-# HTTP checks through Nginx
-check_http "backend /api/health" "http://localhost/api/health"
-check_http "frontend /"          "http://localhost/"
+# HTTP checks — direct to each service port (bypasses Nginx server_name routing)
+check_http "backend /api/health" "http://localhost:5000/api/health"
+check_http "frontend /"          "http://localhost:3000/"
 
 # systemd service checks
 check_svc "welllabs-backend"
