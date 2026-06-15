@@ -83,11 +83,7 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
       <div className="platform-overview-section glassmorphic">
         <div className="overview-header-row">
           <div className="overview-intro-text">
-            <h2 className="section-title">Three cities. Three flood crises solved.</h2>
-            <p className="section-subtitle">
-              One proven strategy: <strong>Blue-Green-Grey infrastructure</strong>. This platform brings their peer-reviewed case studies, 
-              design models, and cost-benefit data to Bangalore.
-            </p>
+            <h2 className="section-title">Bangalore's flood problem has a blueprint. Blue-green-grey infrastructure, modeled and costed for our city.</h2>
           </div>
         </div>
 

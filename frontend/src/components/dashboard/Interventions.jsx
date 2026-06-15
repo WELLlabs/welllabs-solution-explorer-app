@@ -1,109 +1,167 @@
 import React, { useState } from 'react';
 import './Interventions.css';
 
-const INTERVENTIONS_DATA = [
+const K100_STATS = [
+  { value: '9.6 km', label: 'Pilot Stretch', desc: 'Desilted & restored channel', icon: '🛣️' },
+  { value: '32 km²', label: 'Catchment Area', desc: 'Stormwater catchment basin', icon: '🗺️' },
+  { value: '~₹175 cr', label: 'Project Cost', desc: 'Coordinated funding budget', icon: '💰' },
+  { value: '15', label: 'Agencies', desc: 'Government bodies aligned', icon: '🏢' },
+  { value: '135 → 5 MLD', label: 'Sewage Inflow', desc: 'Over 96% sewage diverted', icon: '💧' }
+];
+
+const K100_TIMELINE_DATA = [
   {
-    year: '2026',
-    location: 'Silk Board Junction & HSR Layout Sector 6',
-    status: 'Active Monitoring',
+    yearKey: '1885-1983',
+    phase: 'Origins',
+    title: 'A king’s canal, slowly buried',
+    status: 'Historical Origins',
+    statusClass: 'historical',
+    colorTheme: 'red',
+    bullets: [
+      'Part of Kempegowda’s historic rajakaluve network linking the city’s lakes and carrying monsoon overflow.',
+      'Survey maps from 1885, 1948 and 1983 trace the canal being steadily channelised as the city grew.',
+      'Maintenance lapsed; it became an open sewer and garbage dump, severed from civic life.'
+    ],
+    graphicId: 'origins'
+  },
+  {
+    yearKey: '2021',
+    phase: 'Conception & Pilot',
+    title: 'The plan, the coalition, the mock-up',
+    status: 'Planning & Design',
+    statusClass: 'planning',
+    colorTheme: 'orange',
+    bullets: [
+      'BBMP commissions the ~₹175 crore K100 Citizens’ Waterway pilot; Mod Foundation leads the design concept.',
+      'Model adopted from Seoul’s Cheonggyecheon stream restoration — uncover the water rather than slab over it.',
+      'A coalition of ~15 government agencies is assembled; household and catchment surveys begin.',
+      'A ~300 m demonstration stretch is built opposite Shanthinagar bus station to prove the design.'
+    ],
+    graphicId: 'conception'
+  },
+  {
+    yearKey: '2022-2023',
+    phase: 'Desilt & Divert',
+    title: 'Taking sewage out of storm-water',
+    status: 'Active Engineering',
     statusClass: 'active',
-    floodingDetails: 'A record-breaking 150mm rainfall in 24 hours caused massive stormwater runoff. Water accumulated up to 4 feet on streets due to extensive concrete paving and blocked Rajakaluve drain networks.',
-    bggSolution: 'Reactivated the Sector 6 retention wetland, cleared Rajakaluve blockages, and deployed real-time IoT-based water level sensors to provide early warning alerts to municipal engineers.',
-    impactStats: {
-      loadReduction: '35%',
-      warningTime: '45 mins',
-      wellsRecharged: '28 Wells'
-    },
-    colorTheme: 'red'
+    colorTheme: 'blue',
+    bullets: [
+      'Contaminated silt removed to restore gravity flow and carrying capacity.',
+      'BWSSB lays a trunk sewer from Chickpet metro to NGV and diverts ~110 MLD of sewage (pipes 900–2400 mm).',
+      'Culverts and bridges redesigned to widen flow; native stone edges and indigenous planting introduced as a bio-filter.',
+      'The mid-2023 completion target slips — managing sewage inflow proves the hardest problem.'
+    ],
+    graphicId: 'desilt'
   },
   {
-    year: '2025',
-    location: 'Mahadevapura IT Corridor & Bellandur Basin',
-    status: 'Completed Bypass',
-    statusClass: 'completed',
-    floodingDetails: 'Monsoon flooding submerged critical commercial basement grids, halting tech operations for 48 hours. Industrial runoff mixed with raw sewage, causing severe environmental contamination.',
-    bggSolution: 'Constructed three upstream sewage-filtering wetlands (2.5 MLD capacity total) and routed dedicated bypass channels to redirect peak flow away from office basements.',
-    impactStats: {
-      loadReduction: '48%',
-      warningTime: 'N/A',
-      wellsRecharged: '12 Wells'
-    },
-    colorTheme: 'orange'
+    yearKey: '2024',
+    phase: 'Clean-Water Works',
+    title: 'Closing the last sewage gaps',
+    status: 'Final Pipeline Integration',
+    statusClass: 'active',
+    colorTheme: 'purple',
+    bullets: [
+      'Two new works added: a ₹4.42 crore sewer line (Hosur Road–Neelasandra) and a 15 MLD pumping station on KSRTC land.',
+      'A 5 MLD sewage treatment plant near KR Market is readied to guarantee dry-weather flow.',
+      'BBMP reports sewage inflow cut by ~97%; an Independence Day inauguration is targeted.'
+    ],
+    graphicId: 'cleanwater'
   },
   {
-    year: '2024',
-    location: 'Jakkur Lake Catchment & Yelahanka Zones',
-    status: 'Completed Well Recharge',
+    yearKey: '2025-2026',
+    phase: 'Recognition & Reckoning',
+    title: 'A model — and a maintenance test',
+    status: 'Completed & Replicating',
     statusClass: 'completed',
-    floodingDetails: 'Severe waterlogging in residential layouts while the deep borewells were simultaneously running dry at depths of 1,000+ feet due to groundwater over-extraction.',
-    bggSolution: 'Collaborated with traditional well-diggers (Mannu Vaddars) to construct 42 shallow recharge wells and integrated sand-carbon filtration pits to safely channel street runoff into the soil.',
-    impactStats: {
-      loadReduction: '24%',
-      warningTime: 'N/A',
-      wellsRecharged: '42 Wells'
-    },
-    colorTheme: 'purple'
-  },
-  {
-    year: '2023',
-    location: 'Bommanahalli Residential Sector',
-    status: 'Completed Desilting',
-    statusClass: 'completed',
-    floodingDetails: 'Siltation had reduced local retention lakes\' volume by 45%, forcing lake water to overflow back into residential streets during minor showers.',
-    bggSolution: 'Desilted 80,000 cubic meters of mud from the lake beds, established legal vegetation buffers, and constructed sediment traps at primary inflow gates.',
-    impactStats: {
-      loadReduction: '30%',
-      warningTime: 'N/A',
-      wellsRecharged: '15 Wells'
-    },
-    colorTheme: 'blue'
-  },
-  {
-    year: '2022',
-    location: 'Sarjapur Road Wards & Outer Ring Road',
-    status: 'Completed Swales',
-    statusClass: 'completed',
-    floodingDetails: 'Rapid road asphalt paving created high-velocity runoff sheets that flooded commercial properties and eroded road edges.',
-    bggSolution: 'Excavated 1.2 kilometers of bioswales, planted native reeds to slow down water velocity, and laid porous concrete sidewalks to maximize soil infiltration.',
-    impactStats: {
-      loadReduction: '52%',
-      warningTime: 'N/A',
-      wellsRecharged: '8 Wells'
-    },
-    colorTheme: 'indigo'
+    colorTheme: 'green',
+    bullets: [
+      'Sewage inflow reported down from ~135 MLD to about 5 MLD; recognised by the WRI Prize for Cities and the Creative Bureaucracy Festival.',
+      'Most civil work is complete, but reviews flag the real challenge: upkeep — residual sewage, litter and weathering.',
+      'Officials walk a 26 km stretch in June 2026; the Greater Bengaluru Authority signals it will route treated water in and replicate the model.'
+    ],
+    graphicId: 'recognition'
   }
 ];
 
-const Interventions = () => {
-  const [selectedYear, setSelectedYear] = useState('2026');
 
-  const activeData = INTERVENTIONS_DATA.find(item => item.year === selectedYear) || INTERVENTIONS_DATA[0];
+
+const K100_ASSETS = {
+  publicRealm: [
+    { title: 'Restored channel', desc: '9.6 km of desilted, re-graded waterway with restored gravity flow.', icon: '🌊' },
+    { title: 'Walkway & promenade', desc: 'Pedestrian paths along the channel edge — the new public space.', icon: '🚶' },
+    { title: 'Bridges & culverts', desc: 'Redesigned arched crossings that widen flow and let people cross.', icon: '🌉' },
+    { title: 'Stone edges & planting', desc: 'Native granite edging and indigenous species as a living bio-filter.', icon: '🌿' },
+    { title: 'Seating & park space', desc: 'Plazas, seating and Bengaluru’s first new park in nearly four decades.', icon: '🌳' },
+    { title: 'Wayfinding & signage', desc: 'A dedicated identity and signage system for the corridor.', icon: '🪧' },
+    { title: 'Lighting', desc: 'New lighting that made the edge feel safe and usable after dark.', icon: '💡' }
+  ],
+  hydraulicSystem: [
+    { title: '5 MLD STP', desc: 'Treatment plant near KR Market supplying clean dry-weather flow.', icon: '⚙️' },
+    { title: 'Decentralised treatment', desc: 'On-site wastewater treatment serving the D’Souza Garden settlement.', icon: '🏘️' },
+    { title: 'Trunk & interceptor sewers', desc: 'New / rectified lines (Chickpet–NGV; Hosur Rd–Neelasandra) diverting sewage away.', icon: '🚰' },
+    { title: 'Pumping stations', desc: 'Intermediate stations, incl. a 15 MLD wastewater pump on KSRTC land.', icon: '⛽' },
+    { title: 'Compact substations', desc: 'BESCOM CSS units replacing exposed overhead lines along the corridor.', icon: '⚡' },
+    { title: 'Sensor network', desc: 'KSNDMC flood-line and choke-point sensors for risk monitoring.', icon: '📡' },
+    { title: 'Demonstration stretch', desc: 'The ~300 m Shanthinagar mock-up that de-risked the full build.', icon: '🧱' }
+  ]
+};
+
+const Interventions = () => {
+  const [selectedPhase, setSelectedPhase] = useState('1885-1983');
+  const [selectedAssetTab, setSelectedAssetTab] = useState('publicRealm');
+
+  const activePhase = K100_TIMELINE_DATA.find(item => item.yearKey === selectedPhase) || K100_TIMELINE_DATA[0];
+
+
 
   return (
     <div className="interventions-container animate-fade-in">
       <div className="section-header-compact">
-        <h2>Municipal BGG Interventions Timeline</h2>
-        <p>Explore year-wise flooding incidents across Bangalore and the specific Blue-Green Growth (BGG) solutions deployed to restore hydrological resilience.</p>
+        <h2>K100 Citizens’ Waterway</h2>
+        <h3 className="section-subtitle-main">From open sewer to citizens’ waterway</h3>
+        <p className="k100-intro-para">
+          A 9.6 km pilot project that restores a neglected storm-water drain (rajakaluve) as a working part of Bengaluru’s water ecosystem, and as a vibrant public space. Formerly carrying up to 135 million litres of sewage a day from Majestic bus stand to Bellandur Lake, the drain was desilted, intercepted, and reopened as a stone-edged, planted public waterway.
+        </p>
       </div>
 
+      {/* 2. Top KPIs stats grid */}
+      <div className="k100-stats-grid">
+        {K100_STATS.map((stat, idx) => (
+          <div key={idx} className="k100-stat-card glassmorphic">
+            <div className="stat-icon-wrapper">{stat.icon}</div>
+            <div className="stat-content">
+              <div className="stat-value">{stat.value}</div>
+              <div className="stat-label">{stat.label}</div>
+              <div className="stat-desc">{stat.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 3. Main Timeline Workspace */}
+      <h3 className="timeline-main-heading">Timeline</h3>
       <div className="interventions-workspace">
         {/* Left pane: Interactive timeline tree */}
         <div className="timeline-tree-pane">
           <div className="timeline-line"></div>
-          {INTERVENTIONS_DATA.map((item) => {
-            const isSelected = item.year === selectedYear;
+          {K100_TIMELINE_DATA.map((item) => {
+            const isSelected = item.yearKey === selectedPhase;
             return (
               <div 
-                key={item.year}
+                key={item.yearKey}
                 className={`timeline-node-wrapper ${isSelected ? 'active' : ''}`}
-                onClick={() => setSelectedYear(item.year)}
+                onClick={() => setSelectedPhase(item.yearKey)}
               >
                 <div className={`timeline-dot theme-${item.colorTheme}`}>
                   <span className="dot-inner"></span>
                 </div>
                 <div className="timeline-node-card">
-                  <span className="node-year">{item.year}</span>
-                  <strong className="node-location">{item.location}</strong>
+                  <span className="node-year">{item.yearKey}</span>
+                  <div className="node-text-group">
+                    <strong className="node-phase">{item.phase}</strong>
+                    <span className="node-location">{item.title}</span>
+                  </div>
                   <span className={`node-status ${item.statusClass}`}>{item.status}</span>
                 </div>
               </div>
@@ -113,65 +171,105 @@ const Interventions = () => {
 
         {/* Right pane: Expanded detail visualization */}
         <div className="timeline-details-pane">
-          <div className={`details-card glassmorphic theme-${activeData.colorTheme}`}>
+          <div className={`details-card glassmorphic theme-${activePhase.colorTheme}`}>
             <div className="details-header">
-              <div className="details-badge-year">{activeData.year}</div>
+              <div className="details-badge-year">{activePhase.yearKey}</div>
               <div>
-                <h3>{activeData.location}</h3>
-                <span className={`details-status-pill ${activeData.statusClass}`}>{activeData.status}</span>
+                <h3>{activePhase.title}</h3>
+                <span className={`details-status-pill ${activePhase.statusClass}`}>{activePhase.status}</span>
               </div>
             </div>
 
             <div className="details-body">
               <div className="info-block">
-                <h4>⚠️ Flooding Impact Details</h4>
-                <p>{activeData.floodingDetails}</p>
-              </div>
-
-              <div className="info-block">
-                <h4>🌱 BGG Intervention & Scientific Solution</h4>
-                <p>{activeData.bggSolution}</p>
-              </div>
-
-              <div className="impact-metrics-row">
-                <div className="metric-box">
-                  <span className="metric-val">{activeData.impactStats.loadReduction}</span>
-                  <span className="metric-lbl">Drainage Load Reduced</span>
-                </div>
-                <div className="metric-box">
-                  <span className="metric-val">{activeData.impactStats.wellsRecharged}</span>
-                  <span className="metric-lbl">Local Wells Restored</span>
-                </div>
-                {activeData.impactStats.warningTime !== 'N/A' && (
-                  <div className="metric-box">
-                    <span className="metric-val">{activeData.impactStats.warningTime}</span>
-                    <span className="metric-lbl">Early Warning Buffer</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="details-visual-mock">
-              <div className="visual-title">Infiltration & Flow Simulation</div>
-              <div className="visual-graphic">
-                <div className="graphic-label">Surface Layer (Road / Concrete)</div>
-                <div className="graphic-bar concrete">
-                  <span className="flow-arrow blocked">➔ Runoff Sheet Flow (Choked)</span>
-                </div>
-                
-                <div className="graphic-label">BGG Soil Layer (Wetland / Bioswale)</div>
-                <div className="graphic-bar bio-soil">
-                  <span className="flow-arrow descending">▼ Soil Infiltration Flow (Recharging)</span>
-                </div>
-                
-                <div className="graphic-label">Shallow Water Table</div>
-                <div className="water-table-display">
-                  <div className="water-level-wave" style={{ height: activeData.year === '2026' ? '60%' : '45%' }}></div>
-                  <span className="water-table-text">Target Aquifer Level: +2.4m</span>
-                </div>
+                <h4>🌱 Phase Milestones & Accomplishments</h4>
+                <ul className="k100-bullets">
+                  {activePhase.bullets.map((bullet, index) => (
+                    <li key={index}>{bullet}</li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 4. Before & After Ecological Transformation */}
+      <div className="k100-before-after-section glassmorphic">
+        <div className="section-sub-header">
+          <h3>🔄 Transformation: Before & After</h3>
+          <p>Visual comparisons showing the transition from neglected grey infrastructure to an open ecological waterway corridor.</p>
+        </div>
+
+        <div className="ba-comparison-grid">
+          {/* Column 1: Channel Structure Restoration */}
+          <div className="ba-column-card">
+            <h4 className="ba-column-title">Channel Structure Restoration</h4>
+            <div className="ba-images-row">
+              <div className="ba-img-container">
+                <span className="ba-img-badge before">BEFORE</span>
+                <img src="/images/channelised_drain.png" alt="Channelised Drain Before" className="ba-comparison-img" />
+                <div className="ba-img-caption">The channelised drain — silted, sewage-fed, fenced off from the city.</div>
+              </div>
+              <div className="ba-img-container">
+                <span className="ba-img-badge after">AFTER</span>
+                <img src="/images/reopened_channel.png" alt="Reopened Planted Waterway After" className="ba-comparison-img" />
+                <div className="ba-img-caption">The reopened channel — native stone edges, planting, a walkable promenade.</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Urban Context & Relationship */}
+          <div className="ba-column-card">
+            <h4 className="ba-column-title">Urban Context & Relationship</h4>
+            <div className="ba-images-row">
+              <div className="ba-img-container">
+                <span className="ba-img-badge before">BEFORE</span>
+                <img src="/images/Gray_Infrastructure.png" alt="Grey Infrastructure Before" className="ba-comparison-img" />
+                <div className="ba-img-caption">Grey infrastructure: the drain as the city’s back-of-house.</div>
+              </div>
+              <div className="ba-img-container">
+                <span className="ba-img-badge after">AFTER</span>
+                <img src="/images/Ecological_corridor.png" alt="Ecological Corridor After" className="ba-comparison-img" />
+                <div className="ba-img-caption">Ecological corridor: an open channel people can walk beside.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Dual-Layer Asset Explorer */}
+      <div className="k100-assets-section glassmorphic">
+        <div className="section-sub-header">
+          <h3>📐 K100 System Layer Assets</h3>
+          <p>The pilot produced two layers of assets: a visible public realm on top and a hidden hydraulic system keeping the water clean.</p>
+        </div>
+
+        <div className="assets-tabs-header">
+          <button
+            className={`asset-tab-btn ${selectedAssetTab === 'publicRealm' ? 'active' : ''}`}
+            onClick={() => setSelectedAssetTab('publicRealm')}
+          >
+            🌳 Public Realm
+          </button>
+          <button
+            className={`asset-tab-btn ${selectedAssetTab === 'hydraulicSystem' ? 'active' : ''}`}
+            onClick={() => setSelectedAssetTab('hydraulicSystem')}
+          >
+            ⚙️ Hydraulic System
+          </button>
+        </div>
+
+        <div className="assets-grid animate-fade-in">
+          {K100_ASSETS[selectedAssetTab].map((asset, idx) => (
+            <div key={idx} className="asset-card">
+              <div className="asset-icon">{asset.icon}</div>
+              <div className="asset-info">
+                <h4>{asset.title}</h4>
+                <p>{asset.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

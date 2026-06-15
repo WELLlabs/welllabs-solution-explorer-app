@@ -195,7 +195,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
       <div className="cs-page-header">
         <h2 className="cs-page-title">Global Case Studies</h2>
         <p className="cs-page-subtitle">
-          Peer-reviewed flood resilience programmes — design models, verified results, and cost-benefit data from three cities.
+          Three cities. Three flood crises solved. One proven strategy: Blue-Green-Grey infrastructure.
         </p>
       </div>
 
@@ -293,7 +293,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
 
           {/* Measured Outcomes Table */}
           <div className="cs-full-section">
-            <h3 className="cs-section-title cs-with-icon">📊 Measured Outcomes (Verified Results)</h3>
+            <h3 className="cs-section-title cs-with-icon">📊 Measured Outcomes</h3>
             <div className="cs-table-wrap">
               <table className="cs-outcomes-table">
                 <thead>
