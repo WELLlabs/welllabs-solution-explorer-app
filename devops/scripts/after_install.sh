@@ -81,14 +81,53 @@ for field in "${REQUIRED_FIELDS[@]}"; do
   echo "✓ ${field} is present"
 done
 
-# ── [5] Write backend/.env dynamically ────────────────────────────────────────
+# ── [5] URL-encode MONGO_URI password ────────────────────────────────────────
 echo ""
-echo "--- [5/7] Writing ${SHARED_ENV} dynamically ---"
+echo "--- [5/7] Encoding MONGO_URI password ---"
+
+# Pure-bash URL encoder — MongoDB passwords contain : @ # ! etc.
+url_encode() {
+  local raw="${1}" encoded="" i char hex
+  for (( i = 0; i < ${#raw}; i++ )); do
+    char="${raw:i:1}"
+    case "${char}" in
+      [A-Za-z0-9._~-]) encoded+="${char}" ;;
+      *) printf -v hex '%%%02X' "'${char}"; encoded+="${hex}" ;;
+    esac
+  done
+  echo "${encoded}"
+}
+
+RAW_MONGO_URI=$(jq -r '.MONGO_URI // empty' <<< "${APP_CONFIG_JSON}")
+[[ -n "${RAW_MONGO_URI}" ]] || { echo "ERROR: 'MONGO_URI' missing in secret JSON."; exit 1; }
+
+MONGO_PASS_RAW=$(echo "${RAW_MONGO_URI}" | grep -oP '(?<=://)[^:]+:\K[^@]+')
+
+if [[ -z "${MONGO_PASS_RAW}" ]]; then
+  echo "WARNING: Could not parse password from MONGO_URI — using URI as-is."
+  ENCODED_MONGO_URI="${RAW_MONGO_URI}"
+else
+  MONGO_SCHEME_USER=$(echo "${RAW_MONGO_URI}" | grep -oP '^[^:]+://[^:]+:')
+  MONGO_AFTER_PASS=$(echo "${RAW_MONGO_URI}" | grep -oP '@.+$')
+  ENCODED_MONGO_URI="${MONGO_SCHEME_USER}$(url_encode "${MONGO_PASS_RAW}")${MONGO_AFTER_PASS}"
+  echo "MONGO_URI      : password URL-encoded (redacted)"
+fi
+
+# Patch encoded URI back into JSON so .env gets the safe version
+APP_CONFIG_JSON=$(jq --arg uri "${ENCODED_MONGO_URI}" '.MONGO_URI = $uri' <<< "${APP_CONFIG_JSON}")
+
+# ── [6] Write backend/.env dynamically ────────────────────────────────────────
+echo ""
+echo "--- [6/7] Writing ${SHARED_ENV} dynamically ---"
 
 mkdir -p "${SHARED_DIR}"
 
 # Generate .env file from ALL keys in JSON
-jq -r 'to_entries | .[] | "\(.key)=\(.value)"' <<< "${APP_CONFIG_JSON}" > "${SHARED_ENV}"
+# Values are single-quoted so shell metacharacters (: * # ^ ! @ etc.)
+# inside passwords/secrets do NOT break "source .env" in application_start.sh.
+# Any single-quote inside a value is escaped as '\'' (end quote, literal ', re-open quote).
+jq -r 'to_entries | .[] | "\(.key)='\''\(.value | gsub("'\''"; "'\''\\'\'''\''"))'\''"' \
+  <<< "${APP_CONFIG_JSON}" > "${SHARED_ENV}"
 
 # Secure the file — only root can read it
 chmod 600 "${SHARED_ENV}"
@@ -107,9 +146,9 @@ while IFS='=' read -r key value; do
 done < "${SHARED_ENV}"
 echo "─────────────────────────────────────────────────────────────"
 
-# ── [6] Backend deps, Nginx, symlinks ────────────────────────────────────────
+# ── [7] Backend deps, Nginx, symlinks ────────────────────────────────────────
 echo ""
-echo "--- [6/7] Installing backend dependencies ---"
+echo "--- [7/7] Installing backend dependencies ---"
 
 [ -f "${DEPLOY_DIR}/backend/package.json" ] || {
   echo "ERROR: backend/package.json missing"
@@ -155,7 +194,7 @@ fi
 SERVE_MAIN="$(npm root -g)/serve/build/main.js"
 if [ -f "$SERVE_MAIN" ]; then
   rm -f /usr/bin/serve /usr/local/bin/serve
-  cat << EOF > /tmp/serve_wrapper
+  cat <<EOF > /tmp/serve_wrapper
 #!/bin/bash
 exec /usr/bin/node "$SERVE_MAIN" "\$@"
 EOF
@@ -164,9 +203,9 @@ EOF
   ln -sf /usr/bin/serve /usr/local/bin/serve
 fi
 
-# ── [7] Deploy systemd units ──────────────────────────────────────────────────
+# ── [8] Deploy systemd units ──────────────────────────────────────────────────
 echo ""
-echo "--- [7/7] Deploying systemd units ---"
+echo "--- [8/8] Deploying systemd units ---"
 
 for SVC in welllabs-backend.service welllabs-frontend.service; do
   [ -f "${DEPLOY_DIR}/devops/systemd/${SVC}" ] || {
