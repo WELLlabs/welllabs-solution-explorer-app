@@ -101,9 +101,7 @@ const Dashboard = () => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  // No longer redirecting unauthenticated users to login
 
   return (
     <div className="dashboard-wrapper">
@@ -112,12 +110,12 @@ const Dashboard = () => {
 
       <main className="dashboard-main">
         {/* PENDING VIEW */}
-        {user.role === 'Pending' && (
+        {user?.role === 'Pending' && (
           <PendingApproval />
         )}
 
         {/* WORKSPACE NAVIGATION TABS */}
-        {user.role !== 'Pending' && (
+        {user?.role !== 'Pending' && (
           <div className="dashboard-navigation-tabs">
             <button 
               className={`tab-btn ${activeTab === 'home' ? 'active' : ''}`}
@@ -203,7 +201,7 @@ const Dashboard = () => {
             )}
 
             {/* Admin Exclusive User Management */}
-            {user.role === 'Admin' && (
+            {user?.role === 'Admin' && (
               <button 
                 className={`tab-btn ${activeTab === 'usermanagement' ? 'active' : ''}`}
                 onClick={() => navigate('/usermanagement')}
@@ -222,7 +220,7 @@ const Dashboard = () => {
         )}
 
         {/* 1. HOME VIEW */}
-        {user.role !== 'Pending' && activeTab === 'home' && (
+        {user?.role !== 'Pending' && activeTab === 'home' && (
           <BggIntroduction 
             onNavigateToCase={handleNavigateToCase} 
             onSetActiveTab={(tab) => navigate('/' + tab)} 
@@ -230,14 +228,14 @@ const Dashboard = () => {
         )}
 
         {/* 2. DASHBOARD VIEW (Analytics Component) */}
-        {user.role !== 'Pending' && activeTab === 'dashboard' && (
+        {user?.role !== 'Pending' && activeTab === 'dashboard' && (
           <div className="analytics-view-section animate-fade-in">
             <Analytics />
           </div>
         )}
 
         {/* 3. CASE STUDY VIEW */}
-        {user.role !== 'Pending' && activeTab === 'casestudy' && (
+        {user?.role !== 'Pending' && activeTab === 'casestudy' && (
           <CaseStudies 
             highlightedCaseTitle={highlightedCaseTitle} 
             clearHighlight={() => setHighlightedCaseTitle(null)} 
@@ -245,17 +243,17 @@ const Dashboard = () => {
         )}
 
         {/* 4. INTERVENTIONS VIEW */}
-        {user.role !== 'Pending' && activeTab === 'interventions' && (
+        {user?.role !== 'Pending' && activeTab === 'interventions' && (
           <Interventions />
         )}
 
         {/* 5. FLOOD RISK MAP VIEW */}
-        {user.role !== 'Pending' && activeTab === 'floodriskmap' && (
+        {user?.role !== 'Pending' && activeTab === 'floodriskmap' && (
           <FloodRiskMap />
         )}
 
         {/* 6. DATA LAYERS VIEW */}
-        {user.role !== 'Pending' && activeTab === 'datalayers' && (
+        {user?.role !== 'Pending' && activeTab === 'datalayers' && (
           <div className="data-layers-section animate-fade-in">
             <div className="data-layers-header-row">
               <div>
@@ -323,112 +321,85 @@ const Dashboard = () => {
         )}
 
         {/* 7. PLATFORM VIEW */}
-        {SHOW_PLATFORM_TAB && user.role !== 'Pending' && activeTab === 'platform' && (
+        {SHOW_PLATFORM_TAB && user?.role !== 'Pending' && activeTab === 'platform' && (
           <div className="platform-section animate-fade-in">
-            <div className="platform-hero glassmorphic">
-              <h3>Solution Explorer Security & Architecture</h3>
-              <p>
-                The platform utilizes a secure JWT-token based permission gateway to enforce strict role-based access control (RBAC). 
-                Project data contains 19 highly confidential columns ranging from budget figures, DPR documents, and stakeholder IDs to physical attributes.
-              </p>
-            </div>
-
-            {/* Architectural Flow Graphic */}
-            <div className="pipeline-visual-header">JWT Field-Level Authorization Pipeline</div>
-            <div className="pipeline-visual">
-              <div className="pipeline-node">
-                <strong>React App</strong>
-                <span>Sends Authorization Header</span>
-              </div>
-              <div className="pipeline-arrow">➔</div>
-              <div className="pipeline-node">
-                <strong>JWT Middleware</strong>
-                <span>Decodes token & role specs</span>
-              </div>
-              <div className="pipeline-arrow">➔</div>
-              <div className="pipeline-node">
-                <strong>Mongo Lock</strong>
-                <span>Retrieves database record</span>
-              </div>
-              <div className="pipeline-arrow">➔</div>
-              <div className="pipeline-node">
-                <strong>Security Filter</strong>
-                <span>Filters keys against FIELD_PERMISSIONS</span>
-              </div>
-              <div className="pipeline-arrow">➔</div>
-              <div className="pipeline-node">
-                <strong>Client Render</strong>
-                <span>Strict field layout loading</span>
-              </div>
-            </div>
-
-            {/* Dynamic Permission Simulator Matrix */}
-            <div className="permission-simulator-container glassmorphic">
-              <div className="simulator-header">
-                <div>
-                  <h4>Interactive Permission Matrix Simulator</h4>
-                  <p>Select different user roles to dynamically simulate and visualize field-level locks and permitted values.</p>
+            <div className="platform-projects-container">
+              <div className="projects-grid">
+                {/* Row 1: 3 Visible Projects */}
+                <div className="project-card animate-fade-in">
+                  <div className="project-card-header">
+                    <h4 className="project-card-title">Project 1</h4>
+                  </div>
+                  <div className="project-card-body"></div>
+                </div>
+                <div className="project-card animate-fade-in">
+                  <div className="project-card-header">
+                    <h4 className="project-card-title">Project 2</h4>
+                  </div>
+                  <div className="project-card-body"></div>
+                </div>
+                <div className="project-card animate-fade-in">
+                  <div className="project-card-header">
+                    <h4 className="project-card-title">Project 3</h4>
+                  </div>
+                  <div className="project-card-body"></div>
                 </div>
 
-                <div className="simulator-role-picker">
-                  {['WELL Labs1', 'Consultant', 'GBA', 'Donor', 'Admin'].map((role) => (
-                    <button 
-                      key={role}
-                      className={`sim-role-btn ${simulatedRole === role ? 'active' : ''}`}
-                      onClick={() => setSimulatedRole(role)}
-                    >
-                      {role}
-                    </button>
-                  ))}
+                {/* Row 2: 3 Blurred or Visible Projects depending on auth */}
+                <div className={`project-card animate-fade-in ${!user ? 'blurred-card' : ''}`}>
+                  <div className="project-card-header">
+                    <h4 className="project-card-title">Project 4</h4>
+                  </div>
+                  <div className="project-card-body"></div>
+                </div>
+                <div className={`project-card animate-fade-in ${!user ? 'blurred-card' : ''}`}>
+                  <div className="project-card-header">
+                    <h4 className="project-card-title">Project 5</h4>
+                  </div>
+                  <div className="project-card-body"></div>
+                </div>
+                <div className={`project-card animate-fade-in ${!user ? 'blurred-card' : ''}`}>
+                  <div className="project-card-header">
+                    <h4 className="project-card-title">Project 6</h4>
+                  </div>
+                  <div className="project-card-body"></div>
                 </div>
               </div>
 
-              <div className="simulator-body">
-                <div className="sim-role-specs">
-                  💡 Currently simulating: <strong>{simulatedRole} Profile</strong>
-                  <span className="sim-spec-badge">
-                    {simulatedRole === 'Admin' ? 'All' : '19'} Columns Authorized
-                  </span>
+              {/* Login Wall UI */}
+              {!user ? (
+                <div className="login-overlay-box glassmorphic">
+                  <p>
+                    You are viewing the public version of Solution Explorer. 
+                    Please login to unlock and view details for all projects.
+                  </p>
+                  <button 
+                    onClick={() => navigate('/login')} 
+                    className="login-redirect-button"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                      <polyline points="10 17 15 12 10 7" />
+                      <line x1="15" y1="12" x2="3" y2="12" />
+                    </svg>
+                    Login to Unlock More Projects
+                  </button>
                 </div>
-
-                <div className="simulator-fields-grid">
-                  {[
-                    'Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 
-                    'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 
-                    'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 
-                    'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 
-                    'Donor Asset', 'Donor Support'
-                  ].map((field, fIdx) => {
-                    // Check permission
-                    const isPermitted = simulatedRole === 'Admin' || FIELD_PERMISSIONS[simulatedRole]?.includes(field);
-                    
-                    return (
-                      <div key={fIdx} className={`sim-field-row ${isPermitted ? 'permitted' : 'restricted'}`}>
-                        <div className="sim-field-meta">
-                          <span className="sim-lock-icon">{isPermitted ? '🔓' : '🔒'}</span>
-                          <strong className="sim-field-name">{field}</strong>
-                        </div>
-                        <div className="sim-field-value-preview">
-                          {isPermitted ? (
-                            <span className="preview-text">Example permitted content for {field.toLowerCase()}...</span>
-                          ) : (
-                            <span className="preview-blurred">RESTRICTED_FIELD_ACCESS_DENIED_PROTECTED</span>
-                          )}
-                        </div>
-                        <span className={`sim-status-tag ${isPermitted ? 'yes' : 'no'}`}>
-                          {isPermitted ? 'PERMITTED' : 'HIDDEN'}
-                        </span>
-                      </div>
-                    );
-                  })}
+              ) : (
+                <div className="unlocked-badge">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  All Projects Unlocked
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
 
         {/* 8. ADMIN USER MANAGEMENT VIEW */}
-        {user.role === 'Admin' && activeTab === 'usermanagement' && (
+        {user?.role === 'Admin' && activeTab === 'usermanagement' && (
           <div className="admin-section animate-fade-in">
             <div className="section-header">
               <div>
