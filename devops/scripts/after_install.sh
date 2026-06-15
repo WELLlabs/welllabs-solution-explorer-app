@@ -88,7 +88,11 @@ echo "--- [5/7] Writing ${SHARED_ENV} dynamically ---"
 mkdir -p "${SHARED_DIR}"
 
 # Generate .env file from ALL keys in JSON
-jq -r 'to_entries | .[] | "\(.key)=\(.value)"' <<< "${APP_CONFIG_JSON}" > "${SHARED_ENV}"
+# Values are single-quoted so shell metacharacters (: * # ^ ! @ etc.)
+# inside passwords/secrets do NOT break "source .env" in application_start.sh.
+# Any single-quote inside a value is escaped as '\'' (end quote, literal ', re-open quote).
+jq -r 'to_entries | .[] | "\(.key)='\''\(.value | gsub("'\''"; "'\''\\'\'''\''"))'\''"' \
+  <<< "${APP_CONFIG_JSON}" > "${SHARED_ENV}"
 
 # Secure the file — only root can read it
 chmod 600 "${SHARED_ENV}"

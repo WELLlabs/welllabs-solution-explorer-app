@@ -23,15 +23,6 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
-// MongoDB Connection Options
-mongoose.set('bufferCommands', false); // Disable command buffering to prevent hanging queries when offline
-
-mongoose.connect(process.env.MONGO_URI, {
-  serverSelectionTimeoutMS: 45000, // Wait up to 45 seconds to find the MongoDB server on a slow network
-})
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
-
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 console.log('🔐 Auth routes mounted');
@@ -50,9 +41,22 @@ app.get('/api/health', (req, res) => {
         message: 'Backend is connected to frontend!',
         timestamp: new Date()
     });
-});
+}); 
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`📡 Server running on http://localhost:${PORT}`);
-});
+// ── Start: connect to MongoDB first, then open the HTTP port ──────────────
+(async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 45000, // Wait up to 45 s to find MongoDB
+    });
+    console.log('✅ MongoDB Connected');
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`📡 Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('❌ MongoDB Connection Error:', err);
+    process.exit(1); // Crash fast so systemd can restart the service
+  }
+})();
 
