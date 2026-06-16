@@ -160,6 +160,6 @@ else
   cat /opt/welllabs/logs/frontend-test.log 2>/dev/null || echo "No frontend test log found."
 
   cleanup
-  rm -rf "${BACKEND_REL}" "${FRONTEND_REL}" 2>/dev/null || true
+  rm -rf "${BACKEND_REL}" "${FRONTEND_REL}" 2>/dev/null || true 
   exit 1
 fi

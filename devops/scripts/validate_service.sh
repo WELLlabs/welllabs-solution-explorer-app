@@ -66,7 +66,7 @@ check_svc "nginx"
 
 # Confirm test ports are free
 for PORT in 5001 3001; do
-  fuser -k "${PORT}/tcp" 2>/dev/null || true
+  fuser -k "${PORT}/tcp" 2>/dev/null || true 
 done
 
 # FIX [VUL-7]: Use [[ ]] for the final FAIL check — bash-native, safer than [ ].

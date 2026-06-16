@@ -17,4 +17,4 @@ mkdir -p /opt/welllabs/logs
 # It is fetched from AWS Secrets Manager by after_install.sh
 # using the APP_CONFIG_SECRET_ARN from the deploy-env artifact file.
 
-echo "[deploy] BeforeInstall done"
+echo "[deploy] BeforeInstall done" 

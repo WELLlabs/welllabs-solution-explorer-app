@@ -56,7 +56,7 @@ echo "App Config ARN : ${APP_CONFIG_SECRET_ARN}"
 
 # ── [2] Fetch the app-config secret from Secrets Manager ─────────────────────
 echo ""
-echo "--- [2/7] Fetching secret from AWS Secrets Manager ---"
+echo "--- [2/7] Fetching secret from AWS Secrets Manager ---" 
 
 # FIX [VUL-2]: Separate stderr from stdout so that AWS CLI error messages are
 # NOT captured into APP_CONFIG_JSON. Errors go to the log; the variable stays clean.
