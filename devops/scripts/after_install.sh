@@ -1,7 +1,4 @@
 #!/bin/bash
-# FIX [VUL-1]: set -euo pipefail catches pipe failures AND unset variables.
-# Without -u: a typo like ${DEPLOOY_DIR} silently becomes empty string → disaster.
-# Without -o pipefail: a failed left-side of a pipe is swallowed → empty secrets.
 set -euo pipefail
 
 echo ""
@@ -26,7 +23,6 @@ echo "--- [1/7] Reading deploy-env from artifact ---"
 # Strip leading whitespace (heredoc indentation from buildspec cat <<EOF)
 sed -i 's/^[[:space:]]*//' "${DEPLOY_DIR}/deploy-env"
 
-# FIX [VUL-8 + VUL-3]: Normalize CRLF AFTER validation, and validate deploy-env
 # before sourcing to prevent arbitrary code execution from a tampered artifact.
 # Only lines matching KEY=VALUE, blank lines, or comments are permitted.
 INVALID_LINES=$(grep -cvP '^\s*$|^\s*#|^[A-Z_][A-Z0-9_]*=\S' "${DEPLOY_DIR}/deploy-env" || true)
@@ -40,7 +36,6 @@ fi
 source "${DEPLOY_DIR}/deploy-env"
 
 # Normalize all deployment scripts to have Unix (LF) line endings
-# FIX [VUL-8]: Moved AFTER artifact validation so tampered scripts are caught first.
 find "${DEPLOY_DIR}/devops/scripts" -type f -name "*.sh" -exec sed -i 's/\r$//' {} +
 
 for var in PROJECT_NAME APP_CONFIG_SECRET_ARN; do
@@ -58,7 +53,7 @@ echo "App Config ARN : ${APP_CONFIG_SECRET_ARN}"
 echo ""
 echo "--- [2/7] Fetching secret from AWS Secrets Manager ---" 
 
-# FIX [VUL-2]: Separate stderr from stdout so that AWS CLI error messages are
+
 # NOT captured into APP_CONFIG_JSON. Errors go to the log; the variable stays clean.
 # Removing 2>&1 means a failure exits via set -e (stderr is visible in CodeDeploy logs).
 APP_CONFIG_JSON=$(aws secretsmanager get-secret-value \
@@ -81,7 +76,7 @@ jq -e . > /dev/null 2>&1 <<< "${APP_CONFIG_JSON}" || {
   exit 1
 }
 
-# FIX [VUL-2]: Only log key names — never echo the raw JSON blob.
+
 # Key names alone carry no sensitive information.
 echo "Keys in secret : $(jq -r 'keys | join(", ")' <<< "${APP_CONFIG_JSON}")"
 
@@ -157,7 +152,7 @@ echo ".env written  : ${SHARED_ENV}"
 echo ".env contents:"
 echo "─────────────────────────────────────────────────────────────"
 
-# FIX [VUL-6]: Only log the key NAMES — never echo any value (even partial).
+
 # The original IFS='=' split broke on values containing '=', leaking partial secrets.
 # Using grep to extract key names is safe and unambiguous.
 echo "Keys written to .env:"
@@ -209,7 +204,6 @@ if [[ -n "${NODE_PATH}" ]]; then
 fi
 
 # Ensure serve is installed
-# FIX [VUL-5]: Pin the exact version of serve to ensure deterministic,
 # auditable deployments. Never install an unpinned package in production.
 if ! command -v serve &>/dev/null; then
   echo "[deploy] serve not found. Installing pinned version globally..."
@@ -217,7 +211,6 @@ if ! command -v serve &>/dev/null; then
 fi
 
 # Robust serve wrapper
-# FIX [VUL-4]: Write directly to /usr/bin/serve — no /tmp intermediary.
 # /tmp is world-writable; writing there and then mv'ing creates a TOCTOU
 # race window where an attacker can swap the file before mv executes as root.
 SERVE_MAIN="$(npm root -g)/serve/build/main.js"

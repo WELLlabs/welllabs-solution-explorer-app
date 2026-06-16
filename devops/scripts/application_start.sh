@@ -1,7 +1,5 @@
 #!/bin/bash
-# FIX [VUL-1]: set -euo pipefail — same rationale as after_install.sh.
-# -u  : catch unset variable typos (e.g. ${TIMESTMP} → immediate exit, not silent empty string)
-# -o pipefail : catch failures inside pipes (e.g. ls | tail | xargs rm)
+
 set -euo pipefail
 
 echo "[deploy] ApplicationStart — $(date)"
@@ -17,7 +15,7 @@ FRONTEND_TEST_PORT=3001
 BACKEND_TEST_PID=""
 FRONTEND_TEST_PID=""
 
-# FIX [VUL-2]: Validate SHARED_ENV exists and is non-empty BEFORE doing anything else.
+
 # If after_install.sh failed silently, the .env could be empty or missing.
 # Starting the app with an empty .env means MONGO_URI="" → silent connection failure.
 if [[ ! -f "${SHARED_ENV}" ]]; then
@@ -31,7 +29,7 @@ fi
 
 # ── Health check helper ───────────────────────────────────────
 check() {
-  # FIX [VUL-3]: Quote all variable references inside the function.
+
   # Unquoted $PORT and $URL in [ ] and echo can break on values with spaces or special chars.
   local PORT="${1}" URL="${2}"
   for i in $(seq 1 30); do
@@ -49,12 +47,12 @@ check() {
 
 # ── Cleanup test processes ────────────────────────────────────
 cleanup() {
-  # FIX [VUL-4]: Quote PID variables to avoid word-splitting if they're unexpectedly empty.
+  
   # Also use [[ ]] (bash conditional) instead of [ ] for consistency and safety.
   [[ -n "${BACKEND_TEST_PID}"  ]] && kill "${BACKEND_TEST_PID}"  2>/dev/null || true
   [[ -n "${FRONTEND_TEST_PID}" ]] && kill "${FRONTEND_TEST_PID}" 2>/dev/null || true
   sleep 2
-  # FIX [VUL-4]: Use the variables (not hardcoded ports) so cleanup always matches the ports used above.
+  
   fuser -k "${BACKEND_TEST_PORT}/tcp"  2>/dev/null || true
   fuser -k "${FRONTEND_TEST_PORT}/tcp" 2>/dev/null || true
 }
@@ -77,20 +75,14 @@ sleep 1
 # ── STEP 4: Start test processes (invisible to Nginx) ─────────
 cd "${BACKEND_REL}"
 
-# FIX [VUL-5]: Removed the sed -i CRLF normalization of SHARED_ENV here.
-# after_install.sh already writes the .env with correct Unix line endings and
-# sets chmod 600 / chown root:root on it. Re-running sed -i here:
-#   (a) requires write permission on a root-owned 600 file → will FAIL as non-root
-#   (b) modifies a shared security-sensitive file during a live deployment window
-#   (c) is redundant — if you need CRLF normalization, fix it in after_install.sh
-# The check is kept as a guard — if the file has \r it means after_install.sh broke.
+
 if grep -qP '\r' "${SHARED_ENV}" 2>/dev/null; then
   echo "ERROR: ${SHARED_ENV} contains Windows line endings (\\r)."
   echo "This indicates after_install.sh did not write the .env correctly."
   exit 1
 fi
 
-# FIX [VUL-6]: set -a sources ALL variables from .env into the environment.
+
 # This is intentional — node needs the env vars. But we must ensure the file
 # is root-owned (600) before sourcing, otherwise a low-privilege user could
 # have tampered with it between after_install and now.

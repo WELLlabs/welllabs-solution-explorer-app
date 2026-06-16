@@ -1,8 +1,4 @@
 #!/bin/bash
-# FIX [VUL-1]: Add set -euo pipefail.
-# -e  : exit immediately on any command failure
-# -u  : exit if an unset/typo'd variable is used (e.g. ${FAILL} silently becomes 0 → FAIL never triggers)
-# -o pipefail : exit if any stage of a pipe fails (curl | grep | wc etc.)
 set -euo pipefail
 
 echo "[deploy] ValidateService — $(date)"
@@ -10,7 +6,7 @@ echo "[deploy] ValidateService — $(date)"
 FAIL=0
 
 check_http() {
-  # FIX [VUL-2]: Quote all local variables properly.
+
   # Original: sleep $RETRY_DELAY — unquoted, fails if variable contains spaces or is empty.
   # Also use [[ ]] (bash double-bracket) instead of [ ] for safer string comparisons.
   local LABEL="${1}" URL="${2}" EXPECT="${3:-200}"
@@ -29,7 +25,7 @@ check_http() {
 
   echo "[deploy] FAIL ${LABEL} → HTTP ${CODE} (expected ${EXPECT}) after ${MAX_RETRIES} attempts"
   FAIL=$((FAIL + 1))
-  # FIX [VUL-3]: Do NOT return 1 here.
+  
   # If check_http returns 1 and set -e is active, the script exits immediately before
   # running the remaining checks or printing diagnostics. We want ALL checks to run
   # and then decide at the end. So we increment FAIL and return 0 to let the script continue.
@@ -37,9 +33,9 @@ check_http() {
 }
 
 check_svc() {
-  # FIX [VUL-2]: Quote ${SVC} and use [[ ]] instead of [ ].
+ 
   local SVC="${1}"
-  # FIX [VUL-4]: The original used 'STATUS=$(systemctl is-active ... || echo "unknown")'.
+ 
   # With set -e active, the || catches the failure correctly. But the STATUS variable
   # is GLOBAL — not declared with 'local'. In bash, a global variable assignment inside
   # a function modifies the script-level scope, which is intentional here for FAIL tracking.
