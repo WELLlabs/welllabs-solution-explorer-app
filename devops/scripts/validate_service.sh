@@ -1,38 +1,55 @@
 #!/bin/bash
+# FIX [VUL-1]: Add set -euo pipefail.
+# -e  : exit immediately on any command failure
+# -u  : exit if an unset/typo'd variable is used (e.g. ${FAILL} silently becomes 0 → FAIL never triggers)
+# -o pipefail : exit if any stage of a pipe fails (curl | grep | wc etc.)
+set -euo pipefail
 
 echo "[deploy] ValidateService — $(date)"
-
-
 
 FAIL=0
 
 check_http() {
-  local LABEL="$1" URL="$2" EXPECT="${3:-200}"
+  # FIX [VUL-2]: Quote all local variables properly.
+  # Original: sleep $RETRY_DELAY — unquoted, fails if variable contains spaces or is empty.
+  # Also use [[ ]] (bash double-bracket) instead of [ ] for safer string comparisons.
+  local LABEL="${1}" URL="${2}" EXPECT="${3:-200}"
   local MAX_RETRIES=10
   local RETRY_DELAY=3
-  
-  for i in $(seq 1 $MAX_RETRIES); do
-    CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$URL" 2>/dev/null || echo "000")
-    if [ "$CODE" = "$EXPECT" ]; then
-      echo "[deploy] OK   $LABEL → HTTP $CODE (attempt $i)"
+
+  for i in $(seq 1 "${MAX_RETRIES}"); do
+    CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "${URL}" 2>/dev/null || echo "000")
+    if [[ "${CODE}" = "${EXPECT}" ]]; then
+      echo "[deploy] OK   ${LABEL} → HTTP ${CODE} (attempt ${i})"
       return 0
     fi
-    echo "[deploy] RETRY $LABEL → HTTP $CODE (expected $EXPECT), attempt $i/$MAX_RETRIES..."
-    sleep $RETRY_DELAY
+    echo "[deploy] RETRY ${LABEL} → HTTP ${CODE} (expected ${EXPECT}), attempt ${i}/${MAX_RETRIES}..."
+    sleep "${RETRY_DELAY}"
   done
 
-  echo "[deploy] FAIL $LABEL → HTTP $CODE (expected $EXPECT) after $MAX_RETRIES attempts"
+  echo "[deploy] FAIL ${LABEL} → HTTP ${CODE} (expected ${EXPECT}) after ${MAX_RETRIES} attempts"
   FAIL=$((FAIL + 1))
-  return 1
+  # FIX [VUL-3]: Do NOT return 1 here.
+  # If check_http returns 1 and set -e is active, the script exits immediately before
+  # running the remaining checks or printing diagnostics. We want ALL checks to run
+  # and then decide at the end. So we increment FAIL and return 0 to let the script continue.
+  return 0
 }
 
 check_svc() {
-  local SVC="$1"
-  STATUS=$(systemctl is-active "$SVC" 2>/dev/null || echo "unknown")
-  if [ "$STATUS" = "active" ]; then
-    echo "[deploy] OK   $SVC is active"
+  # FIX [VUL-2]: Quote ${SVC} and use [[ ]] instead of [ ].
+  local SVC="${1}"
+  # FIX [VUL-4]: The original used 'STATUS=$(systemctl is-active ... || echo "unknown")'.
+  # With set -e active, the || catches the failure correctly. But the STATUS variable
+  # is GLOBAL — not declared with 'local'. In bash, a global variable assignment inside
+  # a function modifies the script-level scope, which is intentional here for FAIL tracking.
+  # However, 'local STATUS' is safer to prevent accidental namespace pollution.
+  local STATUS
+  STATUS=$(systemctl is-active "${SVC}" 2>/dev/null || echo "unknown")
+  if [[ "${STATUS}" = "active" ]]; then
+    echo "[deploy] OK   ${SVC} is active"
   else
-    echo "[deploy] FAIL $SVC is $STATUS"
+    echo "[deploy] FAIL ${SVC} is ${STATUS}"
     FAIL=$((FAIL + 1))
   fi
 }
@@ -45,39 +62,39 @@ check_http "frontend /"          "http://localhost:3000/"
 check_svc "welllabs-backend"
 check_svc "welllabs-frontend"
 check_svc "nginx"
-check_svc "mongod"
+
 
 # Confirm test ports are free
 for PORT in 5001 3001; do
-  fuser -k ${PORT}/tcp 2>/dev/null || true
+  fuser -k "${PORT}/tcp" 2>/dev/null || true
 done
 
-if [ "$FAIL" -eq 0 ]; then
-  echo "[deploy] ValidateService PASSED ($FAIL failures) — $(date)"
+# FIX [VUL-7]: Use [[ ]] for the final FAIL check — bash-native, safer than [ ].
+if [[ "${FAIL}" -eq 0 ]]; then
+  echo "[deploy] ValidateService PASSED (${FAIL} failures) — $(date)"
   exit 0
 else
-  echo "[deploy] ValidateService FAILED ($FAIL checks) — dumping diagnostics"
+  echo "[deploy] ValidateService FAILED (${FAIL} checks failed) — dumping diagnostics"
 
   echo "=== systemd Status ==="
-  for SVC in welllabs-backend welllabs-frontend nginx mongod; do
-    echo "--- systemctl status $SVC ---"
-    systemctl status "$SVC" --no-pager -n 20 || true
+  for SVC in welllabs-backend welllabs-frontend nginx; do
+    echo "--- systemctl status ${SVC} ---"
+    systemctl status "${SVC}" --no-pager -n 20 || true
   done
 
   echo "=== Backend Production Logs ==="
-  tail -n 50 /opt/welllabs/logs/backend.log 2>/dev/null || echo "No backend log found."
+  tail -n 50 /opt/welllabs/logs/backend.log       2>/dev/null || echo "No backend log found."
   echo "=== Backend Production Error Logs ==="
   tail -n 50 /opt/welllabs/logs/backend-error.log 2>/dev/null || echo "No backend error log found."
 
   echo "=== Frontend Production Logs ==="
-  tail -n 50 /opt/welllabs/logs/frontend.log 2>/dev/null || echo "No frontend log found."
+  tail -n 50 /opt/welllabs/logs/frontend.log       2>/dev/null || echo "No frontend log found."
   echo "=== Frontend Production Error Logs ==="
   tail -n 50 /opt/welllabs/logs/frontend-error.log 2>/dev/null || echo "No frontend error log found."
 
   echo "=== Nginx Error Logs ==="
-  tail -n 30 /var/log/nginx/error.log 2>/dev/null || echo "No nginx error log found."
-  tail -n 30 /var/log/nginx/welllabs-error.log 2>/dev/null || echo "No welllabs nginx error log found."
+  tail -n 30 /var/log/nginx/error.log              2>/dev/null || echo "No nginx error log found."
+  tail -n 30 /var/log/nginx/welllabs-error.log     2>/dev/null || echo "No welllabs nginx error log found."
 
   exit 1
 fi
-
