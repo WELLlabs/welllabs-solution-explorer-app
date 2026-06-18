@@ -34,3 +34,11 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Raw GIS Shapefile binaries
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg
+*.qmd

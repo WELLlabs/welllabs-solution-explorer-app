@@ -16,6 +16,7 @@ import Analytics from './Analytics';
 import CaseStudies from '../components/dashboard/CaseStudies';
 import Interventions from '../components/dashboard/Interventions';
 import FloodRiskMap from '../components/dashboard/FloodRiskMap';
+import DataLayersView from '../components/dashboard/DataLayersView';
 
 // Export FIELD_PERMISSIONS to keep references intact
 export const FIELD_PERMISSIONS = {
@@ -254,70 +255,7 @@ const Dashboard = () => {
 
         {/* 6. DATA LAYERS VIEW */}
         {user?.role !== 'Pending' && activeTab === 'datalayers' && (
-          <div className="data-layers-section animate-fade-in">
-            <div className="data-layers-header-row">
-              <div>
-                <h2>Google Earth Engine (GEE) Applications</h2>
-                <p className="tab-description-subtitle">Access live GIS satellite maps and spatial telemetry dashboards compiled by WELL Labs.</p>
-              </div>
-            </div>
-
-            <div className="gee-links-portal-grid">
-              {[
-                {
-                  name: "Urban Water Explorer",
-                  url: "https://gcp-welllabs.projects.earthengine.app/view/urban-water",
-                  desc: "Analyze municipal water stress indices, surface runoff risks, and active lake restoration monitoring datasets across urban watersheds.",
-                  icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 21h18M3 10h18M5 10V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5M10 21V16a2 2 0 0 1 4 0v5" />
-                    </svg>
-                  ),
-                  badge: "URBAN METRICS",
-                  colorTheme: "blue"
-                },
-                {
-                  name: "Solutions Explorer Map",
-                  url: "https://gcp-welllabs.projects.earthengine.app/view/solutionsexplorer",
-                  desc: "Unified interactive spatial viewer illustrating localized recharge wells, parklands, geological corridors, and citizen science telemetry.",
-                  icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                  ),
-                  badge: "CORE EXPLORER",
-                  colorTheme: "indigo"
-                }
-              ].map((app, index) => (
-                <div key={index} className={`gee-portal-card glassmorphic theme-${app.colorTheme}`}>
-                  <div className="gee-card-top">
-                    <span className="gee-portal-badge">{app.badge}</span>
-                    <div className="gee-portal-icon">{app.icon}</div>
-                  </div>
-                  <h3>{app.name}</h3>
-                  <p className="gee-portal-desc">{app.desc}</p>
-                  <div className="gee-portal-url-box">
-                    <span className="gee-url-label">APP URL</span>
-                    <code className="gee-url-text">{app.url}</code>
-                  </div>
-                  <a 
-                    href={app.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="gee-launch-btn"
-                  >
-                    Launch GEE Application
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '8px' }}>
-                      <line x1="7" y1="17" x2="17" y2="7" />
-                      <polyline points="7 7 17 7 17 17" />
-                    </svg>
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
+          <DataLayersView />
         )}
 
         {/* 7. PLATFORM VIEW */}

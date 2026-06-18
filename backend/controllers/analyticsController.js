@@ -142,8 +142,33 @@ const getWardSummary = async (req, res) => {
   }
 };
 
+const getProjectsList = async (req, res) => {
+  console.log('📋 getProjectsList called');
+  try {
+    const projects = await Project.find({});
+    res.json(projects);
+  } catch (err) {
+    console.error('🚨 Error fetching projects list:', err);
+    res.status(500).json({ message: 'Failed to fetch projects list', error: err.message });
+  }
+};
+
+const getWellsList = async (req, res) => {
+  console.log('📋 getWellsList called');
+  try {
+    const wells = await Well.find({});
+    res.json(wells);
+  } catch (err) {
+    console.error('🚨 Error fetching wells list:', err);
+    res.status(500).json({ message: 'Failed to fetch wells list', error: err.message });
+  }
+};
+
 module.exports = {
   getOverviewSummary,
   getCorporationSummary,
-  getWardSummary
+  getWardSummary,
+  getProjectsList,
+  getWellsList
 };
+

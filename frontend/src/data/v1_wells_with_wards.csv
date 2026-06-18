@@ -1,0 +1,98 @@
+latitude,longitude,well_name,well_type,owner_name,year_dug,lining,diameter_ft,depth_ft,water_level_ft,ph,tds,ec,salinity,has_fluoride,has_arsenic,surveyor_name,survey_date,fid,ac_no,ac,ac_kn,Assembly,ward_id,Corporation,corporation_id,ward_name,ward_name_kn,corporation_kn
+13.0774567505845,77.5616177916527,Balasubramanian's well near Vidyaranyapura Post Office,Open and Recharge well,Balasubramanian,,Concrete rings,"5","30",,,,,,,,,,277,"152",Byatarayanapura,ಬ್ಯಾಟರಾಯನಪುರ,152 - Byatarayanapura,"10",North,"2",10 - Vidyaranyapura,ವಿದ್ಯಾರಣ್ಯಪುರ,ಉತ್ತರ
+12.9158762373167,77.6747969537973,Maurya's Well near Serenity Kaikondrahalli,Open Well,Reddy,,Stone Lined,"18","40","20",,,,,,,,,95,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"49",East,"3",49 - Shivanasamudra Ward,ಶಿವನಸಮುದ್ರ ವಾರ್ಡ್,ಪೂರ್ವ
+13.0889512,77.612367,The Jakkur Open Well,Open Well,,,Stone Lined,,,,,,,,,,,,287,"152",Byatarayanapura,ಬ್ಯಾಟರಾಯನಪುರ,152 - Byatarayanapura,"20",North,"2",20 - Sampigehalli,ಸಂಪಿಗೆಹಳ್ಳಿ,ಉತ್ತರ
+12.5888344756225,78.1655215099454,Well at NRR Farm near Krishnagiri,Open Well,N R Ranganathan,,Stone Lined,"22","18","0",,,,,,,,,,,,,,,,,,,
+12.92364,77.69299,Well 1 at Adarsh Palm Retreat,Recharge well,Adarsh Palm Retreat,,Concrete rings,"6","25","5",,,,,false,false,,,95,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"49",East,"3",49 - Shivanasamudra Ward,ಶಿವನಸಮುದ್ರ ವಾರ್ಡ್,ಪೂರ್ವ
+12.92382,77.69351,Well 2 at Adarsh Palm Retreat,Recharge well,Adarsh Palm Retreat,,Concrete rings,"6","25","5",,,,,false,false,,,95,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"49",East,"3",49 - Shivanasamudra Ward,ಶಿವನಸಮುದ್ರ ವಾರ್ಡ್,ಪೂರ್ವ
+12.92374,77.69412,Well 3 at Adarsh Palm Retreat,Recharge well,Adarsh Palm Retreat,,Concrete rings,"6","25","5",,,,,false,false,,,95,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"49",East,"3",49 - Shivanasamudra Ward,ಶಿವನಸಮುದ್ರ ವಾರ್ಡ್,ಪೂರ್ವ
+12.90879779192,77.6471225917339,Bharat Well in HSR Layout,,,,,,,,,,,,false,false,,,183,"175",Bommanahalli,ಬೊಮ್ಮನಹಳ್ಳಿ,175 - Bommanahalli,"71",South,"4",71 - Agara,ಅಗರ,ದಕ್ಷಿಣ
+12.9510341172288,77.7047548815608,Well near SGR Dental College Marathalli,,,,,"20","4","6",,,,,false,false,,,180,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"41",East,"3",41 - Munnenkolalu,ಮುನ್ನೇನಕೊಳಲು,ಪೂರ್ವ
+12.971386705132,77.5925091281533,Cubbon Park Well used for Karaga,Open Well,Horticulture Department,,Stone Lined,"10","25","20",,,,,,,,,108,"162",Shivajinagar,ಶಿವಾಜಿನಗರ,162 - Shivajinagar,"4",Central,"1",4 - Sampangirama Nagar,ಸಂಪಂಗಿರಾಮ ನಗರ,ಕೇಂದ್ರ
+12.9714863549089,77.5909752398729,Cubbon Park Well opposite of STP plant,Open Well,Horticulture Department,,Stone Lined,"20","40","25",,,,,,,,,108,"162",Shivajinagar,ಶಿವಾಜಿನಗರ,162 - Shivajinagar,"4",Central,"1",4 - Sampangirama Nagar,ಸಂಪಂಗಿರಾಮ ನಗರ,ಕೇಂದ್ರ
+12.9718140553692,77.5891909003258,Cubbon Park Well,Open Well,Horticulture Department,,Stone Lined,"10","40","25",,,,,,,,,108,"162",Shivajinagar,ಶಿವಾಜಿನಗರ,162 - Shivajinagar,"4",Central,"1",4 - Sampangirama Nagar,ಸಂಪಂಗಿರಾಮ ನಗರ,ಕೇಂದ್ರ
+12.9741474792647,77.588922008872,Cubbon Park Well,Open Well,Horticulture Department,,Stone Lined,"15","30","15",,,,,,,,,108,"162",Shivajinagar,ಶಿವಾಜಿನಗರ,162 - Shivajinagar,"4",Central,"1",4 - Sampangirama Nagar,ಸಂಪಂಗಿರಾಮ ನಗರ,ಕೇಂದ್ರ
+12.9714863549089,77.5909752398729,Cubbon Park Well opposite of STP,Open Well,Horticulture Department,,Stone Lined,,,"3",,,,,,,,,108,"162",Shivajinagar,ಶಿವಾಜಿನಗರ,162 - Shivajinagar,"4",Central,"1",4 - Sampangirama Nagar,ಸಂಪಂಗಿರಾಮ ನಗರ,ಕೇಂದ್ರ
+12.9774143012778,77.5877944752574,K.R Circle Well in Ramanjaneyaswamy Temple,Open Well,Temple priest,,Stone Lined,"6","45","25",,,,,,,,,108,"162",Shivajinagar,ಶಿವಾಜಿನಗರ,162 - Shivajinagar,"4",Central,"1",4 - Sampangirama Nagar,ಸಂಪಂಗಿರಾಮ ನಗರ,ಕೇಂದ್ರ
+12.9754621850735,77.6461147516966,Indiranagar Well 233 Defence colony,Open Well,Rebecca,,Concrete rings,"3","18","15",,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.9679352042887,77.6458032801747,Indiranaga Well - 4161,Open Well,Shubha,,Concrete rings,"3","12","12",,,,,,,,,33,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"20",Central,"1",20 - Kodihalli,ಕೋಡಿಹಳ್ಳಿ,ಕೇಂದ್ರ
+12.9763439880819,77.6442358642817,Indiranagar Well in Defence Colony Park,Open Well,,,Stone Lined,"30",,"9",,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.9719437632088,77.6369526609778,Indiranagar Well near ESI Hospital,Open Well,,,Stone Lined,"19",,"4",,,,,,,,,22,"163",Shanthinagar,ಶಾಂತಿನಗರ,163 - Shanthinagar,"23",Central,"1",23 - Jogpalya,ಜೋಗಪಾಳ್ಯ,ಕೇಂದ್ರ
+12.9754344142721,77.636739090085,Indiranagar Well of Vani,Open Well,Vani,,Concrete rings,"3","20",,,,,,,,,,22,"163",Shanthinagar,ಶಾಂತಿನಗರ,163 - Shanthinagar,"23",Central,"1",23 - Jogpalya,ಜೋಗಪಾಳ್ಯ,ಕೇಂದ್ರ
+12.9753723383521,77.6368497312069,Indiranagar Well 815 10th cross,Open Well,,,Concrete rings,"3",,,,,,,,,,,22,"163",Shanthinagar,ಶಾಂತಿನಗರ,163 - Shanthinagar,"23",Central,"1",23 - Jogpalya,ಜೋಗಪಾಳ್ಯ,ಕೇಂದ್ರ
+12.975109659024,77.6384724676609,Indiranagar Well 5th Cross,Open Well,,,Stone Lined,"5","12","35",,,,,,,,,22,"163",Shanthinagar,ಶಾಂತಿನಗರ,163 - Shanthinagar,"23",Central,"1",23 - Jogpalya,ಜೋಗಪಾಳ್ಯ,ಕೇಂದ್ರ
+12.9688859727414,77.645077072084,Indiranagar Well near House number 3007,Open Well,,,Concrete rings,"5",,"18",,,,,,,,,33,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"20",Central,"1",20 - Kodihalli,ಕೋಡಿಹಳ್ಳಿ,ಕೇಂದ್ರ
+12.9671791610771,77.6449614018202,HAL 2nd Stage Well,Open Well,Villagers,,Concrete rings,"7","30","14",,,,,,,,,33,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"20",Central,"1",20 - Kodihalli,ಕೋಡಿಹಳ್ಳಿ,ಕೇಂದ್ರ
+12.966649210663,77.6446680352092,HAL 2nd Stage Well near Balmuri Ganesha Temple,Open Well,Villagers,,Stone Lined,"11",,"14",,,,,,,,,33,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"20",Central,"1",20 - Kodihalli,ಕೋಡಿಹಳ್ಳಿ,ಕೇಂದ್ರ
+13.0048344406221,77.5675786659122,Malleswaram Well 6th main 15th cross,Open Well,Malleswaram,,Stone Lined,"50","45","30",,,,,,,,,318,"157",Malleshwaram,ಮಲ್ಲೇಶ್ವರಂ,157 - Malleshwaram,"53",West,"5",53 - Malleshwaram,ಮಲ್ಲೇಶ್ವರಂ,ಪಶ್ಚಿಮ
+12.9163278653939,77.6727973669767,Priya's well near Kaikondrahalli Lake,Open Well,Priya,,Stone Lined,"30","80","30",,,,,,,,,179,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"31",South,"4",31 - Kasavanahalli,ಕಸವನಹಳ್ಳಿ,ದಕ್ಷಿಣ
+12.9156716645616,77.6751563698053,Maurya's Well near Kaikondrahalli Lake,Open Well,Maurya,,Stone Lined,"12","60","13",,,,,,,,,95,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"49",East,"3",49 - Shivanasamudra Ward,ಶಿವನಸಮುದ್ರ ವಾರ್ಡ್,ಪೂರ್ವ
+12.9163641393936,77.6754913106561,Maurya's Well near Edge Apartment Kaikondrahalli Lake,Open Well,Maurya,,Concrete rings,"6","35","27",,,,,,,,,95,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"49",East,"3",49 - Shivanasamudra Ward,ಶಿವನಸಮುದ್ರ ವಾರ್ಡ್,ಪೂರ್ವ
+12.9161762334822,77.6754426956177,Baig residency Well near Kaikondrahalli Lake,Open Well,Advocates,,Concrete rings,"6","35","31",,,,,,,,,95,"174",Mahadevapura,ಮಹದೇವಪುರ,174 - Mahadevapura,"49",East,"3",49 - Shivanasamudra Ward,ಶಿವನಸಮುದ್ರ ವಾರ್ಡ್,ಪೂರ್ವ
+13.0842025105739,77.559879720211,Vidyaranyapura Well near Ganesha Temple,Open Well,Ganesha temple,,Stone Lined,,,,,,,,,,,,272,"152",Byatarayanapura,ಬ್ಯಾಟರಾಯನಪುರ,152 - Byatarayanapura,"8",North,"2",8 - Singapura,ಸಿಂಗಾಪುರ,ಉತ್ತರ
+13.0846221550178,77.5639506429434,Vidyaranyapura Well of Chitra Vishwanath,Open Well,Chitra Vishwanath,,Concrete rings,,,,,,,,,,,,277,"152",Byatarayanapura,ಬ್ಯಾಟರಾಯನಪುರ,152 - Byatarayanapura,"10",North,"2",10 - Vidyaranyapura,ವಿದ್ಯಾರಣ್ಯಪುರ,ಉತ್ತರ
+12.9806291337201,77.6380443200469,Well near Indira Nagar stage I - 1,Open Well,Beena Rao,,Concrete rings,"3","20","1",,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.9807238791674,77.6382337510586,Well near Indira Nagar stage I - 2,Open Well,Suchitra,,Concrete rings,"3","30",,,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.9809081426237,77.6380516961217,Well near Indira Nagar stage I - 3,Open Well,Panikkar,,Concrete rings,"3","24",,,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.979624503048,77.6384258642793,Well near Indira Nagar stage I- 4,Open Well,Tejus,,Concrete rings,"2","20",,,,,,,,,,60,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"9",Central,"1",9 - Hoysala Nagara Central,ಹೊಯ್ಸಳ ನಗರ ಕೇಂದ್ರ,ಕೇಂದ್ರ
+12.9796552137693,77.6405434682965,Well near Indira Nagar stage I - 5,Open and Recharge Well,,,Stone Lined,"3","20","10",,,,,,,,,60,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"9",Central,"1",9 - Hoysala Nagara Central,ಹೊಯ್ಸಳ ನಗರ ಕೇಂದ್ರ,ಕೇಂದ್ರ
+12.9805879684455,77.6379926875234,Well near Indira Nagar stage I - 6,Open Well,,,Concrete rings,"3","20","18",,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.9804347420857,77.6398527994752,Well near Indira Nagar stage I - 7,Open Well,Sooraj,,Concrete rings,"3","20",,,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.9805922156567,77.6394326984882,Well near Indira Nagar stage I - 8,Open Well,Ravi,,Concrete rings,"3","20",,,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.982344020728,77.6398155838251,Well near Indira Nagar stage I - 9,Open Well,Krishnan,,Concrete rings,"3","14","12",,,,,,,,,279,"161",C.V. Raman Nagar,ಸಿ.ವಿ. ರಾಮನ್ ನಗರ,161 - C.V. Raman Nagar,"15",Central,"1",15 - Indiranagar,ಇಂದಿರಾನಗರ,ಕೇಂದ್ರ
+12.8678876,77.5689479,"Well in Nandi Garden Apartment, JP Nagar 9th Phase,Well Owner Name: Nandi Gardens",Recharge well,,Jun-18,Stone Lined,"6","25","24",,,,,,,,,202,"176",Bangalore South,ಬೆಂಗಳೂರು ದಕ್ಷಿಣ,176 - Bangalore South,"41",South,"4",41 - Kothanur,ಕೊತ್ತನೂರು,ದಕ್ಷಿಣ
+13.21808,77.6878209,Devanahalli Dry Open Well,open well,,,Stone Lined,"23","26",no water,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.211298,77.7187328,Devanahalli Munirajapp Well,open well,Munirajappa,,Stone Lined,"25","50","10",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.25043514,77.71079703,Devanahalli -Open well next to Devanahalli Fort,Open Well,Public well,,Stone Lined,"15",,"5",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.25082601,77.71075753,Devanahalli -Aravind's open well,Open Well,Aravind,,Stone Lined,"15","60","30",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.25148,77.71052,Devanahalli -Aravind's filter borewell,Filter borewell,Aravind,,,"0.5","60",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.25099726,77.71074967,Devanahalli -Aravind's neighbors well,Open Well,,,Stone Lined,"10","50","29",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.24849,77.70786,Devanahalli -Ravikumar's well,Open Well,Ravikumar,,Stone Lined,"20","48","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.24794,77.70769,Devanahalli -Muniraju's well,Open Well,Muniraju,,Stone Lined,"24","43","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.23309,77.70446,Devanahalli -Narayanaswami's well,Open Well,Narayanswami,,Stone Lined,"22","64","50",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.23234,77.70439,Devanahalli -Well opposite Narayanswami's farm,Open Well,,,Stone Lined,"21","55","45",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.20643,77.73695,Devanahalli -Well in the Bettakote Lake command Area,Open Well,,,Stone Lined,"13","21","5.1",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.204,77.738,Devanahalli -First Open well from the runway,Open Well,,,Stone Lined,"22","34","35",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.20413,77.73903,Devanahalli -Second open well from the runway,Open Well,,,Stone Lined,"20","38","36.8",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.20392,77.73999,"Devanahalli -Third well from the runway, closer to the road",Open Well,Philosophical farmer,,Stone Lined,"26","36",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.22709,77.70576,Devanahalli -New Well,Open Well,Old guy's well,,Stone Lined,"25","52","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.22791,77.70526,Devanahalli -New Well,Open Well,,,Stone Lined,"25","50","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2281,77.7055,Devanahalli -New Well,Open Well,,,Stone Lined,"23","45","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21168,77.74078,Devanahalli -Open well near Bettakotte Lake,Open Well,,,Stone Lined,,,"0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.238,77.689,Devanahalli -Open well Near Sanne Amanikere,Open Well,,,Stone Lined,"17","36",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.25974,77.70578,Devanahalli -Open well in private land,Open Well,,,Stone Lined,"15","60",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.26081,77.70521,Devanahalli -Open well near Dodda Amanikere,Open Well,,,Stone Lined,"12","36",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.155,77.722,Devanahalli -Damaged open well near SEZ,Open Well,Public well,,Stone Lined,"33","35",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21255,77.71896,Devanahalli -Open well in Anneshwara 1,Open Well,,,Stone Lined,15-20,"45","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21127,77.71867,Devanahalli -Munirajappa's well,Open Well,Munirajappa/Akalamma,,Stone Lined,"20","50","20: May 2018
+10: Aug 2018",7,360,520,240,,,Anand and Aditi,,,,,,,,,,,,
+13.211,77.718,Devanahalli -Open well in Anneshwara 3,Open Well,,,Stone Lined,"25",,20: May 2018,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21243,77.71727,Devanahalli -Open well in Anneshwara 4,Open Well,,,Stone Lined,"25","45",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2114,77.71754,Devanahalli -Open well in Anneshwara 5,Open Well,,,Stone Lined,"30",,40: May 2018,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21226,77.71895,Devanahalli -Open well in Anneshwara 6,Open Well,,,Stone Lined,"25","35",,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21137,77.71821,Devanahalli -Open well in Anneshwara 7,Open Well,,,Stone Lined,"20",,30: May 2018,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2133016,77.7189,Devanahalli -Panchayat Filter Borewell,Filter borewell,Panchayat,,Stone Lined,"45",,,7.15,160,230,100,,,Anand and Aditi,,,,,,,,,,,,
+13.21299,77.7188,Devanahalli -Panchayat Filter Borewell,Filter borewell,Panchayat,,Stone Lined,"43",,,6.15,320,464,210,,,Anand and Aditi,,,,,,,,,,,,
+13.21252,77.7187,Devanahalli -Private Filter borewell,Filter borewell,,,Stone Lined,"95",,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2126,77.7189,Devanahalli -Private Filter borewell,Filter borewell,,,Stone Lined,45-46,,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2125,77.7173,Devanahalli -Private Filter borewell,Filter borewell,,,Stone Lined,"75",,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2123,77.716,Devanahalli -Panchayat Rig borewell,Rig borewell,Panchayat,,Stone Lined,"250",,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21291,77.71543,Devanahalli -Panchayat Rig borewell,Rig borewell,Panchayat,,Stone Lined,"240",,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2127,77.7135,Devanahalli -Panchayat Rig borewell,Rig borewell,Panchayat,,Stone Lined,"250",,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.20876,77.73996,Devanahalli -Private Rig borewell near Bettakote command area,Rig borewell,,,Stone Lined,,,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2088,77.73962,Devanahalli -Private Filter borewell,Filter borewell,,,Stone Lined,"130",,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.20962,77.73981,Devanahalli -Private Filter borewell,Filter borewell,,,,"140",,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.219371,77.72197,Devanahalli -Chennaraya's open well,Open well,Chennaraya,,Stone Lined,"15","30","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.221414,77.7193028,Devanahalli -Venkataramanappa's well,Open well,Venkataramanappa,,Stone Lined,"22","50","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2212724,77.7200534,Devanahalli -Narayanappa's well,Open well,Narayanappa,,Stone Lined,"30","50","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2150498,77.7134163,Devanahalli -Krishnamurthy's well,Open well,Krishnamurthy,,Stone Lined,"24","25","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2113027,77.7196122,Devanahalli -Open well near BIAL layout,Open well,,,Stone Lined,"21","22","19",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2205183,77.7126433,Devanahalli -Open well on Anneshwara Road,Open well,,,Stone Lined,"19","27","27",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2163354,77.7054425,Devanahalli -Manjunath's well,Open well,Manjunath,,Stone Lined,"24",60+10ft of silt,"0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2195716,77.6960775,Devanahalli -Mariamma's well,Open well,Mariamma,,Stone Lined,"24","18","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2186867,77.6922317,Devanahalli -Bhuvanahalli Murlappa's well,Open well,Bhuvanahalli Murlappa,,Stone Lined,"34","38","29",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.21808,77.6878209,Devanahalli -Private open well/New open well 1 Boosavanahalli,Open well,,,Stone Lined,"23","26","0",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.2297678,77.69770187,Devanahalli -Private open well near HyAqua,Open well,,,Stone Lined,"30","16","10",,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.23295,77.7316,Devanahalli -Moula and Nawaz's site,Rig borewell,Moula and Nawaz,,,,500/600,,,,,,,,Anand and Aditi,,,,,,,,,,,,
+13.36774,77.65393,Open Well in village near Nandi Hill Foot hills,Open well,,,Stone Lined,,,,,,,,,,,,,,,,,,,,,,
+12.877306,77.658611,Open well 1 Yamlur shed  near Parappana Agrahara tank,Open well,,,Stone Lined,,,,,,,,,,,,315,"176",Bangalore South,ಬೆಂಗಳೂರು ದಕ್ಷಿಣ,176 - Bangalore South,"33",South,"4",33 - Naganathapura,ನಾಗನಾಥಪುರ,ದಕ್ಷಿಣ

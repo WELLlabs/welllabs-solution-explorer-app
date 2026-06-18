@@ -3,7 +3,9 @@ const router = express.Router();
 const {
   getOverviewSummary,
   getCorporationSummary,
-  getWardSummary
+  getWardSummary,
+  getProjectsList,
+  getWellsList
 } = require('../controllers/analyticsController');
 
 const { protect } = require('../middleware/authMiddleware');
@@ -15,5 +17,7 @@ const { protect } = require('../middleware/authMiddleware');
 router.get('/overview', getOverviewSummary);
 router.get('/corporation', getCorporationSummary);
 router.get('/ward', getWardSummary);
+router.get('/projects', getProjectsList);
+router.get('/wells', getWellsList);
 
 module.exports = router;
