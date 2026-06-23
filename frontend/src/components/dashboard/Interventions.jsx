@@ -174,10 +174,8 @@ const Interventions = () => {
           <div className={`details-card glassmorphic theme-${activePhase.colorTheme}`}>
             <div className="details-header">
               <div className="details-badge-year">{activePhase.yearKey}</div>
-              <div>
-                <h3>{activePhase.title}</h3>
-                <span className={`details-status-pill ${activePhase.statusClass}`}>{activePhase.status}</span>
-              </div>
+              <h3 className="details-title">{activePhase.title}</h3>
+              <span className={`details-status-pill ${activePhase.statusClass}`}>{activePhase.status}</span>
             </div>
 
             <div className="details-body">

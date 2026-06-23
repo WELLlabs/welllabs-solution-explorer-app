@@ -371,7 +371,7 @@ const Analytics = () => {
                 <th>Projects Count</th>
                 <th>Wells Count</th>
                 <th>Total Assets</th>
-                <th>Ward Load share</th>
+
               </tr>
             </thead>
             <tbody>
@@ -398,12 +398,6 @@ const Analytics = () => {
                       </td>
                       <td>
                         <strong>{total}</strong>
-                      </td>
-                      <td>
-                        <div className="load-bar-wrapper">
-                          <div className="load-bar-fill" style={{ width: `${loadSharePercent}%` }}></div>
-                          <span className="load-val">{((total / (overview?.totalProjects + overview?.totalWells)) * 100).toFixed(1)}%</span>
-                        </div>
                       </td>
                     </tr>
                   );

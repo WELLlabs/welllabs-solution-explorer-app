@@ -288,13 +288,13 @@
 .details-card.theme-purple { border-left: 6px solid #a855f7; }
 .details-card.theme-green { border-left: 6px solid #10b981; }
 
-.details-header {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 16px;
+.details-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
 }
+
 
 .details-badge-year {
   font-size: 18px;
