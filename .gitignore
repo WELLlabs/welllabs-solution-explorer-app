@@ -42,3 +42,7 @@ lerna-debug.log*
 *.prj
 *.cpg
 *.qmd
+
+# Backups
+backup/
+

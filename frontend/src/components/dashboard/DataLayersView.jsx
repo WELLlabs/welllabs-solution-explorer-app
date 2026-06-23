@@ -82,6 +82,38 @@ const parseCoordinate = (val) => {
   return num;
 };
 
+// Utility helper to check if a point [lat, lng] is inside a polygon ring
+const pointInPolygon = (lat, lng, polygonCoords) => {
+  if (!polygonCoords || polygonCoords.length === 0) return false;
+  // GeoJSON coordinates are in [lng, lat] format
+  const x = lng;
+  const y = lat;
+  let inside = false;
+  for (let i = 0, j = polygonCoords.length - 1; i < polygonCoords.length; j = i++) {
+    const xi = polygonCoords[i][0];
+    const yi = polygonCoords[i][1];
+    const xj = polygonCoords[j][0];
+    const yj = polygonCoords[j][1];
+    
+    const intersect = ((yi > y) !== (yj > y))
+        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+};
+
+// Utility helper to check if a point [lat, lng] is inside a GeoJSON Geometry (Polygon or MultiPolygon)
+const isPointInGeometry = (lat, lng, geometry) => {
+  if (!geometry) return false;
+  const { type, coordinates } = geometry;
+  if (type === 'Polygon') {
+    return pointInPolygon(lat, lng, coordinates[0]);
+  } else if (type === 'MultiPolygon') {
+    return coordinates.some(polygon => pointInPolygon(lat, lng, polygon[0]));
+  }
+  return false;
+};
+
 // Normalize Project Schema from both API and Fallback JSON/CSV
 const normalizeProject = (p) => {
   const lat = parseCoordinate(p.latitude !== undefined ? p.latitude : p.Latitude);
@@ -164,6 +196,19 @@ const DataLayersView = () => {
   const [projects, setProjects] = useState([]);
   const [wells, setWells] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Refs for access inside Leaflet event listeners
+  const wellsRef = useRef([]);
+  const projectsRef = useRef([]);
+
+  useEffect(() => {
+    wellsRef.current = wells;
+  }, [wells]);
+
+  useEffect(() => {
+    projectsRef.current = projects;
+  }, [projects]);
+
   const [dataSource, setDataSource] = useState('API'); // 'API' or 'Local Fallback'
 
   // Toggle checkboxes (all off by default as requested: "keep the check box off for every one by default")
@@ -334,7 +379,7 @@ const DataLayersView = () => {
             popupContent = `
               <div class="map-popup-container">
                 <span class="popup-badge" style="background-color: ${color}20; color: ${color};">GBA WARD BOUNDARY</span>
-                <h4 class="popup-title" style="margin: 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">${wardName} ${wardNameKn ? `(${wardNameKn})` : ''}</h4>
+                <h4 class="popup-title" style="margin: 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">${wardName}</h4>
                 <p class="popup-ward" style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">🏢 Corporation: <strong>${corp}</strong></p>
                 <p class="popup-ward" style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">🗳️ Assembly: <strong>${ac}</strong></p>
                 <p class="popup-ward" style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">🔑 Ward ID: <strong>${wardId}</strong></p>
@@ -377,7 +422,7 @@ const DataLayersView = () => {
             popupContent = `
               <div class="map-popup-container">
                 <span class="popup-badge" style="background-color: ${color}20; color: ${color};">ASSEMBLY BOUNDARY</span>
-                <h4 class="popup-title" style="margin: 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">${acName} ${acNameKn ? `(${acNameKn})` : ''}</h4>
+                <h4 class="popup-title" style="margin: 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">${acName}</h4>
                 <p class="popup-ward" style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">🔑 AC Code: <strong>${acCode}</strong></p>
                 <p class="popup-ward" style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">📍 District Code: <strong>${district}</strong></p>
               </div>
@@ -385,6 +430,69 @@ const DataLayersView = () => {
           }
 
           leafletLayer.bindPopup(popupContent);
+
+          leafletLayer.on('click', () => {
+            const props = feature.properties || {};
+            let regionName = props.AC_NAME || props.ac_name || props.Name || props.wardName || props.name || 'Unknown Region';
+            
+            // 1. Spatial matching using geometry
+            const matchingWells = (wellsRef.current || []).filter(w => isPointInGeometry(w.lat, w.lng, feature.geometry));
+            const matchingProjects = (projectsRef.current || []).filter(p => isPointInGeometry(p.lat, p.lng, feature.geometry));
+            
+            // 2. Attribute-based matching as fallback/addition
+            let attrMatchingWells = [];
+            let attrMatchingProjects = [];
+
+            if (layerType === 'gba_wards') {
+              const wName = (props.wardName || '').toLowerCase().trim();
+              const wId = String(props.wardId || '').trim();
+              attrMatchingWells = (wellsRef.current || []).filter(w => 
+                (w.wardName && w.wardName.toLowerCase().trim() === wName) || 
+                (w.wardId && String(w.wardId).trim() === wId)
+              );
+              attrMatchingProjects = (projectsRef.current || []).filter(p => 
+                (p.wardName && p.wardName.toLowerCase().trim() === wName) || 
+                (p.wardId && String(p.wardId).trim() === wId)
+              );
+            } else if (layerType === 'gba_corporations') {
+              const corpName = (props.name || '').toLowerCase().trim();
+              attrMatchingWells = (wellsRef.current || []).filter(w => 
+                w.corporation && w.corporation.toLowerCase().trim().includes(corpName)
+              );
+              attrMatchingProjects = (projectsRef.current || []).filter(p => 
+                p.corporation && p.corporation.toLowerCase().trim().includes(corpName)
+              );
+            } else if (layerType === 'assembly') {
+              const acName = (props.AC_NAME || props.ac_name || props.Name || '').toLowerCase().trim();
+              attrMatchingWells = (wellsRef.current || []).filter(w => 
+                w.ac && w.ac.toLowerCase().trim() === acName
+              );
+              attrMatchingProjects = (projectsRef.current || []).filter(p => 
+                p.ac && p.ac.toLowerCase().trim() === acName
+              );
+            }
+
+            // Union matching lists (deduplicating by identifier)
+            const getUniqueAssets = (spatialList, attrList) => {
+              const map = new Map();
+              spatialList.forEach(item => map.set(item._id || item._mb_row_id || item.wellName || item.projName, item));
+              attrList.forEach(item => map.set(item._id || item._mb_row_id || item.wellName || item.projName, item));
+              return Array.from(map.values());
+            };
+
+            const finalWells = getUniqueAssets(matchingWells, attrMatchingWells);
+            const finalProjects = getUniqueAssets(matchingProjects, attrMatchingProjects);
+
+            console.log(`%c🗺️ [REGION LAYER CLICK] - Type: ${layerType.toUpperCase()}`, 'color: #0284c7; font-weight: bold; font-size: 14px;');
+            console.log('Region Name:', regionName);
+            const filteredProps = { ...props };
+            delete filteredProps.wardNameKn;
+            delete filteredProps.acKn;
+            console.log('Region Properties:', filteredProps);
+            console.log(`Assets present in this region (Total: ${finalWells.length + finalProjects.length}):`);
+            console.log(`- Wells (${finalWells.length}):`, finalWells);
+            console.log(`- Projects (${finalProjects.length}):`, finalProjects);
+          });
 
           leafletLayer.on('mouseover', () => {
             leafletLayer.setStyle({
@@ -696,10 +804,20 @@ const DataLayersView = () => {
         </div>
       `);
 
+      marker.on('click', () => {
+        const matchingWells = (wellsRef.current || []).filter(well => well.wardName === wardName);
+        const matchingProjects = (projectsRef.current || []).filter(p => p.wardName === wardName);
+
+        console.log(`%c🟡 [WARD SUMMARY CLICK] - Ward: ${wardName}`, 'color: #d97706; font-weight: bold; font-size: 14px;');
+        console.log('Ward Info:', { wardName, wardNameKn, wardId, corporation });
+        console.log(`Assets in this Ward (Total: ${matchingWells.length + matchingProjects.length}):`);
+        console.log(`- Wells (${matchingWells.length}):`, matchingWells);
+        console.log(`- Projects (${matchingProjects.length}):`, matchingProjects);
+      });
+
       marker.addTo(wardsGroup);
       boundsPoints.push([lat, lng]);
     });
-
     if (boundsPoints.length > 0) {
       const bounds = L.latLngBounds(boundsPoints);
       map.flyToBounds(bounds, {
@@ -802,6 +920,9 @@ const DataLayersView = () => {
       marker.on('click', () => {
         setSelectedItem(item);
         map.setView([lat, lng], 14);
+
+        console.log(`%c📍 [ASSET CLICK] - Type: ${badgeLabel}`, `color: ${color}; font-weight: bold; font-size: 14px;`);
+        console.log('Asset Details:', item);
       });
 
       marker.addTo(markersGroup);
@@ -822,6 +943,13 @@ const DataLayersView = () => {
 
   const handleSelectItem = (item) => {
     setSelectedItem(item);
+
+    const isProj = item.projName !== undefined;
+    const badgeLabel = isProj ? 'PROJECT' : 'WELL';
+    const color = isProj ? getProjectColor(item.status, item.tags) : getWellColor(item.wellType);
+    console.log(`%c📍 [LIST ITEM SELECT] - Type: ${badgeLabel}`, `color: ${color}; font-weight: bold; font-size: 14px;`);
+    console.log('Asset Details:', item);
+
     if (mapRef.current) {
       mapRef.current.flyTo([item.lat, item.lng], 14, {
         animate: true,
@@ -908,7 +1036,7 @@ const DataLayersView = () => {
                 }, {})).length} Wards)
               </label>
 
-              <label className="checkbox-container">
+              {/* <label className="checkbox-container">
                 <input
                   type="checkbox"
                   checked={showAssemblyConst2}
@@ -916,7 +1044,7 @@ const DataLayersView = () => {
                 />
                 <span className="custom-check assembly-indicator"></span>
                 Assembly Boundaries {loadingAssemblyConst2 && <span className="small-inline-spinner"></span>}
-              </label>
+              </label> */}
 
               <label className="checkbox-container">
                 <input
