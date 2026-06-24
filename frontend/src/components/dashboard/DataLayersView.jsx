@@ -987,10 +987,10 @@ const DataLayersView = () => {
       <div className="data-layers-header-row">
         <div>
           <h2>Interactive Spatial Explorer</h2>
-          <p className="tab-description-subtitle">
+          {/* <p className="tab-description-subtitle">
             Local GIS map visualization for municipal watersheds, projects, and ground wells compiled by WELL Labs.
             <span className="data-source-badge">Source: {dataSource}</span>
-          </p>
+          </p> */}
         </div>
       </div>
 

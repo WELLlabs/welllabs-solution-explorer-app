@@ -90,26 +90,34 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
         {/* Separated Platform Features Grid */}
         <div className="platform-features-grid">
           <div className="feature-card">
-            <div className="feature-icon">🔍</div>
-            <h3>Automated Suitability</h3>
+            <div className="feature-header">
+              <div className="feature-icon">🔍</div>
+              <h3>Automated Suitability</h3>
+            </div>
             <p>Analyze optimal locations for BGG interventions using gap analysis and flood risk maps.</p>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">🧮</div>
-            <h3>Design Calculator</h3>
+            <div className="feature-header">
+              <div className="feature-icon">🧮</div>
+              <h3>Design Calculator</h3>
+            </div>
             <p>Estimate site-specific construction costs and run hydrological simulation designs.</p>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">📊</div>
-            <h3>Real-Time Tracking</h3>
+            <div className="feature-header">
+              <div className="feature-icon">📊</div>
+              <h3>Real-Time Tracking</h3>
+            </div>
             <p>Track live water table levels, ward-wise flood impacts, and local telemetry dashboards.</p>
           </div>
 
           <div className="feature-card">
-            <div className="feature-icon">🤝</div>
-            <h3>Collaborative Network</h3>
+            <div className="feature-header">
+              <div className="feature-icon">🤝</div>
+              <h3>Collaborative Network</h3>
+            </div>
             <p>Connect government bodies, researchers, field implementers, and CSR funding partners.</p>
           </div>
         </div>
