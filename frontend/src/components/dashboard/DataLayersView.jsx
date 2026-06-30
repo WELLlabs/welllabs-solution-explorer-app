@@ -178,10 +178,63 @@ const isPointInGeometry = (lat, lng, geometry) => {
   return false;
 };
 
+// Category resolution based on project tags
+const getProjectCategoryInfo = (tags) => {
+  const tagsStr = String(tags || '').toLowerCase();
+  if (tagsStr.includes('rainwater')) {
+    return {
+      id: 'rainwater',
+      name: 'Rainwater Harvesting',
+      color: '#10b981',
+      icon: '🌧️'
+    };
+  }
+  if (tagsStr.includes('groundwater')) {
+    return {
+      id: 'groundwater',
+      name: 'Groundwater Management',
+      color: '#8b5cf6',
+      icon: '💧'
+    };
+  }
+  if (tagsStr.includes('flood')) {
+    return {
+      id: 'flood',
+      name: 'Flood Management',
+      color: '#ea580c',
+      icon: '🛡️'
+    };
+  }
+  if (tagsStr.includes('lake')) {
+    return {
+      id: 'lake',
+      name: 'Lake Rejuvenation',
+      color: '#0284c7',
+      icon: '🌊'
+    };
+  }
+  if (tagsStr.includes('iuwm')) {
+    return {
+      id: 'iuwm',
+      name: 'Integrated Urban Water Management (IUWM)',
+      color: '#ec4899',
+      icon: '🔄'
+    };
+  }
+  return {
+    id: 'other',
+    name: 'Other Solutions',
+    color: '#64748b',
+    icon: '⚙️'
+  };
+};
+
 // Normalize Project Schema from both API and Fallback JSON/CSV
 const normalizeProject = (p) => {
   const lat = parseCoordinate(p.latitude !== undefined ? p.latitude : p.Latitude);
   const lng = parseCoordinate(p.longitude !== undefined ? p.longitude : p.Longitude);
+  const tagsVal = String(p.tags || p['Tags'] || '');
+  const categoryInfo = getProjectCategoryInfo(tagsVal);
   
   return {
     projNo: String(p.projNo || p['Proj No'] || p.proj_no || ''),
@@ -195,7 +248,8 @@ const normalizeProject = (p) => {
     status: String(p.status || p['Status'] || ''),
     projLead: String(p.projLead || p['Proj Lead'] || p.proj_lead || ''),
     stakeholders: String(p.stakeholders || p['Stakeholders'] || ''),
-    tags: String(p.tags || p['Tags'] || ''),
+    tags: tagsVal,
+    categoryInfo: categoryInfo,
     areaCatchment: String(p.areaCatchment || p['Area Catchment'] || p.area_catchment || ''),
     drainLength: String(p.drainLength || p['Drain Length'] || p.drain_length || ''),
     mediaLink: String(p.mediaLink || p['Media Link'] || p.media_link || ''),
@@ -291,6 +345,16 @@ const DataLayersView = () => {
   // New placeholder layers states
   const [showNewProjects, setShowNewProjects] = useState(false);
   const [showNewFloodRisk, setShowNewFloodRisk] = useState(false);
+
+  // Categories state for filtering existing interventions
+  const [selectedCategories, setSelectedCategories] = useState({
+    lake: true,
+    flood: true,
+    groundwater: true,
+    rainwater: true,
+    iuwm: true,
+    other: true
+  });
 
   const assemblyConst2LayerRef = useRef(null);
   const bengaluruAssemblyLayerRef = useRef(null);
@@ -899,7 +963,10 @@ const DataLayersView = () => {
   }, [showWards, wells, projects, loading]);
 
   // Color mappings - matching the layer checkboxes exactly for differentiation
-  const getProjectColor = () => {
+  const getProjectColor = (status, tags) => {
+    if (tags) {
+      return getProjectCategoryInfo(tags).color;
+    }
     return '#3b82f6'; // Premium blue color matching projects checkbox
   };
 
@@ -925,11 +992,15 @@ const DataLayersView = () => {
 
     if (showProjects) {
       const filteredProjects = projects.filter((p) => {
-        return (
+        const matchesSearch =
           p.projName.toLowerCase().includes(search) ||
           p.wardName.toLowerCase().includes(search) ||
-          p.tags.toLowerCase().includes(search)
-        );
+          p.tags.toLowerCase().includes(search);
+        
+        const categoryId = p.categoryInfo?.id || 'other';
+        const matchesCategory = selectedCategories[categoryId] === true;
+        
+        return matchesSearch && matchesCategory;
       });
       items = [...items, ...filteredProjects];
     }
@@ -968,25 +1039,41 @@ const DataLayersView = () => {
       const badgeLabel = isProj ? 'PROJECT' : 'WELL';
       const color = isProj ? getProjectColor(item.status, item.tags) : getWellColor(item.wellType);
 
-      const marker = L.circleMarker([lat, lng], {
-        radius: 7,
-        fillColor: color,
-        color: '#ffffff',
-        weight: 1.5,
-        opacity: 1,
-        fillOpacity: 0.85
-      });
-
-      const viewMoreBtn = isProj 
-        ? `<a href="/interventions" target="_blank" class="popup-view-more-btn" style="display: block; margin-top: 8px; text-decoration: none; background-color: ${color}; color: white; text-align: center; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 750; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">View More Details</a>`
-        : '';
+      let marker;
+      if (isProj) {
+        const pinIcon = L.divIcon({
+          className: 'custom-leaflet-pin-container',
+          html: `
+            <div class="pin-marker-wrapper animate-bounce-in">
+              <svg class="pin-svg" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 0C7.16 0 0 7.16 0 16C0 26.6 14.8 41.1 15.4 41.7C15.7 42 16.3 42 16.6 41.7C17.2 41.1 32 26.6 32 16C32 7.16 24.8 0 16 0Z" fill="${color}"/>
+                <circle cx="16" cy="16" r="10" fill="#ffffff" />
+                <text x="16" y="16" fill="#0f172a" font-size="12px" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" text-anchor="middle" dominant-baseline="central">${item.categoryInfo?.icon || '🌱'}</text>
+              </svg>
+            </div>
+          `,
+          iconSize: [32, 42],
+          iconAnchor: [16, 42],
+          popupAnchor: [0, -42]
+        });
+        marker = L.marker([lat, lng], { icon: pinIcon });
+      } else {
+        marker = L.circleMarker([lat, lng], {
+          radius: 7,
+          fillColor: color,
+          color: '#ffffff',
+          weight: 1.5,
+          opacity: 1,
+          fillOpacity: 0.85
+        });
+      }
 
       marker.bindPopup(`
         <div class="map-popup-container">
           <span class="popup-badge" style="background-color: ${color}20; color: ${color};">${badgeLabel}: ${String(type || 'UNSPECIFIED').toUpperCase()}</span>
           <h4 class="popup-title">${name}</h4>
           <p class="popup-ward">📍 ${item.wardName || 'Unknown Ward'}</p>
-          ${viewMoreBtn}
+          ${isProj ? `<p class="popup-category" style="margin: 4px 0 8px 0; font-size: 11px; color: #475569;">🏷️ Category: <strong style="color: ${color};">${item.categoryInfo?.name}</strong></p>` : ''}
           <span class="popup-hint">Click point for full details</span>
         </div>
       `);
@@ -1062,7 +1149,7 @@ const DataLayersView = () => {
         duration: 1.2
       });
     }
-  }, [showWells, showProjects, showNewProjects, wells, projects, searchText, loading]);
+  }, [showWells, showProjects, showNewProjects, wells, projects, searchText, loading, selectedCategories]);
 
   const handleSelectItem = (item) => {
     setSelectedItem(item);
@@ -1105,6 +1192,18 @@ const DataLayersView = () => {
     return itemId && selectedId && itemId === selectedId;
   };
 
+  const getCategoryCounts = () => {
+    const counts = { lake: 0, flood: 0, groundwater: 0, rainwater: 0, iuwm: 0, other: 0 };
+    projects.forEach((p) => {
+      const catId = p.categoryInfo?.id || 'other';
+      if (counts[catId] !== undefined) {
+        counts[catId]++;
+      }
+    });
+    return counts;
+  };
+  const categoryCounts = getCategoryCounts();
+
   return (
     <div className="data-layers-wrapper animate-fade-in">
       <div className="data-layers-header-row">
@@ -1143,6 +1242,67 @@ const DataLayersView = () => {
                 <span className="custom-check project-indicator"></span>
                 Existing Interventions ({showProjects ? `${filteredItems.filter(i => i.projName !== undefined).length} active` : `${projects.length} total`})
               </label>
+
+              {showProjects && (
+                <div className="nested-category-filters animate-slide-down">
+                  <label className="category-checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.lake}
+                      onChange={(e) => setSelectedCategories({ ...selectedCategories, lake: e.target.checked })}
+                    />
+                    <span className="custom-check-nested" style={{ borderColor: '#0284c7', backgroundColor: selectedCategories.lake ? '#0284c7' : 'transparent' }}></span>
+                    <span className="category-label-text">🌊 Lakes ({categoryCounts.lake})</span>
+                  </label>
+                  <label className="category-checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.flood}
+                      onChange={(e) => setSelectedCategories({ ...selectedCategories, flood: e.target.checked })}
+                    />
+                    <span className="custom-check-nested" style={{ borderColor: '#ea580c', backgroundColor: selectedCategories.flood ? '#ea580c' : 'transparent' }}></span>
+                    <span className="category-label-text">🛡️ Flood ({categoryCounts.flood})</span>
+                  </label>
+                  <label className="category-checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.groundwater}
+                      onChange={(e) => setSelectedCategories({ ...selectedCategories, groundwater: e.target.checked })}
+                    />
+                    <span className="custom-check-nested" style={{ borderColor: '#8b5cf6', backgroundColor: selectedCategories.groundwater ? '#8b5cf6' : 'transparent' }}></span>
+                    <span className="category-label-text">💧 Groundwater ({categoryCounts.groundwater})</span>
+                  </label>
+                  <label className="category-checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.rainwater}
+                      onChange={(e) => setSelectedCategories({ ...selectedCategories, rainwater: e.target.checked })}
+                    />
+                    <span className="custom-check-nested" style={{ borderColor: '#10b981', backgroundColor: selectedCategories.rainwater ? '#10b981' : 'transparent' }}></span>
+                    <span className="category-label-text">🌧️ Rainwater ({categoryCounts.rainwater})</span>
+                  </label>
+                  <label className="category-checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.iuwm}
+                      onChange={(e) => setSelectedCategories({ ...selectedCategories, iuwm: e.target.checked })}
+                    />
+                    <span className="custom-check-nested" style={{ borderColor: '#ec4899', backgroundColor: selectedCategories.iuwm ? '#ec4899' : 'transparent' }}></span>
+                    <span className="category-label-text">🔄 IUWM ({categoryCounts.iuwm})</span>
+                  </label>
+                  {categoryCounts.other > 0 && (
+                    <label className="category-checkbox-container">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.other}
+                        onChange={(e) => setSelectedCategories({ ...selectedCategories, other: e.target.checked })}
+                      />
+                      <span className="custom-check-nested" style={{ borderColor: '#64748b', backgroundColor: selectedCategories.other ? '#64748b' : 'transparent' }}></span>
+                      <span className="category-label-text">⚙️ Other ({categoryCounts.other})</span>
+                    </label>
+                  )}
+                </div>
+              )}
 
               <label className="checkbox-container">
                 <input
@@ -1301,7 +1461,25 @@ const DataLayersView = () => {
                       <div className="item-color-dot" style={{ backgroundColor: color }}></div>
                       <div className="item-details">
                         <strong className="item-title">{name}</strong>
-                        <span className="item-subtitle">{desc || 'Open Well'} — {item.wardName || 'Unknown Ward'}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span className="item-subtitle">{desc || 'Open Well'} — {item.wardName || 'Unknown Ward'}</span>
+                          {isProj && item.categoryInfo && (
+                            <span className="item-category-badge" style={{ 
+                              display: 'inline-block', 
+                              fontSize: '9.5px', 
+                              fontWeight: '750', 
+                              color: color, 
+                              backgroundColor: color + '12', 
+                              padding: '2px 6px', 
+                              borderRadius: '4px', 
+                              alignSelf: 'flex-start', 
+                              marginTop: '2px',
+                              letterSpacing: '0.2px'
+                            }}>
+                              {item.categoryInfo.icon} {item.categoryInfo.name}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -1323,7 +1501,9 @@ const DataLayersView = () => {
                   : `0 of ${wells.length + projects.length} items visible`}
               </span>
             </div>
-            <div ref={mapContainerRef} className="leaflet-map-canvas"></div>
+            <div className="leaflet-map-wrapper-inner" style={{ position: 'relative', width: '100%', height: 'calc(100% - 48px)' }}>
+              <div ref={mapContainerRef} className="leaflet-map-canvas" style={{ width: '100%', height: '100%' }}></div>
+            </div>
           </div>
 
           {/* Details Sidebar Pane */}
@@ -1333,7 +1513,13 @@ const DataLayersView = () => {
                 {selectedItem.projName !== undefined ? (
                   <>
                     <div className="details-header">
-                      <span className="details-type-tag project-tag">PROJECT</span>
+                      {selectedItem.categoryInfo ? (
+                        <span className="details-type-tag project-tag" style={{ backgroundColor: selectedItem.categoryInfo.color + '15', color: selectedItem.categoryInfo.color }}>
+                          {selectedItem.categoryInfo.name.toUpperCase()}
+                        </span>
+                      ) : (
+                        <span className="details-type-tag project-tag">PROJECT</span>
+                      )}
                       <h3>{selectedItem.projName}</h3>
                       <div
                         className={`status-pill ${selectedItem.status?.toLowerCase().includes('completed') ? 'completed' : 'active'}`}

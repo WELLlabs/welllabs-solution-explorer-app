@@ -761,3 +761,207 @@
   color: #0f172a;
   transform: translateY(-1px);
 }
+
+/* ==========================================================================
+   Category division & custom standing pin styling
+   ========================================================================== */
+
+/* Nested Category Filters */
+.nested-category-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 28px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.category-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.category-checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.custom-check-nested {
+  height: 14px;
+  width: 14px;
+  border-width: 1.5px;
+  border-style: solid;
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s ease;
+  background-color: transparent;
+  flex-shrink: 0;
+}
+
+.category-checkbox-container:hover {
+  color: #0f172a;
+}
+
+.category-checkbox-container input:checked ~ .custom-check-nested::after {
+  content: "";
+  position: absolute;
+  left: 3.5px;
+  top: 0.5px;
+  width: 3px;
+  height: 6px;
+  border: solid white;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.category-label-text {
+  white-space: nowrap;
+}
+
+/* Custom Standing Leaflet Pin Markers */
+.custom-leaflet-pin-container {
+  background: none !important;
+  border: none !important;
+}
+
+.pin-marker-wrapper {
+  position: relative;
+  width: 32px;
+  height: 42px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-origin: bottom center;
+}
+
+.pin-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 42px;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+}
+
+.pin-inner-icon {
+  position: absolute;
+  top: 16px; /* Center inside the circle vertically */
+  left: 16px; /* Center inside the circle horizontally */
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  line-height: 1;
+  z-index: 10; /* Ensure icon prints on top of SVG */
+  pointer-events: none; /* Let clicks pass through */
+  user-select: none;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dynamic Floating Map Legend */
+.map-floating-legend {
+  position: absolute;
+  bottom: 24px;
+  left: 12px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 170px;
+  transition: all 0.3s ease;
+}
+
+.map-floating-legend h6 {
+  margin: 0 0 2px 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: #334155;
+}
+
+.legend-icon-pin {
+  font-size: 10.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-weight: normal;
+}
+
+/* CSS Animations for slide-down elements */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Animations for marker pin load */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-100%);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1) translateY(10%);
+  }
+  80% {
+    transform: scale(0.95) translateY(-5%);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
