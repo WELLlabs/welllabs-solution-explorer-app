@@ -17,6 +17,7 @@ import CaseStudies from '../components/dashboard/CaseStudies';
 import Interventions from '../components/dashboard/Interventions';
 import FloodRiskMap from '../components/dashboard/FloodRiskMap';
 import DataLayersView from '../components/dashboard/DataLayersView';
+import NewProjectsView from '../components/dashboard/NewProjectsView';
 
 // Export FIELD_PERMISSIONS to keep references intact
 export const FIELD_PERMISSIONS = {
@@ -116,7 +117,7 @@ const Dashboard = () => {
         )}
 
         {/* WORKSPACE NAVIGATION TABS */}
-        {user?.role !== 'Pending' && (
+        {user?.role !== 'Pending' && activeTab !== 'interventions' && activeTab !== 'newprojects' && (
           <div className="dashboard-navigation-tabs">
             <button 
               className={`tab-btn ${activeTab === 'home' ? 'active' : ''}`}
@@ -127,19 +128,6 @@ const Dashboard = () => {
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
               Home
-            </button>
-
-            <button 
-              className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => navigate('/dashboard')}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="9" />
-                <rect x="14" y="3" width="7" height="5" />
-                <rect x="14" y="12" width="7" height="9" />
-                <rect x="3" y="16" width="7" height="5" />
-              </svg>
-              Dashboard
             </button>
 
             <button 
@@ -154,52 +142,17 @@ const Dashboard = () => {
             </button>
 
             <button 
-              className={`tab-btn ${activeTab === 'interventions' ? 'active' : ''}`}
-              onClick={() => navigate('/interventions')}
+              className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+              onClick={() => navigate('/dashboard')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 8v4l3 3" />
-                <circle cx="12" cy="12" r="10" />
+                <rect x="3" y="3" width="7" height="9" />
+                <rect x="14" y="3" width="7" height="5" />
+                <rect x="14" y="12" width="7" height="9" />
+                <rect x="3" y="16" width="7" height="5" />
               </svg>
-              Interventions
+              Dashboard
             </button>
-
-            <button 
-              className={`tab-btn ${activeTab === 'floodriskmap' ? 'active' : ''}`}
-              onClick={() => navigate('/floodriskmap')}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-                <line x1="8" y1="2" x2="8" y2="18" />
-                <line x1="16" y1="6" x2="16" y2="22" />
-              </svg>
-              Flood Risk Map
-            </button>
-
-            <button 
-              className={`tab-btn ${activeTab === 'datalayers' ? 'active' : ''}`}
-              onClick={() => navigate('/datalayers')}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                <polyline points="2 17 12 22 22 17" />
-                <polyline points="2 12 12 17 22 12" />
-              </svg>
-              Data Layers
-            </button>
-
-            {SHOW_PLATFORM_TAB && (
-              <button 
-                className={`tab-btn ${activeTab === 'platform' ? 'active' : ''}`}
-                onClick={() => navigate('/platform')}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                Platform
-              </button>
-            )}
 
             {/* Admin Exclusive User Management */}
             {user?.role === 'Admin' && (
@@ -228,11 +181,9 @@ const Dashboard = () => {
           />
         )}
 
-        {/* 2. DASHBOARD VIEW (Analytics Component) */}
+        {/* 2. DASHBOARD VIEW (consists of DataLayersView as the main map interface) */}
         {user?.role !== 'Pending' && activeTab === 'dashboard' && (
-          <div className="analytics-view-section animate-fade-in">
-            <Analytics />
-          </div>
+          <DataLayersView />
         )}
 
         {/* 3. CASE STUDY VIEW */}
@@ -248,92 +199,9 @@ const Dashboard = () => {
           <Interventions />
         )}
 
-        {/* 5. FLOOD RISK MAP VIEW */}
-        {user?.role !== 'Pending' && activeTab === 'floodriskmap' && (
-          <FloodRiskMap />
-        )}
-
-        {/* 6. DATA LAYERS VIEW */}
-        {user?.role !== 'Pending' && activeTab === 'datalayers' && (
-          <DataLayersView />
-        )}
-
-        {/* 7. PLATFORM VIEW */}
-        {SHOW_PLATFORM_TAB && user?.role !== 'Pending' && activeTab === 'platform' && (
-          <div className="platform-section animate-fade-in">
-            <div className="platform-projects-container">
-              <div className="projects-grid">
-                {/* Row 1: 3 Visible Projects */}
-                <div className="project-card animate-fade-in">
-                  <div className="project-card-header">
-                    <h4 className="project-card-title">Project 1</h4>
-                  </div>
-                  <div className="project-card-body"></div>
-                </div>
-                <div className="project-card animate-fade-in">
-                  <div className="project-card-header">
-                    <h4 className="project-card-title">Project 2</h4>
-                  </div>
-                  <div className="project-card-body"></div>
-                </div>
-                <div className="project-card animate-fade-in">
-                  <div className="project-card-header">
-                    <h4 className="project-card-title">Project 3</h4>
-                  </div>
-                  <div className="project-card-body"></div>
-                </div>
-
-                {/* Row 2: 3 Blurred or Visible Projects depending on auth */}
-                <div className={`project-card animate-fade-in ${!user ? 'blurred-card' : ''}`}>
-                  <div className="project-card-header">
-                    <h4 className="project-card-title">Project 4</h4>
-                  </div>
-                  <div className="project-card-body"></div>
-                </div>
-                <div className={`project-card animate-fade-in ${!user ? 'blurred-card' : ''}`}>
-                  <div className="project-card-header">
-                    <h4 className="project-card-title">Project 5</h4>
-                  </div>
-                  <div className="project-card-body"></div>
-                </div>
-                <div className={`project-card animate-fade-in ${!user ? 'blurred-card' : ''}`}>
-                  <div className="project-card-header">
-                    <h4 className="project-card-title">Project 6</h4>
-                  </div>
-                  <div className="project-card-body"></div>
-                </div>
-              </div>
-
-              {/* Login Wall UI */}
-              {!user ? (
-                <div className="login-overlay-box glassmorphic">
-                  <p>
-                    You are viewing the public version of Solution Explorer. 
-                    Please login to unlock and view details for all projects.
-                  </p>
-                  <button 
-                    onClick={() => navigate('/login')} 
-                    className="login-redirect-button"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                      <polyline points="10 17 15 12 10 7" />
-                      <line x1="15" y1="12" x2="3" y2="12" />
-                    </svg>
-                    Login to Unlock More Projects
-                  </button>
-                </div>
-              ) : (
-                <div className="unlocked-badge">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                  All Projects Unlocked
-                </div>
-              )}
-            </div>
-          </div>
+        {/* 5. NEW PROJECTS VIEW */}
+        {user?.role !== 'Pending' && activeTab === 'newprojects' && (
+          <NewProjectsView />
         )}
 
         {/* 8. ADMIN USER MANAGEMENT VIEW */}

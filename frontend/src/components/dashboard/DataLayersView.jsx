@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../../config/api';
@@ -9,6 +10,69 @@ import localProjects from '../../data/projects.json';
 import localWells from '../../data/wells.json';
 import v1WellsCsv from '../../data/v1_wells_with_wards.csv?raw';
 import v1ProjectsCsv from '../../data/v1_projects_with_wards.csv?raw';
+
+const NEW_PROJECTS_DATA = [
+  {
+    id: 'kasavanahalli',
+    name: 'Kasavanahalli Lake',
+    stage: 'Design',
+    phase: 'Phase 2',
+    progress: 34,
+    cost: '₹4.20 Cr',
+    committed: '₹4.20 Cr',
+    lat: 12.903973,
+    lng: 77.667712,
+    details: 'Rejuvenation of the lake. Focuses on setting up wetland systems, desilting, channel restoration, improving water quality index, and constructing perimeter walking pathways for the local community.'
+  },
+  {
+    id: 'doddakannelli',
+    name: 'Doddakannelli Lake',
+    stage: 'Design',
+    phase: 'Phase 1',
+    progress: 11,
+    cost: '₹2.10 Cr',
+    committed: '₹2.10 Cr',
+    lat: 12.9126,
+    lng: 77.6896,
+    details: 'Diagnosing sewage inlet points and catchment siltation. A detailed project report (DPR) is underway to divert raw sewage from entering the main lake body.'
+  },
+  {
+    id: 'varthur',
+    name: 'Varthur Lake — Zone 1',
+    stage: 'Diagnosis',
+    phase: 'Phase 1',
+    progress: 10,
+    cost: '₹9.60 Cr',
+    committed: '₹9.60 Cr',
+    lat: 12.9431,
+    lng: 77.7471,
+    details: 'Comprehensive catchment mapping and water quality monitoring. Focuses on sediment analysis and planning massive de-weeding and aeration systems to restore the lake\'s ecological balance.'
+  },
+  {
+    id: 'halanayakanahalli',
+    name: 'Halanayakanahalli Lake',
+    stage: 'Diagnosis',
+    phase: 'Phase 1',
+    progress: 0,
+    cost: '₹2.80 Cr',
+    committed: '₹2.80 Cr',
+    lat: 12.8988,
+    lng: 77.6922,
+    details: 'Preliminary environmental baseline assessment. Project kicked off to map the incoming storm-water drains and outline encroachment boundaries for eviction and preservation.'
+  },
+  {
+    id: 'saulkere',
+    name: 'Saul Kere',
+    stage: 'Diagnosis',
+    phase: 'Phase 1',
+    progress: 0,
+    cost: '₹3.60 Cr',
+    committed: '₹3.60 Cr',
+    lat: 12.9238,
+    lng: 77.6787,
+    details: 'Diagnosis stage to analyze catchment runoff and identify point sources of heavy metal pollution. Planning installation of trash racks and silt traps at key inlet channels.'
+  }
+];
 
 // Utility helper to parse a CSV text string into an array of objects, handling quoted values correctly
 const parseCSV = (csvText) => {
@@ -191,6 +255,7 @@ const DataLayersView = () => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersLayerGroupRef = useRef(null);
+  const navigate = useNavigate();
 
   // Datasets
   const [projects, setProjects] = useState([]);
@@ -222,6 +287,10 @@ const DataLayersView = () => {
   const [showGbaCorporations, setShowGbaCorporations] = useState(false);
   const [showValleys, setShowValleys] = useState(false);
   const [showGreenspaces, setShowGreenspaces] = useState(false);
+
+  // New placeholder layers states
+  const [showNewProjects, setShowNewProjects] = useState(false);
+  const [showNewFloodRisk, setShowNewFloodRisk] = useState(false);
 
   const assemblyConst2LayerRef = useRef(null);
   const bengaluruAssemblyLayerRef = useRef(null);
@@ -549,7 +618,7 @@ const DataLayersView = () => {
     }
 
     // Layer 2: bengaluruAssembly (Bengaluru Assemblies Map)
-    if (showBengaluruAssembly) {
+    if (showBengaluruAssembly || showNewFloodRisk) {
       if (!bengaluruAssemblyLayerRef.current) {
         setLoadingBengaluruAssembly(true);
         import('../../data/assembly_const2/bengaluru_assembly_const.json')
@@ -673,7 +742,7 @@ const DataLayersView = () => {
         greenspacesLayerRef.current = null;
       }
     }
-  }, [showAssemblyConst2, showBengaluruAssembly, showKarnatakaAssembly, showGbaWards, showGbaCorporations, showValleys, showGreenspaces]);
+  }, [showAssemblyConst2, showBengaluruAssembly, showKarnatakaAssembly, showGbaWards, showGbaCorporations, showValleys, showGreenspaces, showNewFloodRisk]);
 
   // Clear selected item if corresponding layer is unchecked
   useEffect(() => {
@@ -885,7 +954,7 @@ const DataLayersView = () => {
     // Clear existing layers
     markersGroup.clearLayers();
 
-    if (!showWells && !showProjects) return;
+    if (!showWells && !showProjects && !showNewProjects) return;
 
     const boundsPoints = [];
 
@@ -908,11 +977,16 @@ const DataLayersView = () => {
         fillOpacity: 0.85
       });
 
+      const viewMoreBtn = isProj 
+        ? `<a href="/interventions" target="_blank" class="popup-view-more-btn" style="display: block; margin-top: 8px; text-decoration: none; background-color: ${color}; color: white; text-align: center; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 750; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">View More Details</a>`
+        : '';
+
       marker.bindPopup(`
         <div class="map-popup-container">
           <span class="popup-badge" style="background-color: ${color}20; color: ${color};">${badgeLabel}: ${String(type || 'UNSPECIFIED').toUpperCase()}</span>
           <h4 class="popup-title">${name}</h4>
           <p class="popup-ward">📍 ${item.wardName || 'Unknown Ward'}</p>
+          ${viewMoreBtn}
           <span class="popup-hint">Click point for full details</span>
         </div>
       `);
@@ -929,6 +1003,55 @@ const DataLayersView = () => {
       boundsPoints.push([lat, lng]);
     });
 
+    if (showNewProjects) {
+      NEW_PROJECTS_DATA.forEach((item) => {
+        const { lat, lng } = item;
+        if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
+
+        const color = '#3b82f6'; // Match projects color
+
+        const marker = L.circleMarker([lat, lng], {
+          radius: 8,
+          fillColor: color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.9
+        });
+
+        const viewMoreBtn = `<a href="/newprojects?id=${item.id}" target="_blank" class="popup-view-more-btn" style="display: block; margin-top: 8px; text-decoration: none; background-color: ${color}; color: white; text-align: center; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 750; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">View More Details</a>`;
+
+        marker.bindPopup(`
+          <div class="map-popup-container">
+            <span class="popup-badge" style="background-color: ${color}20; color: ${color};">PROJECT: ${item.stage.toUpperCase()}</span>
+            <h4 class="popup-title">${item.name}</h4>
+            <p class="popup-ward">📋 Cost: <strong>${item.cost}</strong> | Progress: <strong>${item.progress}%</strong></p>
+            ${viewMoreBtn}
+            <span class="popup-hint">Click point for full details</span>
+          </div>
+        `);
+
+        marker.on('click', () => {
+          setSelectedItem({
+            ...item,
+            projName: item.name,
+            status: item.stage,
+            budget: item.cost,
+            timeline: item.phase,
+            tags: 'Lakes',
+            lat: lat,
+            lng: lng,
+            wardName: 'Kasavanahalli',
+            corporation: 'South'
+          });
+          map.setView([lat, lng], 14);
+        });
+
+        marker.addTo(markersGroup);
+        boundsPoints.push([lat, lng]);
+      });
+    }
+
     // Zoom automatically to active bounds containing visible points
     if (boundsPoints.length > 0) {
       const bounds = L.latLngBounds(boundsPoints);
@@ -939,7 +1062,7 @@ const DataLayersView = () => {
         duration: 1.2
       });
     }
-  }, [showWells, showProjects, wells, projects, searchText, loading]);
+  }, [showWells, showProjects, showNewProjects, wells, projects, searchText, loading]);
 
   const handleSelectItem = (item) => {
     setSelectedItem(item);
@@ -1018,7 +1141,7 @@ const DataLayersView = () => {
                   onChange={(e) => setShowProjects(e.target.checked)}
                 />
                 <span className="custom-check project-indicator"></span>
-                Projects ({showProjects ? `${filteredItems.filter(i => i.projName !== undefined).length} active` : `${projects.length} total`})
+                Existing Interventions ({showProjects ? `${filteredItems.filter(i => i.projName !== undefined).length} active` : `${projects.length} total`})
               </label>
 
               <label className="checkbox-container">
@@ -1105,6 +1228,26 @@ const DataLayersView = () => {
                 <span className="custom-check greenspaces-indicator"></span>
                 Greenspaces {loadingGreenspaces && <span className="small-inline-spinner"></span>}
               </label>
+
+              <label className="checkbox-container">
+                <input
+                  type="checkbox"
+                  checked={showNewProjects}
+                  onChange={(e) => setShowNewProjects(e.target.checked)}
+                />
+                <span className="custom-check new-projects-indicator"></span>
+                Projects
+              </label>
+
+              <label className="checkbox-container">
+                <input
+                  type="checkbox"
+                  checked={showNewFloodRisk}
+                  onChange={(e) => setShowNewFloodRisk(e.target.checked)}
+                />
+                <span className="custom-check new-flood-risk-indicator"></span>
+                Flood Risk {loadingBengaluruAssembly && showNewFloodRisk && <span className="small-inline-spinner"></span>}
+              </label>
             </div>
           </div>
 
@@ -1138,7 +1281,7 @@ const DataLayersView = () => {
                 </div>
               ) : (!showWells && !showProjects) ? (
                 <div className="list-empty-state">
-                  Check the <strong>Wells</strong> or <strong>Projects</strong> layer above to display spatial data.
+                  Check the <strong>Wells</strong> or <strong>Existing Interventions</strong> layer above to display spatial data.
                 </div>
               ) : filteredItems.length === 0 ? (
                 <div className="list-empty-state">No matching assets found.</div>
@@ -1374,7 +1517,7 @@ const DataLayersView = () => {
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-                <p>Tick the "Wells" or "Projects" layers and choose a location to view telemetry measurements here.</p>
+                <p>Tick the "Wells" or "Existing Interventions" layers and choose a location to view telemetry measurements here.</p>
               </div>
             )}
           </div>

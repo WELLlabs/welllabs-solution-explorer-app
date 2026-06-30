@@ -23,7 +23,7 @@
 /* Layout & Centered Header */
 .data-layers-header-row {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   width: 100%;
   margin-bottom: 4px;
@@ -32,8 +32,8 @@
 .data-layers-header-row > div {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .map-view-layout {
@@ -170,6 +170,8 @@
 .checkbox-container input:checked ~ .gba-corps-indicator { background-color: #ec4899; border-color: #ec4899; }
 .checkbox-container input:checked ~ .valleys-indicator { background-color: #06b6d4; border-color: #06b6d4; }
 .checkbox-container input:checked ~ .greenspaces-indicator { background-color: #22c55e; border-color: #22c55e; }
+.checkbox-container input:checked ~ .new-projects-indicator { background-color: #3b82f6; border-color: #3b82f6; }
+.checkbox-container input:checked ~ .new-flood-risk-indicator { background-color: #ef4444; border-color: #ef4444; }
 
 /* Inline Spinner for loading large dynamic boundaries datasets */
 .small-inline-spinner {
