@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../../config/api';
 import './DataLayersView.css';
+import Analytics from '../../pages/Analytics';
 
 // Fallback local datasets (both JSON and rich CSV v1 with ward mapping telemetry)
 import localProjects from '../../data/projects.json';
@@ -79,7 +80,7 @@ const parseCSV = (csvText) => {
   const lines = [];
   let currentLine = '';
   let insideQuotes = false;
-  
+
   for (let i = 0; i < csvText.length; i++) {
     const char = csvText[i];
     if (char === '"') {
@@ -94,14 +95,14 @@ const parseCSV = (csvText) => {
   if (currentLine) lines.push(currentLine);
 
   if (lines.length === 0) return [];
-  
+
   const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
   const result = [];
-  
+
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
     if (!line.trim()) continue;
-    
+
     const values = [];
     let curVal = '';
     let inQ = false;
@@ -117,7 +118,7 @@ const parseCSV = (csvText) => {
       curVal += c;
     }
     values.push(curVal.trim().replace(/^"|"$/g, ''));
-    
+
     const row = {};
     headers.forEach((header, index) => {
       row[header] = values[index] !== undefined ? values[index] : '';
@@ -158,9 +159,9 @@ const pointInPolygon = (lat, lng, polygonCoords) => {
     const yi = polygonCoords[i][1];
     const xj = polygonCoords[j][0];
     const yj = polygonCoords[j][1];
-    
+
     const intersect = ((yi > y) !== (yj > y))
-        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
     if (intersect) inside = !inside;
   }
   return inside;
@@ -235,7 +236,7 @@ const normalizeProject = (p) => {
   const lng = parseCoordinate(p.longitude !== undefined ? p.longitude : p.Longitude);
   const tagsVal = String(p.tags || p['Tags'] || '');
   const categoryInfo = getProjectCategoryInfo(tagsVal);
-  
+
   return {
     projNo: String(p.projNo || p['Proj No'] || p.proj_no || ''),
     projName: String(p.projName || p['Proj Name'] || p.proj_name || ''),
@@ -438,7 +439,7 @@ const DataLayersView = () => {
   // Initialize Leaflet Map
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    
+
     if (mapRef.current) return;
     const container = mapContainerRef.current;
     if (container._leaflet_id) {
@@ -567,11 +568,11 @@ const DataLayersView = () => {
           leafletLayer.on('click', () => {
             const props = feature.properties || {};
             let regionName = props.AC_NAME || props.ac_name || props.Name || props.wardName || props.name || 'Unknown Region';
-            
+
             // 1. Spatial matching using geometry
             const matchingWells = (wellsRef.current || []).filter(w => isPointInGeometry(w.lat, w.lng, feature.geometry));
             const matchingProjects = (projectsRef.current || []).filter(p => isPointInGeometry(p.lat, p.lng, feature.geometry));
-            
+
             // 2. Attribute-based matching as fallback/addition
             let attrMatchingWells = [];
             let attrMatchingProjects = [];
@@ -579,28 +580,28 @@ const DataLayersView = () => {
             if (layerType === 'gba_wards') {
               const wName = (props.wardName || '').toLowerCase().trim();
               const wId = String(props.wardId || '').trim();
-              attrMatchingWells = (wellsRef.current || []).filter(w => 
-                (w.wardName && w.wardName.toLowerCase().trim() === wName) || 
+              attrMatchingWells = (wellsRef.current || []).filter(w =>
+                (w.wardName && w.wardName.toLowerCase().trim() === wName) ||
                 (w.wardId && String(w.wardId).trim() === wId)
               );
-              attrMatchingProjects = (projectsRef.current || []).filter(p => 
-                (p.wardName && p.wardName.toLowerCase().trim() === wName) || 
+              attrMatchingProjects = (projectsRef.current || []).filter(p =>
+                (p.wardName && p.wardName.toLowerCase().trim() === wName) ||
                 (p.wardId && String(p.wardId).trim() === wId)
               );
             } else if (layerType === 'gba_corporations') {
               const corpName = (props.name || '').toLowerCase().trim();
-              attrMatchingWells = (wellsRef.current || []).filter(w => 
+              attrMatchingWells = (wellsRef.current || []).filter(w =>
                 w.corporation && w.corporation.toLowerCase().trim().includes(corpName)
               );
-              attrMatchingProjects = (projectsRef.current || []).filter(p => 
+              attrMatchingProjects = (projectsRef.current || []).filter(p =>
                 p.corporation && p.corporation.toLowerCase().trim().includes(corpName)
               );
             } else if (layerType === 'assembly') {
               const acName = (props.AC_NAME || props.ac_name || props.Name || '').toLowerCase().trim();
-              attrMatchingWells = (wellsRef.current || []).filter(w => 
+              attrMatchingWells = (wellsRef.current || []).filter(w =>
                 w.ac && w.ac.toLowerCase().trim() === acName
               );
-              attrMatchingProjects = (projectsRef.current || []).filter(p => 
+              attrMatchingProjects = (projectsRef.current || []).filter(p =>
                 p.ac && p.ac.toLowerCase().trim() === acName
               );
             }
@@ -996,10 +997,10 @@ const DataLayersView = () => {
           p.projName.toLowerCase().includes(search) ||
           p.wardName.toLowerCase().includes(search) ||
           p.tags.toLowerCase().includes(search);
-        
+
         const categoryId = p.categoryInfo?.id || 'other';
         const matchesCategory = selectedCategories[categoryId] === true;
-        
+
         return matchesSearch && matchesCategory;
       });
       items = [...items, ...filteredProjects];
@@ -1177,7 +1178,7 @@ const DataLayersView = () => {
 
   const isItemSelected = (item) => {
     if (!selectedItem) return false;
-    
+
     // Check if same class (Project vs Well)
     const isProj = item.projName !== undefined;
     const isSelectedProj = selectedItem.projName !== undefined;
@@ -1232,7 +1233,7 @@ const DataLayersView = () => {
                 <span className="custom-check well-indicator"></span>
                 Wells ({showWells ? `${filteredItems.filter(i => i.projName === undefined).length} active` : `${wells.length} total`})
               </label>
-              
+
               <label className="checkbox-container">
                 <input
                   type="checkbox"
@@ -1414,9 +1415,29 @@ const DataLayersView = () => {
           {/* Search and List Panel */}
           <div className="sidebar-section list-section">
             <div className="search-bar-container" style={{ marginBottom: (showWells || showProjects) ? '4px' : '0px' }}>
+              <svg 
+                className="search-icon-svg" 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#64748b" 
+                strokeWidth="2.5" 
+                style={{ 
+                  position: 'absolute', 
+                  left: '14px', 
+                  top: '50%', 
+                  transform: 'translateY(-50%)', 
+                  pointerEvents: 'none',
+                  zIndex: 2
+                }}
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
               <input
                 type="text"
-                placeholder="Search wells or projects by name or ward..."
+                placeholder="Search wells or projects..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 disabled={!showWells && !showProjects}
@@ -1464,15 +1485,15 @@ const DataLayersView = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                           <span className="item-subtitle">{desc || 'Open Well'} — {item.wardName || 'Unknown Ward'}</span>
                           {isProj && item.categoryInfo && (
-                            <span className="item-category-badge" style={{ 
-                              display: 'inline-block', 
-                              fontSize: '9.5px', 
-                              fontWeight: '750', 
-                              color: color, 
-                              backgroundColor: color + '12', 
-                              padding: '2px 6px', 
-                              borderRadius: '4px', 
-                              alignSelf: 'flex-start', 
+                            <span className="item-category-badge" style={{
+                              display: 'inline-block',
+                              fontSize: '9.5px',
+                              fontWeight: '750',
+                              color: color,
+                              backgroundColor: color + '12',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              alignSelf: 'flex-start',
                               marginTop: '2px',
                               letterSpacing: '0.2px'
                             }}>
@@ -1496,8 +1517,8 @@ const DataLayersView = () => {
             <div className="map-view-header">
               <h4>🗺️ Bengaluru Map View — Groundwater & Watershed Explorer</h4>
               <span className="asset-count-badge">
-                {(showWells || showProjects) 
-                  ? `Showing ${filteredItems.length} of ${wells.length + projects.length} items` 
+                {(showWells || showProjects)
+                  ? `Showing ${filteredItems.length} of ${wells.length + projects.length} items`
                   : `0 of ${wells.length + projects.length} items visible`}
               </span>
             </div>
@@ -1707,6 +1728,12 @@ const DataLayersView = () => {
               </div>
             )}
           </div>
+
+          {/* Analytics Dashboard Pane */}
+          <div className="analytics-details-card glassmorphic">
+            <Analytics />
+          </div>
+
         </div>
       </div>
     </div>
