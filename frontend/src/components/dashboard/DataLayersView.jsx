@@ -1075,6 +1075,11 @@ const DataLayersView = () => {
           <h4 class="popup-title">${name}</h4>
           <p class="popup-ward">📍 ${item.wardName || 'Unknown Ward'}</p>
           ${isProj ? `<p class="popup-category" style="margin: 4px 0 8px 0; font-size: 11px; color: #475569;">🏷️ Category: <strong style="color: ${color};">${item.categoryInfo?.name}</strong></p>` : ''}
+          ${isProj ? `
+            <a href="/interventions" target="_blank" rel="noopener noreferrer" class="popup-view-details-btn">
+              View More Details
+            </a>
+          ` : ''}
           <span class="popup-hint">Click point for full details</span>
         </div>
       `);
