@@ -340,6 +340,19 @@ const NewProjectsView = () => {
   const p = PROJECTS.find(x => x.id === selectedProjectId) || PROJECTS[0];
   const activeSet = new Set([...p.fundedIdx, ...selectedPicks]);
   const unfunded = p.assets.map((_, i) => i).filter(i => !p.fundedIdx.has(i));
+  const activeImpact = impactOf(p, activeSet);
+
+  const [simulationCatchment, setSimulationCatchment] = useState(p.catchment);
+  const [simulationCnBase, setSimulationCnBase] = useState(p.cnBase);
+  const [simulationCnProj, setSimulationCnProj] = useState(activeImpact.cnEff);
+
+  // Keep simulation states synced with active project / picks unless manually adjusted
+  useEffect(() => {
+    setSimulationCatchment(p.catchment);
+    setSimulationCnBase(p.cnBase);
+    setSimulationCnProj(activeImpact.cnEff);
+    setSimulationRainfall(p.P);
+  }, [selectedProjectId, selectedPicks, p.catchment, p.cnBase, activeImpact.cnEff, p.P]);
 
   // Initialize phase when active project changes
   useEffect(() => {
@@ -677,85 +690,140 @@ const NewProjectsView = () => {
               <div className="t">Estimated cost: <b>{rs(pickCost)}</b></div>
             </div>
             <div className="cta-row" style={{ justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button className="btn btn-primary" onClick={() => setActiveTab('funding')}>Proceed to Funding →</button>
+              <button className="btn btn-primary" onClick={() => setActiveTab('impact')}>See impact →</button>
             </div>
           </div>
         );
 
       case 'impact':
-        // Slider simulation values
-        const baseRunoff = runoff(simulationRainfall, p.cnBase) / 1000 * p.catchment * 1e6;
-        const projRunoff = runoff(simulationRainfall, activeImpact.cnEff) / 1000 * p.catchment * 1e6;
+        // Slider simulation values using local state overrides
+        const baseRunoff = runoff(simulationRainfall, simulationCnBase) / 1000 * simulationCatchment * 1e6;
+        const projRunoff = runoff(simulationRainfall, simulationCnProj) / 1000 * simulationCatchment * 1e6;
         const eventRetainedValue = Math.max(0, baseRunoff - projRunoff);
 
         return (
-          <div className="impact-grid animate-fade-in">
-            <div>
-              <div className="impact-head">
-                <div><b>Project volumetric benefits</b> · SCS Curve Number</div>
+          <div className="animate-fade-in">
+            <div className="impact-grid">
+              <div>
+                <div className="impact-head">
+                  <div><b>Project volumetric benefits</b> · SCS Curve Number</div>
+                </div>
+                {!activeImpact.enablerOK && (
+                  <div className="warn">
+                    <b>Sewage diversion is pending.</b> In-lake storage benefit is blocked until raw sewage inflow is intercepted.
+                  </div>
+                )}
+                <div className="metrics">
+                  <div className="metric">
+                    <b>{m3(activeImpact.storage)}</b>
+                    <span className="u">in-lake storage</span>
+                    <span>Restored live volume for flood buffer</span>
+                  </div>
+                  <div className="metric">
+                    <b>{m3(activeImpact.eventRetained)}</b>
+                    <span className="u">event retention</span>
+                    <span>Retained in catchment at {p.P}mm storm</span>
+                  </div>
+                  <div className="metric">
+                    <b>{m3(activeImpact.annual)}</b>
+                    <span className="u">annual benefit</span>
+                    <span>Total annual water recharged and retained</span>
+                  </div>
+                  <div className="metric">
+                    <b>{activeImpact.people.toLocaleString('en-IN')}</b>
+                    <span className="u">people in scope</span>
+                    <span>Local population benefiting from recharge</span>
+                  </div>
+                </div>
               </div>
-              {!activeImpact.enablerOK && (
-                <div className="warn">
-                  <b>Sewage diversion is pending.</b> In-lake storage benefit is blocked until raw sewage inflow is intercepted.
+
+              <div className="calc">
+                <h4>SCS Curve Number Runoff Calculator</h4>
+                <div className="note">Interactively simulate storm runoff benefits based on catchment curve numbers.</div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                  <div>
+                    <label htmlFor="calc-area" style={{ display: 'block', marginBottom: '4px' }}>
+                      Catchment area: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{simulationCatchment.toFixed(1)} km²</span>
+                    </label>
+                    <input
+                      type="range"
+                      id="calc-area"
+                      min="1.0"
+                      max="50.0"
+                      step="0.1"
+                      value={simulationCatchment}
+                      onChange={(e) => setSimulationCatchment(parseFloat(e.target.value))}
+                      style={{ width: '100%', accentColor: '#5BC8B8' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="calc-base-cn" style={{ display: 'block', marginBottom: '4px' }}>
+                      Baseline CN: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{simulationCnBase}</span>
+                    </label>
+                    <input
+                      type="range"
+                      id="calc-base-cn"
+                      min="30"
+                      max="100"
+                      step="1"
+                      value={simulationCnBase}
+                      onChange={(e) => setSimulationCnBase(parseInt(e.target.value))}
+                      style={{ width: '100%', accentColor: '#5BC8B8' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="calc-proj-cn" style={{ display: 'block', marginBottom: '4px' }}>
+                      Current project CN: <span className="val" style={{ float: 'right', color: '#5BC8B8', fontWeight: 'bold' }}>{simulationCnProj.toFixed(1)}</span>
+                    </label>
+                    <input
+                      type="range"
+                      id="calc-proj-cn"
+                      min="30.0"
+                      max="100.0"
+                      step="0.1"
+                      value={simulationCnProj}
+                      onChange={(e) => setSimulationCnProj(parseFloat(e.target.value))}
+                      style={{ width: '100%', accentColor: '#5BC8B8' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="calc-p" style={{ display: 'block', marginBottom: '4px' }}>
+                      Design storm rainfall: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{simulationRainfall} mm</span>
+                    </label>
+                    <input
+                      type="range"
+                      id="calc-p"
+                      min="20"
+                      max="150"
+                      step="1"
+                      value={simulationRainfall}
+                      onChange={(e) => setSimulationRainfall(parseInt(e.target.value))}
+                      style={{ width: '100%', accentColor: '#5BC8B8' }}
+                    />
+                  </div>
                 </div>
-              )}
-              <div className="metrics">
-                <div className="metric">
-                  <b>{m3(activeImpact.storage)}</b>
-                  <span className="u">in-lake storage</span>
-                  <span>Restored live volume for flood buffer</span>
+
+                <div className="out">
+                  <span>Baseline runoff:</span>
+                  <b>{m3(baseRunoff)}</b>
                 </div>
-                <div className="metric">
-                  <b>{m3(activeImpact.eventRetained)}</b>
-                  <span className="u">event retention</span>
-                  <span>Retained in catchment at {p.P}mm storm</span>
+                <div className="out">
+                  <span>Project runoff:</span>
+                  <b>{m3(projRunoff)}</b>
                 </div>
-                <div className="metric">
-                  <b>{m3(activeImpact.annual)}</b>
-                  <span className="u">annual benefit</span>
-                  <span>Total annual water recharged and retained</span>
-                </div>
-                <div className="metric">
-                  <b>{activeImpact.people.toLocaleString('en-IN')}</b>
-                  <span className="u">people in scope</span>
-                  <span>Local population benefiting from recharge</span>
+                <div className="out" style={{ borderTop: '2px solid #5BC8B8', paddingTop: '10px', marginTop: '10px' }}>
+                  <span>Runoff retained:</span>
+                  <b style={{ color: '#5BC8B8' }}>{m3(eventRetainedValue)}</b>
                 </div>
               </div>
             </div>
-
-            <div className="calc">
-              <h4>SCS Curve Number Runoff Calculator</h4>
-              <div className="note">Interactively simulate storm runoff benefits based on catchment curve numbers.</div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                <div>Catchment area: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{p.catchment} km²</span></div>
-                <div style={{ borderBottom: '1px solid #244a4d', paddingBottom: '6px' }}>Baseline CN: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{p.cnBase}</span></div>
-                <div>Current project CN: <span className="val" style={{ float: 'right', color: '#5BC8B8', fontWeight: 'bold' }}>{activeImpact.cnEff.toFixed(1)}</span></div>
-              </div>
-
-              <label htmlFor="calc-p">Design storm rainfall: <span className="val">{simulationRainfall} mm</span></label>
-              <input
-                type="range"
-                id="calc-p"
-                min="20"
-                max="150"
-                value={simulationRainfall}
-                onChange={(e) => setSimulationRainfall(parseInt(e.target.value))}
-                style={{ width: '100%', accentColor: '#5BC8B8', marginTop: '6px' }}
-              />
-
-              <div className="out">
-                <span>Baseline runoff:</span>
-                <b>{m3(baseRunoff)}</b>
-              </div>
-              <div className="out">
-                <span>Project runoff:</span>
-                <b>{m3(projRunoff)}</b>
-              </div>
-              <div className="out" style={{ borderTop: '2px solid #5BC8B8', paddingTop: '10px', marginTop: '10px' }}>
-                <span>Runoff retained:</span>
-                <b style={{ color: '#5BC8B8' }}>{m3(eventRetainedValue)}</b>
-              </div>
+            
+            <div className="cta-row" style={{ justifyContent: 'flex-end', marginTop: '24px' }}>
+              <button className="btn btn-primary" onClick={() => setActiveTab('funding')}>Proceed to Funding →</button>
             </div>
           </div>
         );

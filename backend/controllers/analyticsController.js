@@ -171,4 +171,3 @@ module.exports = {
   getProjectsList,
   getWellsList
 };
-
