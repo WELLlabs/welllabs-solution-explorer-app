@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import './NewProjectsView.css';
 
 /* ============ helpers ============ */
 const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
@@ -72,182 +71,133 @@ const AG = {
   }
 };
 
-/* ============ projects list ============ */
-const PROJECTS = [
-  {
-    id: 'kasavanahalli',
-    name: 'Kasavanahalli Lake',
-    loc: 'Sarjapur Road · East Bengaluru',
-    status: 'Design · Phase 2',
-    scale: 'M',
-    area: 21,
-    catchment: 6.5,
-    imperv: 62,
-    P: 90,
-    cnBase: 88,
-    cnProj: 80,
-    annualVWB: 620000,
-    people: 11000,
-    recharge: 380000,
-    short: 'A 21-ha tech-corridor tank whose lost storage now spills into HSR and Sarjapur streets each monsoon.',
-    team: ['welllabs', 'malligavad', 'unitedway', 'trust'],
-    alts: ['fol', 'biome'],
-    funders: [
-      { name: 'Indus Semiconductor Foundation', sector: 'Semiconductors', idx: [0, 1], date: 'Apr 2026' },
-      { name: 'Kaveri Mobility CSR', sector: 'Auto / mobility', idx: [2], date: 'May 2026' },
-      { name: 'Lumen Cloud Foundation', sector: 'IT services', idx: [5], date: 'Jun 2026' }
-    ],
-    assets: [
-      { n: 'Diagnosis, bathymetry & DPR', t: 'grey', cost: 38, phase: 1, vwb: 0, fn: 'Survey, water balance and the costed Detailed Project Report.' },
-      { n: 'Community visioning & committee', t: 'green', cost: 14, phase: 1, vwb: 0, fn: 'Participatory visioning; forms the committee that will run O&M.' },
-      { n: 'Sewage diversion & interception', t: 'grey', cost: 62, phase: 3, vwb: 0, enabler: true, fn: 'Stops dry-weather sewage — precondition for every other asset.' },
-      { n: 'Desilting & live-storage recovery', t: 'blue', cost: 138, phase: 3, vwb: 210000, fn: 'Recovers ~1 m of depth, restoring flood-buffer storage.' },
-      { n: 'Peripheral bund & outlet weir', t: 'grey', cost: 70, phase: 3, vwb: 0, fn: '0.6 m freeboard + weir to pass the design storm safely.' },
-      { n: 'Inlet silt trap & forebay', t: 'grey', cost: 28, phase: 3, vwb: 0, fn: 'Drops silt before the main lake — protects recovered storage.' },
-      { n: 'Constructed wetland', t: 'green', cost: 40, phase: 3, vwb: 0, cn: .5, fn: 'Polishes inflow; lowers the catchment curve number.' },
-      { n: 'Recharge well field', t: 'blue', cost: 22, phase: 3, vwb: 0, cn: .3, fn: 'Sends held stormwater to the aquifer, not the roads.' },
-      { n: 'Shoreline buffer & planting', t: 'green', cost: 8, phase: 3, vwb: 0, cn: .2, fn: 'Native edge that stabilises the bank and supports birdlife.' }
-    ]
-  },
-  {
-    id: 'doddakannelli',
-    name: 'Doddakannelli Lake',
-    loc: 'Sarjapur · Wipro corridor',
-    status: 'Diagnosis · Phase 1',
-    scale: 'S',
-    area: 8,
-    catchment: 2.2,
-    imperv: 55,
-    P: 90,
-    cnBase: 86,
-    cnProj: 78,
-    annualVWB: 200000,
-    people: 7400,
-    recharge: 140000,
-    short: 'An 8-ha neighbourhood lake that overflows onto connecting roads in heavy rain.',
-    team: ['welllabs', 'fol', 'unitedway', 'trust'],
-    alts: ['malligavad', 'biome'],
-    funders: [{ name: 'Sarjapur Tech Park CSR', sector: 'Commercial real estate', idx: [0], date: 'Jun 2026' }],
-    assets: [
-      { n: 'Diagnosis, survey & DPR', t: 'grey', cost: 24, phase: 1, vwb: 0, fn: 'Survey, water balance and DPR for the lake and its catchment.' },
-      { n: 'Community visioning & committee', t: 'green', cost: 9, phase: 1, vwb: 0, fn: 'Agreeing the lake’s purpose; forming the O&M committee.' },
-      { n: 'Sewage diversion', t: 'grey', cost: 34, phase: 3, vwb: 0, enabler: true, fn: 'Intercepts dry-weather sewage before any desilting starts.' },
-      { n: 'Desilting & storage recovery', t: 'blue', cost: 62, phase: 3, vwb: 64000, fn: 'Recovers ~0.8 m of live storage to buffer inflow.' },
-      { n: 'Bund & outlet', t: 'grey', cost: 38, phase: 3, vwb: 0, fn: 'Rebuilt bund and controlled outlet for the design storm.' },
-      { n: 'Inlet forebay', t: 'grey', cost: 16, phase: 3, vwb: 0, fn: 'Settles silt at the inlet before it reaches the lake.' },
-      { n: 'Constructed wetland', t: 'green', cost: 19, phase: 3, vwb: 0, cn: .6, fn: 'Treats inflow and reduces catchment runoff.' },
-      { n: 'Recharge wells', t: 'blue', cost: 8, phase: 3, vwb: 0, cn: .4, fn: 'Directs held water into the shallow aquifer.' }
-    ]
-  },
-  {
-    id: 'varthur',
-    name: 'Varthur Lake — Zone 1',
-    loc: 'Varthur · downstream of Bellandur',
-    status: 'Diagnosis · Phase 1',
-    scale: 'L',
-    area: 60,
-    catchment: 12,
-    imperv: 58,
-    P: 90,
-    cnBase: 90,
-    cnProj: 82,
-    annualVWB: 640000,
-    people: 20000,
-    recharge: 520000,
-    short: 'A flood-critical lake at the bottom of the eastern valley; Zone 1 protects thousands of downstream homes.',
-    team: ['welllabs', 'malligavad', 'unitedway', 'trust'],
-    alts: ['fol', 'biome'],
-    funders: [
-      { name: 'Bellandur Valley Foundation', sector: 'Banking & finance', idx: [0], date: 'Mar 2026' },
-      { name: 'Eastside Community Trust', sector: 'Philanthropy', idx: [1], date: 'May 2026' }
-    ],
-    assets: [
-      { n: 'Diagnosis, bathymetry & DPR', t: 'grey', cost: 70, phase: 1, vwb: 0, fn: 'Full bathymetric & topographic survey and Zone-1 DPR.' },
-      { n: 'Multi-village visioning', t: 'green', cost: 28, phase: 1, vwb: 0, fn: 'Consensus-building across communities around the lake.' },
-      { n: 'Sewage interception & diversion', t: 'grey', cost: 180, phase: 3, vwb: 0, enabler: true, fn: 'Large-scale interception of dry-weather flows — the enabler.' },
-      { n: 'Desilting & storage recovery (Zone 1)', t: 'blue', cost: 300, phase: 3, vwb: 720000, fn: 'Recovers ~1.2 m across 60 ha — biggest flood-buffer gain.' },
-      { n: 'Bund rehabilitation & outlet sluice', t: 'grey', cost: 168, phase: 3, vwb: 0, fn: 'Strengthened bund and gated sluice for the design flood.' },
-      { n: 'Inlet forebays & silt traps (2)', t: 'grey', cost: 86, phase: 3, vwb: 0, fn: 'Two forebays drop silt before the restored basin.' },
-      { n: 'Constructed wetland complex', t: 'green', cost: 96, phase: 3, vwb: 0, cn: .6, fn: 'Treats inflow and reduces catchment runoff.' },
-      { n: 'Recharge well field', t: 'blue', cost: 22, phase: 3, vwb: 0, cn: .25, fn: 'Sends held water into the aquifer.' },
-      { n: 'Shoreline, buffer & access', t: 'green', cost: 10, phase: 3, vwb: 0, cn: .15, fn: 'Buffer planting and safe public access.' }
-    ]
-  },
-  {
-    id: 'halanayakanahalli',
-    name: 'Halanayakanahalli Lake',
-    loc: 'Sarjapur Road · Carmelaram',
-    status: 'Diagnosis · Phase 1',
-    scale: 'S',
-    area: 12,
-    catchment: 3.4,
-    imperv: 58,
-    P: 90,
-    cnBase: 87,
-    cnProj: 79,
-    annualVWB: 300000,
-    people: 8600,
-    recharge: 190000,
-    short: 'Newly listed. A 12-ha lake on the Sarjapur belt where early funding shapes the design itself.',
-    team: ['welllabs', 'fol', 'unitedway'],
-    alts: ['malligavad', 'biome', 'trust'],
-    funders: [],
-    assets: [
-      { n: 'Diagnosis, survey & DPR', t: 'grey', cost: 30, phase: 1, vwb: 0, fn: 'Survey, water balance and DPR for the lake and catchment.' },
-      { n: 'Community visioning & committee', t: 'green', cost: 10, phase: 1, vwb: 0, fn: 'Agreeing purpose with residents; forming the O&M committee.' },
-      { n: 'Sewage diversion', t: 'grey', cost: 44, phase: 3, vwb: 0, enabler: true, fn: 'Intercepts dry-weather sewage — funded first.' },
-      { n: 'Desilting & storage recovery', t: 'blue', cost: 92, phase: 3, vwb: 108000, fn: 'Recovers ~0.9 m of live flood storage.' },
-      { n: 'Bund & outlet', t: 'grey', cost: 48, phase: 3, vwb: 0, fn: 'Bund and controlled outlet sized to the design storm.' },
-      { n: 'Inlet forebay', t: 'grey', cost: 20, phase: 3, vwb: 0, fn: 'Settles incoming silt before the lake.' },
-      { n: 'Constructed wetland', t: 'green', cost: 26, phase: 3, vwb: 0, cn: .6, fn: 'Treats inflow and lowers catchment runoff.' },
-      { n: 'Recharge wells', t: 'blue', cost: 10, phase: 3, vwb: 0, cn: .4, fn: 'Directs held water into the aquifer.' }
-    ]
-  },
-  {
-    id: 'saulkere',
-    name: 'Saul Kere',
-    loc: 'Bellandur · Outer Ring Road',
-    status: 'Diagnosis · Phase 1',
-    scale: 'M',
-    area: 18,
-    catchment: 5.2,
-    imperv: 64,
-    P: 90,
-    cnBase: 89,
-    cnProj: 81,
-    annualVWB: 480000,
-    people: 13200,
-    recharge: 300000,
-    short: 'Newly listed. An 18-ha ORR lake in a heavily built catchment that backs up onto arterial roads.',
-    team: ['welllabs', 'biome', 'unitedway'],
-    alts: ['malligavad', 'fol', 'trust'],
-    funders: [],
-    assets: [
-      { n: 'Diagnosis, survey & DPR', t: 'grey', cost: 34, phase: 1, vwb: 0, fn: 'Survey, water balance and DPR.' },
-      { n: 'Community visioning & committee', t: 'green', cost: 12, phase: 1, vwb: 0, fn: 'Visioning with residents; forming the O&M committee.' },
-      { n: 'Sewage diversion & interception', t: 'grey', cost: 56, phase: 3, vwb: 0, enabler: true, fn: 'Stops dry-weather sewage — the enabling asset.' },
-      { n: 'Desilting & storage recovery', t: 'blue', cost: 120, phase: 3, vwb: 180000, fn: 'Recovers ~1 m of live storage across 18 ha.' },
-      { n: 'Peripheral bund & outlet weir', t: 'grey', cost: 64, phase: 3, vwb: 0, fn: 'Bund + weir to hold and release the design storm.' },
-      { n: 'Inlet silt trap & forebay', t: 'grey', cost: 24, phase: 3, vwb: 0, fn: 'Drops silt before the main lake.' },
-      { n: 'Constructed wetland', t: 'green', cost: 36, phase: 3, vwb: 0, cn: .5, fn: 'Polishes inflow; lowers catchment runoff.' },
-      { n: 'Recharge well field', t: 'blue', cost: 8, phase: 3, vwb: 0, cn: .3, fn: 'Sends held water to the aquifer.' },
-      { n: 'Shoreline buffer & planting', t: 'green', cost: 6, phase: 3, vwb: 0, cn: .2, fn: 'Native buffer along the restored edge.' }
-    ]
-  }
-];
+/** Map our Intervention.type enum → the blue/green/grey colour category */
+const INT_COLOUR = {
+  raingarden:         'green',
+  bioswale:           'green',
+  constructed_wetlands: 'green',
+  infiltration_trench:'blue',
+  percolation:        'blue',
+  rainwater_harvesting:'blue',
+  detention_basin:    'blue',
+  underground_tank:   'grey',
+  permeable_pathway:  'grey',
+  ecobloc:            'grey',
+  tree_trench:        'green',
+  swd_inlet:          'grey',
+  other:              'grey',
+};
 
-// Preprocess PROJECTS to add totals, percentages, and group types
-PROJECTS.forEach(p => {
-  p.total = p.assets.reduce((s, a) => s + a.cost, 0);
-  p.fundedIdx = new Set(p.funders.flatMap(f => f.idx));
-  p.funders.forEach(f => f.amount = f.idx.reduce((s, i) => s + p.assets[i].cost, 0));
-  p.committed = [...p.fundedIdx].reduce((s, i) => s + p.assets[i].cost, 0);
-  p.committedPct = p.committed / p.total;
-  p.enablerIdx = p.assets.findIndex(a => a.enabler);
-  p.fullStorage = p.assets.reduce((s, a) => s + (a.vwb || 0), 0);
-  p.fullCN = p.assets.reduce((s, a) => s + (a.cn || 0), 0);
-  p.group = p.status.includes('Implementation') ? 'Implementation' : p.status.includes('Design') ? 'Design' : 'Diagnosis';
-});
+/** Friendly display name for each intervention type */
+const INT_LABEL = {
+  raingarden:          'Rain Garden',
+  bioswale:            'Bioswale',
+  infiltration_trench: 'Infiltration Trench',
+  percolation:         'Percolation Well',
+  detention_basin:     'Detention / Retention Basin',
+  constructed_wetlands:'Constructed Wetland',
+  rainwater_harvesting:'Rainwater Harvesting',
+  permeable_pathway:   'Permeable Pathway',
+  ecobloc:             'ECOBLOC Underground Tank',
+  tree_trench:         'Tree Trench',
+  swd_inlet:           'SWD Inlet Placement',
+  underground_tank:    'Underground Tank',
+  other:               'Other Intervention',
+};
+
+/** Friendly display name for SiteProject.type */
+const SITE_TYPE_LABEL = {
+  lake:       '🔵 Blue Site · Lake',
+  park:       '🟢 Green Site · Park',
+  stormdrain: '⚫ Grey Site · Storm Drain',
+  campus:     '🏢 Campus Level',
+};
+
+/**
+ * Normalise a SiteProject document (with embedded interventions[]) into
+ * the shape the existing component expects.
+ */
+function normaliseProject(site) {
+  const interventions = site.interventions || [];
+
+  // Build the `assets` array from interventions
+  const assets = interventions.map((iv, i) => {
+    const colour = INT_COLOUR[iv.type] || 'grey';
+    const label  = INT_LABEL[iv.type]  || iv.type;
+    const qty    = iv.quantity ? `×${iv.quantity} ` : '';
+    const dims   = [
+      iv.details?.length_m ? `L:${iv.details.length_m}` : null,
+      iv.details?.width_m  ? `W:${iv.details.width_m}`  : null,
+      iv.details?.depth_m  ? `D:${iv.details.depth_m}`  : null,
+      iv.details?.area     ? `A:${iv.details.area}`      : null,
+    ].filter(Boolean).join(' ');
+
+    return {
+      n:     `${qty}${label}${dims ? ` (${dims})` : ''}`,
+      t:     colour,
+      cost:  0,          // cost data not in sheet — shown as TBD
+      phase: 3,          // implementation phase by default
+      vwb:   colour === 'blue' ? 5000 : 0,  // rough placeholder
+      cn:    colour === 'green' ? 0.3 : colour === 'blue' ? 0.2 : 0,
+      fn:    `${label} — ${dims || 'dimensions to be confirmed'}`,
+    };
+  });
+
+  // If no interventions, show a placeholder so the detail panel doesn't crash
+  if (assets.length === 0) {
+    assets.push({
+      n: 'Interventions being planned',
+      t: 'grey', cost: 0, phase: 1, vwb: 0, fn: 'Site scoping in progress.'
+    });
+  }
+
+  const typeLabel = SITE_TYPE_LABEL[site.type] || site.type;
+  const watershed = site.watershed ? `${site.watershed} · ` : '';
+
+  return {
+    id:         site.site_id,
+    name:       site.name || site.site_id,
+    loc:        `${watershed}${typeLabel}`,
+    status:     'Planning · Phase 1',
+    scale:      'M',
+    area:       0,
+    catchment:  1,
+    imperv:     50,
+    P:          90,
+    cnBase:     85,
+    cnProj:     78,
+    annualVWB:  assets.reduce((s, a) => s + (a.vwb || 0), 0),
+    people:     500,
+    recharge:   0,
+    short:      site.site_level_impact
+                  || site.subcatchment_level_impact
+                  || `${site.name} — a ${site.type} site in the ${site.watershed || 'Nallurhalli'} micro-watershed. ${interventions.length} intervention(s) proposed.`,
+    team:       ['welllabs', 'unitedway'],
+    alts:       ['fol', 'biome'],
+    funders:    [],
+    assets,
+    // pass through raw fields for the overview tab
+    _raw: site,
+  };
+}
+
+/** Compute derived totals on a project object (works for both old & new shape) */
+function preprocessProject(p) {
+  p.total      = p.assets.reduce((s, a) => s + a.cost, 0);
+  p.fundedIdx  = new Set(p.funders.flatMap(f => f.idx || []));
+  p.funders.forEach(f => {
+    if (f.idx) f.amount = f.idx.reduce((s, i) => s + (p.assets[i]?.cost || 0), 0);
+  });
+  p.committed    = [...p.fundedIdx].reduce((s, i) => s + (p.assets[i]?.cost || 0), 0);
+  p.committedPct = p.total > 0 ? p.committed / p.total : 0;
+  p.enablerIdx   = p.assets.findIndex(a => a.enabler);
+  p.fullStorage  = p.assets.reduce((s, a) => s + (a.vwb || 0), 0);
+  p.fullCN       = p.assets.reduce((s, a) => s + (a.cn  || 0), 0);
+  p.group        = p.status.includes('Implementation') ? 'Implementation'
+                 : p.status.includes('Design')         ? 'Design'
+                 : 'Diagnosis';
+  return p;
+}
 
 /* impact of a set of asset indices (Set or array) */
 function impactOf(p, set) {
@@ -293,8 +243,36 @@ const TABS = [
 const NewProjectsView = () => {
   const location = useLocation();
 
+  // ── Live data from MongoDB ──────────────────────────────────────────────
+  const [rawSites, setRawSites]   = useState([]);
+  const [loading,  setLoading]    = useState(true);
+  const [fetchErr, setFetchErr]   = useState(null);
+
+  useEffect(() => {
+    fetch('/api/sites')
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(data => {
+        setRawSites(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch sites:', err);
+        setFetchErr(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  // Normalise + preprocess whenever rawSites changes
+  const PROJECTS = useMemo(
+    () => rawSites.map(s => preprocessProject(normaliseProject(s))),
+    [rawSites]
+  );
+
   // Bulletproof function to parse project ID from React Router or window location search parameters
-  const getQueryProjectId = () => {
+  const getQueryProjectId = (projects) => {
     try {
       const search = location.search || window.location.search;
       if (!search) return null;
@@ -302,17 +280,15 @@ const NewProjectsView = () => {
       const id = params.get('id');
       if (!id) return null;
       const cleanId = id.trim().toLowerCase();
-      return PROJECTS.some(p => p.id === cleanId) ? cleanId : null;
+      return projects.some(p => p.id === cleanId) ? cleanId : null;
     } catch (e) {
       console.error('Error parsing query project id:', e);
       return null;
     }
   };
 
-  const initialProjectId = getQueryProjectId() || PROJECTS[0].id;
-
   // React Component State
-  const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [activePhase, setActivePhase] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -325,9 +301,19 @@ const NewProjectsView = () => {
   const [showCommitDialog, setShowCommitDialog] = useState(false);
   const [simulationRainfall, setSimulationRainfall] = useState(90);
 
+  // Once data loads, set the initial selected project
+  useEffect(() => {
+    if (PROJECTS.length === 0) return;
+    if (!selectedProjectId) {
+      const queryId = getQueryProjectId(PROJECTS);
+      setSelectedProjectId(queryId || PROJECTS[0].id);
+    }
+  }, [PROJECTS]);
+
   // Sync state with URL parameter if it changes
   useEffect(() => {
-    const queryId = getQueryProjectId();
+    if (PROJECTS.length === 0) return;
+    const queryId = getQueryProjectId(PROJECTS);
     if (queryId && queryId !== selectedProjectId) {
       setSelectedProjectId(queryId);
       // Reset active tab & selections when project changes via URL
@@ -335,7 +321,43 @@ const NewProjectsView = () => {
       setSelectedPicks(new Set());
       setCustomAmount(0);
     }
-  }, [location.search, window.location.search]);
+  }, [location.search, window.location.search, PROJECTS]);
+
+  // Guard: while loading or if PROJECTS is empty, render a loading state
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-slate-500">
+          <svg className="animate-spin w-8 h-8 text-teal-600" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity=".25"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+          </svg>
+          <span className="font-mono text-sm">Loading sites from database…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchErr) {
+    return (
+      <div className="w-full min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-8 max-w-md text-center">
+          <div className="text-2xl mb-2">⚠️</div>
+          <h3 className="font-bold text-red-700 mb-1">Could not load sites</h3>
+          <p className="text-sm text-red-500">{fetchErr}</p>
+          <p className="text-xs text-slate-400 mt-3">Make sure the backend server is running on port 5000.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (PROJECTS.length === 0) {
+    return (
+      <div className="w-full min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-400 text-sm font-mono">No sites found in database.</div>
+      </div>
+    );
+  }
 
   const p = PROJECTS.find(x => x.id === selectedProjectId) || PROJECTS[0];
   const activeSet = new Set([...p.fundedIdx, ...selectedPicks]);
@@ -487,34 +509,36 @@ const NewProjectsView = () => {
       const totalCost = picks.reduce((s, a) => s + a.cost, 0);
       return (
         <div>
-          <h4>Project: {p.name}</h4>
-          <p>You have selected the following blue-green-grey assets to build a water security commitment:</p>
-          <table className="dlg-table">
-            <thead>
+          <h4 className="text-sm font-bold text-[var(--ink)] m-0">Project: {p.name}</h4>
+          <p className="text-xs md:text-sm text-[var(--ink-2)] my-3">You have selected the following blue-green-grey assets to build a water security commitment:</p>
+          <table className="w-full border-collapse text-xs md:text-sm mt-3">
+            <thead className="bg-[#FAFBF9]">
               <tr>
-                <th>Asset Item</th>
-                <th>Type</th>
-                <th>Cost (Lakhs)</th>
+                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
+                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
+                <th className="border-b border-[var(--line)] pb-2 text-right text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
               </tr>
             </thead>
             <tbody>
               {picks.map((a, idx) => (
-                <tr key={idx}>
-                  <td>{a.n}</td>
-                  <td><span className={`tag ${a.t}`}>{a.t}</span></td>
-                  <td className="m">{rs(a.cost)}</td>
+                <tr key={idx} className="border-b border-slate-100">
+                  <td className="py-2.5 text-[var(--ink-2)] text-left">{a.n}</td>
+                  <td className="py-2.5 text-[var(--ink-2)] text-left">
+                    <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${a.t === 'blue' ? 'bg-[#E2EEF4] text-[#1D5E8C]' : a.t === 'green' ? 'bg-[#E7EFDF] text-[#3E6325]' : 'bg-[#E5E9EB] text-[#475760]'}`}>{a.t}</span>
+                  </td>
+                  <td className="py-2.5 text-[var(--ink-2)] text-right font-mono">{rs(a.cost)}</td>
                 </tr>
               ))}
               <tr style={{ fontWeight: 'bold', borderTop: '2px solid var(--ink)' }}>
-                <td>Total Commitment</td>
-                <td>—</td>
-                <td className="m" style={{ color: 'var(--teal)' }}>{rs(totalCost)}</td>
+                <td className="py-3 text-left">Total Commitment</td>
+                <td className="py-3 text-left">—</td>
+                <td className="py-3 text-right font-mono text-[var(--teal)]">{rs(totalCost)}</td>
               </tr>
             </tbody>
           </table>
-          <div className="cta-row" style={{ marginTop: '20px' }}>
-            <button className="btn btn-primary" onClick={() => { alert('Commitment submitted successfully! Thank you for your support.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
-            <button className="btn btn-ghost" onClick={() => setShowCommitDialog(false)}>Cancel</button>
+          <div className="flex gap-3 flex-wrap justify-start mt-6">
+            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#C8743C] text-white" onClick={() => { alert('Commitment submitted successfully! Thank you for your support.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
+            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[var(--line)] text-[var(--ink)] hover:bg-slate-50 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
           </div>
         </div>
       );
@@ -536,29 +560,35 @@ const NewProjectsView = () => {
       }
       return (
         <div>
-          <h4>Project: {p.name}</h4>
-          <p>You are making a custom CSR commitment of <strong>{rs(customAmount)}</strong>. This will fund or build the following sequential assets:</p>
-          <table className="dlg-table">
-            <thead>
+          <h4 className="text-sm font-bold text-[var(--ink)] m-0">Project: {p.name}</h4>
+          <p className="text-xs md:text-sm text-[var(--ink-2)] my-3">You are making a custom CSR commitment of <strong>{rs(customAmount)}</strong>. This will fund or build the following sequential assets:</p>
+          <table className="w-full border-collapse text-xs md:text-sm mt-3">
+            <thead className="bg-[#FAFBF9]">
               <tr>
-                <th>Asset Item</th>
-                <th>Allocation</th>
-                <th>Status</th>
+                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
+                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Allocation</th>
+                <th className="border-b border-[var(--line)] pb-2 text-right text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody>
               {customAllocated.map((item, idx) => (
-                <tr key={idx}>
-                  <td>{item.n}</td>
-                  <td className="m">{rs(item.cost)}</td>
-                  <td>{item.partial ? <span className="tag grey">Partial Funding</span> : <span className="tag green">Full Funding</span>}</td>
+                <tr key={idx} className="border-b border-slate-100">
+                  <td className="py-2.5 text-[var(--ink-2)] text-left">{item.n}</td>
+                  <td className="py-2.5 text-[var(--ink-2)] text-left font-mono">{rs(item.cost)}</td>
+                  <td className="py-2.5 text-[var(--ink-2)] text-right">
+                    {item.partial ? (
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#E5E9EB] text-[#475760]">Partial Funding</span>
+                    ) : (
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#E7EFDF] text-[#3E6325]">Full Funding</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="cta-row" style={{ marginTop: '20px' }}>
-            <button className="btn btn-primary" onClick={() => { alert('CSR Commitment registered successfully! Thank you.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
-            <button className="btn btn-ghost" onClick={() => setShowCommitDialog(false)}>Cancel</button>
+          <div className="flex gap-3 flex-wrap justify-start mt-6">
+            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#C8743C] text-white" onClick={() => { alert('CSR Commitment registered successfully! Thank you.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
+            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[var(--line)] text-[var(--ink)] hover:bg-slate-50 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
           </div>
         </div>
       );
@@ -573,29 +603,48 @@ const NewProjectsView = () => {
       case 'overview':
         const maxFlood = impactOf(p, p.assets.map((_, i) => i)).storage;
         return (
-          <div className="animate-fade-in">
-            <div className="kfacts">
-              <div className="k"><b>{cr(p.total)}</b><span>Intervention cost</span></div>
-              <div className="k"><b>{p.area} ha</b><span>Water spread</span></div>
-              <div className="k"><b>{p.catchment} km²</b><span>Catchment</span></div>
-              <div className="k"><b>{p.imperv}%</b><span>Built-up</span></div>
+          <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
+                <b className="text-lg font-bold text-slate-800">{cr(p.total)}</b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Intervention cost</span>
+              </div>
+              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
+                <b className="text-lg font-bold text-slate-800">{p.area} ha</b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Water spread</span>
+              </div>
+              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
+                <b className="text-lg font-bold text-slate-800">{p.catchment} km²</b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Catchment</span>
+              </div>
+              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
+                <b className="text-lg font-bold text-slate-800">{p.imperv}%</b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Built-up</span>
+              </div>
             </div>
-            <div className="ov-grid">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-8 items-center text-left">
               <div>
-                <p className="lead">{p.short}</p>
-                <div className="cobens">
-                  <span className="coben">{m3(maxFlood)} max flood storage</span>
-                  <span className="coben">{(p.annualVWB / 1e6).toFixed(2)}M m³/yr potential VWB</span>
-                  <span className="coben">{p.people.toLocaleString('en-IN')} people</span>
-                  <span className="coben">{p.funders.length ? (`Backed by ${p.funders.length} partner${p.funders.length > 1 ? 's' : ''}`) : 'Open — no commitments yet'}</span>
+                <p className="text-base md:text-lg text-[var(--ink)] font-medium leading-relaxed mb-4">{p.short}</p>
+                <div className="flex flex-col gap-2 mb-6 text-left">
+                  <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{m3(maxFlood)} max flood storage</span>
+                  <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{(p.annualVWB / 1e6).toFixed(2)}M m³/yr potential VWB</span>
+                  <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{p.people.toLocaleString('en-IN')} people</span>
+                  <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{p.funders.length ? (`Backed by ${p.funders.length} partner${p.funders.length > 1 ? 's' : ''}`) : 'Open — no commitments yet'}</span>
                 </div>
-                <div className="cta-row">
-                  <button className="btn btn-primary" onClick={() => setActiveTab('funding')}>Fund this project →</button>
-                  <button className="btn btn-ghost" onClick={() => setActiveTab('assets')}>Browse assets</button>
+                <div className="flex gap-3 flex-wrap text-left">
+                  <button
+                    className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#b8602c] text-white hover:opacity-90"
+                    style={{ backgroundColor: '#C8743C' }}
+                    onClick={() => setActiveTab('funding')}
+                  >Fund this project →</button>
+                  <button
+                    className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-white text-slate-700 shadow-[0_1px_4px_rgba(0,0,0,0.08)] hover:shadow-[0_2px_10px_rgba(0,0,0,0.12)] border-0"
+                    onClick={() => setActiveTab('assets')}
+                  >Browse assets</button>
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div className="ov-mini-tank" style={{ height: '170px' }}>{renderTank(p.committedPct, 0)}</div>
+                <div className="w-full max-w-[140px] h-[170px] rounded-2xl overflow-hidden mx-auto shadow-[0_2px_12px_rgba(0,0,0,0.06)]">{renderTank(p.committedPct, 0)}</div>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--ink-2)', marginTop: '8px' }}>
                   <b style={{ color: 'var(--ink)' }}>{rs(p.committed)}</b> committed · <b style={{ color: 'var(--ink)' }}>{rs(p.total - p.committed)}</b> still needed
                 </div>
@@ -609,24 +658,32 @@ const NewProjectsView = () => {
         const built = i >= 2;
         const cum = i < 2 ? p.assets.filter(a => a.phase === 1).reduce((s, a) => s + a.cost, 0) : p.total;
         return (
-          <div className="animate-fade-in">
-            <div className="ph-pills">
+          <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
+            <div className="flex flex-col md:flex-row gap-1.5 border border-slate-200 rounded-2xl p-1.5 bg-slate-50 mb-6">
               {PHASES.map((ph, k) => (
-                <button key={k} className={k === i ? 'on' : ''} onClick={() => setActivePhase(k)}>
-                  <span className="pn">{MONTHS[p.scale][k]} · P{k + 1}</span>
-                  <span className="pt">{ph.t}</span>
+                <button
+                  key={k}
+                  className={`flex-1 flex flex-col items-center md:items-start p-3 rounded-xl border transition-all duration-150 cursor-pointer text-center md:text-left ${
+                    k === i
+                      ? 'bg-white border-slate-200 shadow-sm'
+                      : 'border-transparent bg-slate-100/60 hover:bg-white/80'
+                  }`}
+                  onClick={() => setActivePhase(k)}
+                >
+                  <span className={`font-mono text-[10.5px] uppercase tracking-wider ${k === i ? 'text-teal-600' : 'text-slate-500'}`}>{MONTHS[p.scale][k]} · P{k + 1}</span>
+                  <span className={`text-sm font-bold mt-0.5 ${k === i ? 'text-slate-900' : 'text-slate-500'}`}>{ph.t}</span>
                 </button>
               ))}
             </div>
-            <div className="ph-detail">
-              <div className="ph-art">{renderPhaseArt(i)}</div>
+            <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 items-start text-left">
+              <div className="w-full aspect-[220/190] rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.06)] shrink-0">{renderPhaseArt(i)}</div>
               <div>
-                <div className="ph-when">{MONTHS[p.scale][i]} · Phase {i + 1}</div>
-                <h4>{PHASES[i].t}</h4>
-                <ul>
-                  {PHASES[i].b.map((x, idx) => <li key={idx}>{x}</li>)}
+                <div className="font-mono text-xs uppercase tracking-wider text-[var(--teal)] font-bold mb-1">{MONTHS[p.scale][i]} · Phase {i + 1}</div>
+                <h4 className="text-base font-bold text-[var(--ink)] mb-3">{PHASES[i].t}</h4>
+                <ul className="pl-[18px] margin-0 flex flex-col gap-2 list-disc mb-5 text-[14.5px] text-[var(--ink-2)] leading-relaxed">
+                  {PHASES[i].b.map((x, idx) => <li key={idx} className="text-left">{x}</li>)}
                 </ul>
-                <div className="ph-unlocked">
+                <div className="bg-teal-50/60 rounded-xl p-4 text-xs font-mono text-teal-700 text-left">
                   By end of this phase: <b>{rs(cum)}</b> deployed · {built ? <span><b>{m3(impactOf(p, p.assets.map((_, j) => j)).storage)}</b> flood storage live</span> : 'planning, no works yet'}
                 </div>
               </div>
@@ -638,13 +695,13 @@ const NewProjectsView = () => {
         const pickCost = [...selectedPicks].reduce((s, idx) => s + p.assets[idx].cost, 0);
         const funderOf = idx => p.funders.find(f => f.idx.includes(idx));
         return (
-          <div className="animate-fade-in">
-            <div className="legend">
-              <span><i className="i-blue"></i> Blue — storage &amp; conveyance</span>
-              <span><i className="i-green"></i> Green — wetlands &amp; vegetation</span>
-              <span><i className="i-grey"></i> Grey — engineered structures</span>
+          <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
+            <div className="flex flex-wrap gap-4 text-xs font-mono text-[var(--ink-2)] mb-4 text-left">
+              <span className="flex items-center gap-2"><i className="w-3 h-3 rounded-full shrink-0 bg-[var(--blue)]"></i> Blue — storage &amp; conveyance</span>
+              <span className="flex items-center gap-2"><i className="w-3 h-3 rounded-full shrink-0 bg-[var(--green)]"></i> Green — wetlands &amp; vegetation</span>
+              <span className="flex items-center gap-2"><i className="w-3 h-3 rounded-full shrink-0 bg-[var(--grey)]"></i> Grey — engineered structures</span>
             </div>
-            <div className="assets-list">
+            <div className="flex flex-col gap-2">
               {p.assets.map((a, idx) => {
                 const f = funderOf(idx);
                 const funded = !!f;
@@ -652,11 +709,16 @@ const NewProjectsView = () => {
                 return (
                   <div
                     key={idx}
-                    className={`asset ${funded ? 'funded' : pick ? 'pick' : ''}`}
+                    className={`grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center rounded-xl p-3.5 transition-all duration-150 text-left border-2 ${
+                      funded
+                        ? 'bg-slate-50 border-transparent cursor-default opacity-90'
+                        : pick
+                          ? 'bg-teal-50 border-teal-400/60 cursor-pointer'
+                          : 'bg-slate-50/80 border-transparent hover:border-teal-300/50 hover:bg-white cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.04)]'
+                    }`}
                     onClick={funded ? undefined : () => togglePick(idx)}
-                    style={funded ? { cursor: 'default', opacity: 0.92 } : {}}
                   >
-                    <div className="chk" style={funded ? { background: 'var(--grey)', borderColor: 'var(--grey)' } : {}}>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-150 ${funded ? 'bg-slate-400 border-slate-400' : pick ? 'bg-teal-600 border-teal-600' : 'border-slate-300 bg-white'}`}>
                       {funded ? (
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
                           <rect x="5" y="11" width="14" height="9" rx="1.5" />
@@ -668,29 +730,33 @@ const NewProjectsView = () => {
                         </svg>
                       )}
                     </div>
-                    <div className="name">
-                      <b>
+                    <div className="flex flex-col gap-0.5 text-left">
+                      <b className="text-sm font-bold text-[var(--ink)] flex items-center gap-1.5 flex-wrap">
                         {a.n}
-                        <span className={`tag ${a.t}`}>{a.t}</span>
-                        {a.enabler && <span className="tag grey">enabler</span>}
-                        {funded && <span className="tag" style={{ background: '#E6E0F0', color: '#5b4b8a' }}>funded</span>}
+                        <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${a.t === 'blue' ? 'bg-[#E2EEF4] text-[#1D5E8C]' : a.t === 'green' ? 'bg-[#E7EFDF] text-[#3E6325]' : 'bg-[#E5E9EB] text-[#475760]'}`}>{a.t}</span>
+                        {a.enabler && <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#E5E9EB] text-[#475760]">enabler</span>}
+                        {funded && <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#E6E0F0] text-[#5b4b8a]">funded</span>}
                       </b>
-                      <span>{a.fn}{funded && <span> · <b style={{ color: 'var(--ink)' }}>Funded by {f.name}</b></span>}</span>
+                      <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}{funded && <span> · <b style={{ color: 'var(--ink)' }}>Funded by {f.name}</b></span>}</span>
                     </div>
-                    <div className="vol">
-                      {a.vwb ? <span><b>{m3(a.vwb)}</b> storage</span> : a.cn ? <span><b>↓CN</b> retention</span> : <span><b>—</b> enabling</span>}
+                    <div className="text-xs font-mono text-[var(--ink-2)] text-right">
+                      {a.vwb ? <span><b className="font-bold">{m3(a.vwb)}</b> storage</span> : a.cn ? <span><b className="font-bold">↓CN</b> retention</span> : <span><b>—</b> enabling</span>}
                     </div>
-                    <div className="cost">{rs(a.cost)}</div>
+                    <div className="text-sm font-mono font-bold text-[var(--ink)] text-right min-w-[70px]">{rs(a.cost)}</div>
                   </div>
                 );
               })}
             </div>
-            <div className="asset-foot">
-              <div className="t">Selected assets: <b>{selectedPicks.size}</b></div>
-              <div className="t">Estimated cost: <b>{rs(pickCost)}</b></div>
+            <div className="flex justify-between items-center bg-slate-100/70 rounded-xl px-5 py-3.5 mt-4 text-sm font-mono text-slate-600">
+              <div>Selected assets: <b className="font-bold text-slate-800">{selectedPicks.size}</b></div>
+              <div>Estimated cost: <b className="font-bold text-slate-800">{rs(pickCost)}</b></div>
             </div>
-            <div className="cta-row" style={{ justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button className="btn btn-primary" onClick={() => setActiveTab('impact')}>See impact →</button>
+            <div className="flex gap-3 flex-wrap justify-end mt-4">
+              <button
+                className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#b8602c] text-white hover:opacity-90"
+                style={{ backgroundColor: '#C8743C' }}
+                onClick={() => setActiveTab('impact')}
+              >See impact →</button>
             </div>
           </div>
         );
@@ -702,44 +768,44 @@ const NewProjectsView = () => {
         const eventRetainedValue = Math.max(0, baseRunoff - projRunoff);
 
         return (
-          <div className="animate-fade-in">
-            <div className="impact-grid">
+          <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_296px] gap-8 items-start text-left">
               <div>
-                <div className="impact-head">
-                  <div><b>Project volumetric benefits</b> · SCS Curve Number</div>
+                <div className="font-mono text-xs uppercase tracking-wider text-[var(--ink-2)] mb-4 text-left">
+                  <b>Project volumetric benefits</b> · SCS Curve Number
                 </div>
                 {!activeImpact.enablerOK && (
-                  <div className="warn">
+                  <div className="bg-[#fee2e2] border border-[#fca5a5] text-red-800 rounded-xl p-4 text-xs font-semibold mb-5 text-left">
                     <b>Sewage diversion is pending.</b> In-lake storage benefit is blocked until raw sewage inflow is intercepted.
                   </div>
                 )}
-                <div className="metrics">
-                  <div className="metric">
-                    <b>{m3(activeImpact.storage)}</b>
-                    <span className="u">in-lake storage</span>
-                    <span>Restored live volume for flood buffer</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.storage)}</b>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">in-lake storage</span>
+                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Restored live volume for flood buffer</span>
                   </div>
-                  <div className="metric">
-                    <b>{m3(activeImpact.eventRetained)}</b>
-                    <span className="u">event retention</span>
-                    <span>Retained in catchment at {p.P}mm storm</span>
+                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.eventRetained)}</b>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">event retention</span>
+                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Retained in catchment at {p.P}mm storm</span>
                   </div>
-                  <div className="metric">
-                    <b>{m3(activeImpact.annual)}</b>
-                    <span className="u">annual benefit</span>
-                    <span>Total annual water recharged and retained</span>
+                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.annual)}</b>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">annual benefit</span>
+                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Total annual water recharged and retained</span>
                   </div>
-                  <div className="metric">
-                    <b>{activeImpact.people.toLocaleString('en-IN')}</b>
-                    <span className="u">people in scope</span>
-                    <span>Local population benefiting from recharge</span>
+                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{activeImpact.people.toLocaleString('en-IN')}</b>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">people in scope</span>
+                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Local population benefiting from recharge</span>
                   </div>
                 </div>
               </div>
 
-              <div className="calc">
-                <h4>SCS Curve Number Runoff Calculator</h4>
-                <div className="note">Interactively simulate storm runoff benefits based on catchment curve numbers.</div>
+              <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col gap-4 text-left shadow-sm">
+                <h4 className="text-base font-bold text-[var(--ink)] m-0">SCS Curve Number Runoff Calculator</h4>
+                <div className="text-[11px] text-[var(--ink-2)] leading-relaxed">Interactively simulate storm runoff benefits based on catchment curve numbers.</div>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
                   <div>
@@ -807,23 +873,24 @@ const NewProjectsView = () => {
                   </div>
                 </div>
 
-                <div className="out">
+                <div className="flex justify-between items-baseline text-xs font-mono text-[var(--ink-2)]">
                   <span>Baseline runoff:</span>
-                  <b>{m3(baseRunoff)}</b>
+                  <b className="text-sm font-bold text-[var(--ink)]">{m3(baseRunoff)}</b>
                 </div>
-                <div className="out">
+                <div className="flex justify-between items-baseline text-xs font-mono text-[var(--ink-2)] mt-1">
                   <span>Project runoff:</span>
-                  <b>{m3(projRunoff)}</b>
+                  <b className="text-sm font-bold text-[var(--ink)]">{m3(projRunoff)}</b>
                 </div>
-                <div className="out" style={{ borderTop: '2px solid #5BC8B8', paddingTop: '10px', marginTop: '10px' }}>
+                <div className="flex justify-between items-baseline text-xs font-mono text-[var(--ink-2)] border-t border-[var(--teal)] pt-2.5 mt-2.5">
                   <span>Runoff retained:</span>
-                  <b style={{ color: '#5BC8B8' }}>{m3(eventRetainedValue)}</b>
+                  <b className="text-sm font-bold text-[var(--teal)]">{m3(eventRetainedValue)}</b>
                 </div>
               </div>
             </div>
             
-            <div className="cta-row" style={{ justifyContent: 'flex-end', marginTop: '24px' }}>
-              <button className="btn btn-primary" onClick={() => setActiveTab('funding')}>Proceed to Funding →</button>
+            <div className="flex gap-3 flex-wrap justify-end mt-6">
+              <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#b8602c] text-white hover:opacity-90"
+                    style={{ backgroundColor: '#C8743C' }} onClick={() => setActiveTab('funding')}>Proceed to Funding →</button>
             </div>
           </div>
         );
@@ -854,32 +921,32 @@ const NewProjectsView = () => {
         }
 
         return (
-          <div className="fund-grid animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 items-start text-left animate-[fadeInUp_0.3s_ease-out_forwards]">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="tank" style={{ height: '300px', width: '100%', maxWidth: '240px' }}>{tankSVG}</div>
+              <div className="w-full max-w-[200px] h-[300px] rounded-2xl overflow-hidden border border-[var(--line)] mx-auto shrink-0">{tankSVG}</div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--ink-2)', marginTop: '8px', textAlign: 'center' }}>
                 <b>{Math.round(currentFundedPct * 100)}%</b> committed {fundingMode === 'assets' && picksSum > 0 ? <span>+ <b>{Math.round(addedFundedPct * 100)}%</b> selected</span> : ''}
               </div>
             </div>
 
             <div>
-              <div className="modes">
-                <button className={fundingMode === 'assets' ? 'on' : ''} onClick={() => setFundingMode('assets')}>Asset-based funding</button>
-                <button className={fundingMode === 'custom' ? 'on' : ''} onClick={() => setFundingMode('custom')}>Custom CSR amount</button>
+              <div className="flex gap-1 border border-[var(--line)] bg-slate-50 p-1 rounded-xl mb-6">
+                <button className={`flex-1 py-2 px-3 border-none rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${fundingMode === 'assets' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900 bg-transparent'}`} onClick={() => setFundingMode('assets')}>Asset-based funding</button>
+                <button className={`flex-1 py-2 px-3 border-none rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${fundingMode === 'custom' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900 bg-transparent'}`} onClick={() => setFundingMode('custom')}>Custom CSR amount</button>
               </div>
 
-              <div className="fsum">
-                <div>
-                  <b>{rs(p.total)}</b>
-                  <span>total project cost</span>
+              <div className="grid grid-cols-3 gap-4 border border-[var(--line)] rounded-2xl p-4 bg-[#FAFBF9] mb-6">
+                <div className="flex flex-col text-left">
+                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(p.total)}</b>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">total project cost</span>
                 </div>
-                <div>
-                  <b>{rs(p.committed)}</b>
-                  <span>already committed</span>
+                <div className="flex flex-col text-left">
+                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(p.committed)}</b>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">already committed</span>
                 </div>
-                <div>
-                  <b>{rs(needed)}</b>
-                  <span>still needed</span>
+                <div className="flex flex-col text-left">
+                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(needed)}</b>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">still needed</span>
                 </div>
               </div>
 
@@ -895,9 +962,9 @@ const NewProjectsView = () => {
                       <strong style={{ fontFamily: 'var(--mono)', fontSize: '18px', color: 'var(--teal)' }}>{rs(picksSum)}</strong>
                     </div>
                   </div>
-                  <div className="cta-row">
+                  <div className="flex gap-3 flex-wrap justify-start mt-6">
                     <button
-                      className="btn btn-primary"
+                      className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#C8743C] text-white"
                       disabled={selectedPicks.size === 0}
                       style={selectedPicks.size === 0 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                       onClick={() => setShowCommitDialog(true)}
@@ -911,7 +978,7 @@ const NewProjectsView = () => {
                   <p style={{ fontSize: '14px', color: 'var(--ink-2)', marginBottom: '12px' }}>
                     Enter your desired CSR funding amount. The system will automatically allocate it to the next pending asset in sequence.
                   </p>
-                  <div className="amount-in" style={{ display: 'flex', alignItems: 'center', gap: '9px', background: '#fff', border: '1px solid var(--line)', padding: '6px 12px', borderRadius: '10px' }}>
+                  <div className="flex items-center gap-2.5 bg-white border border-[var(--line)] px-3 py-2.5 rounded-xl">
                     <span style={{ fontFamily: 'var(--mono)', color: 'var(--ink-2)' }}>₹</span>
                     <input
                       type="number"
@@ -922,26 +989,26 @@ const NewProjectsView = () => {
                       placeholder="Enter amount in Lakhs"
                       style={{ border: 'none', outline: 'none', width: '100%', fontSize: '16px', fontWeight: 'bold' }}
                     />
-                    <span className="x" style={{ fontFamily: 'var(--mono)', color: 'var(--ink-2)' }}>Lakhs</span>
+                    <span style={{ fontFamily: 'var(--mono)', color: 'var(--ink-2)' }}>Lakhs</span>
                   </div>
 
                   <div style={{ marginTop: '20px' }}>
-                    <div className="fund-cols">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-left">
                       <div>
-                        <div className="ftitle">Your custom allocation</div>
-                        <div className="ledger" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3 text-left">Your custom allocation</div>
+                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-[var(--line)] rounded-xl bg-slate-50/50 p-2 text-left">
                           {customAllocated.length === 0 ? (
-                            <div className="empty">Enter an amount to see how it allocates to assets.</div>
+                            <div className="text-xs text-[var(--ink-2)] italic p-4 text-center w-full">Enter an amount to see how it allocates to assets.</div>
                           ) : (
                             customAllocated.map((item, idx) => (
-                              <div key={idx} className="frow" style={{ gridTemplateColumns: '1fr auto', padding: '8px 12px' }}>
-                                <div className="fm">
-                                  <b>{item.n}</b>
+                              <div key={idx} className="grid grid-cols-[1fr_auto] gap-3 items-center bg-white border border-[var(--line)] rounded-lg p-2.5 text-left">
+                                <div className="flex flex-col text-left">
+                                  <b className="text-xs font-bold text-[var(--ink)]">{item.n}</b>
                                   <span style={{ color: 'var(--teal-d)', fontFamily: 'var(--mono)', fontSize: '11px', display: 'block' }}>
                                     {item.partial ? 'Partial funding' : 'Full asset funding'}
                                   </span>
                                 </div>
-                                <div className="famt" style={{ fontFamily: 'var(--mono)', fontWeight: 'bold' }}>{rs(item.cost)}</div>
+                                <div className="text-xs font-mono font-bold text-[var(--ink)] text-right">{rs(item.cost)}</div>
                               </div>
                             ))
                           )}
@@ -949,22 +1016,22 @@ const NewProjectsView = () => {
                       </div>
 
                       <div>
-                        <div className="ftitle">Existing funders ledger</div>
-                        <div className="ledger">
+                        <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3 text-left">Existing funders ledger</div>
+                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-[var(--line)] rounded-xl bg-slate-50/50 p-2 text-left">
                           {p.funders.length === 0 ? (
-                            <div className="empty">No commitments for this project yet. Be the first!</div>
+                            <div className="text-xs text-[var(--ink-2)] italic p-4 text-center w-full">No commitments for this project yet. Be the first!</div>
                           ) : (
                             p.funders.map((f, idx) => (
-                              <div key={idx} className="frow">
-                                <div className="mono-av">{initials(f.name)}</div>
-                                <div className="fm">
-                                  <b>{f.name}</b>
-                                  <span>{f.sector} · {f.date}</span>
+                              <div key={idx} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center bg-white border border-[var(--line)] rounded-lg p-2.5 text-left">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-mono text-slate-500 border border-slate-200 shrink-0">{initials(f.name)}</div>
+                                <div className="flex flex-col text-left">
+                                  <b className="text-xs font-bold text-[var(--ink)]">{f.name}</b>
+                                  <span className="text-[10px] text-slate-400 mt-0.5">{f.sector} · {f.date}</span>
                                   <span className="fa" style={{ display: 'block', fontSize: '11px', fontFamily: 'var(--mono)', color: 'var(--teal-d)' }}>
                                     {f.idx.length} assets funded
                                   </span>
                                 </div>
-                                <div className="famt">{rs(f.amount)}</div>
+                                <div className="text-xs font-mono font-bold text-[var(--ink)] text-right">{rs(f.amount)}</div>
                               </div>
                             ))
                           )}
@@ -973,9 +1040,9 @@ const NewProjectsView = () => {
                     </div>
                   </div>
 
-                  <div className="cta-row">
+                  <div className="flex gap-3 flex-wrap justify-start mt-6">
                     <button
-                      className="btn btn-primary"
+                      className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#C8743C] text-white"
                       disabled={customAmount <= 0}
                       style={customAmount <= 0 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                       onClick={() => setShowCommitDialog(true)}
@@ -995,37 +1062,37 @@ const NewProjectsView = () => {
         const selectedAg = AG[activeAgId];
 
         return (
-          <div className="animate-fade-in">
-            <div className="ag-lbl">Project Restoration Team</div>
-            <div className="ag-grid">
+          <div className="animate-[fadeInUp_0.3s_ease-out_forwards] text-left">
+            <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-4 text-left">Project Restoration Team</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               {agencies.map(id => {
                 const ag = AG[id];
                 const isLead = p.team[0] === id;
                 const isTeam = p.team.includes(id);
                 const isSel = activeAgId === id;
                 return (
-                  <button key={id} className={`ag-card ${isSel ? 'on' : ''}`} onClick={() => setSelectedAgencyId(id)}>
-                    <span className="role">{isLead ? 'Lead Agency' : isTeam ? 'Team Partner' : 'Available Partner'}</span>
-                    <h4>{ag.name}</h4>
-                    <p>{ag.role}</p>
+                  <button key={id} className={`bg-white border rounded-xl p-4 text-left flex flex-col hover:border-[var(--teal)] transition-colors duration-150 cursor-pointer ${isSel ? 'border-[var(--teal)] ring-1 ring-[var(--teal)] bg-[#f7f9f6]' : 'border-[var(--line)]'}`} onClick={() => setSelectedAgencyId(id)}>
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--ink-2)]">{isLead ? 'Lead Agency' : isTeam ? 'Team Partner' : 'Available Partner'}</span>
+                    <h4 className="text-sm font-bold text-[var(--ink)] mt-1.5">{ag.name}</h4>
+                    <p className="text-[11px] text-[var(--ink-2)] mt-1 leading-snug">{ag.role}</p>
                   </button>
                 );
               })}
             </div>
 
             {selectedAg && (
-              <div className="ag-profile" style={{ marginTop: '20px' }}>
-                <div className="ph" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <div className="bg-white border border-[var(--line)] rounded-2xl p-6 text-left shadow-sm mt-5">
+                <div className="flex justify-between items-start flex-wrap gap-4 text-left">
                   <div>
-                    <h3>{selectedAg.name}</h3>
-                    <div className="meta" style={{ color: 'var(--ink-2)', fontSize: '13px' }}>{selectedAg.type} · {selectedAg.role}</div>
+                    <h3 className="text-lg font-bold text-[var(--ink)] m-0">{selectedAg.name}</h3>
+                    <div style={{ color: 'var(--ink-2)', fontSize: '13px' }}>{selectedAg.type} · {selectedAg.role}</div>
                   </div>
                   <div>
-                    <div className="ag-phases">
+                    <div className="flex gap-1.5">
                       {[1, 2, 3, 4, 5].map(phNum => {
                         const isActive = selectedAg.phases.includes(phNum);
                         return (
-                          <i key={phNum} className={isActive ? 'on' : ''} title={`Phase ${phNum}: ${PHASES[phNum - 1].t}`}>
+                          <i key={phNum} className={`w-6 h-6 rounded-full flex items-center justify-center text-[10.5px] font-mono not-italic border ${isActive ? 'bg-[var(--teal)] text-white border-[var(--teal)]' : 'bg-slate-100 text-slate-400 border-slate-200'}`} title={`Phase ${phNum}: ${PHASES[phNum - 1].t}`}>
                             {phNum}
                           </i>
                         );
@@ -1033,16 +1100,16 @@ const NewProjectsView = () => {
                     </div>
                   </div>
                 </div>
-                <p className="blurb" style={{ margin: '12px 0', fontSize: '14.5px' }}>{selectedAg.blurb}</p>
+                <p className="margin-0 my-3 text-[14.5px] leading-relaxed text-slate-600 text-left">{selectedAg.blurb}</p>
 
                 <div style={{ marginTop: '12px' }}>
                   <div style={{ fontFamily: 'var(--mono)', fontSize: '10px', textTransform: 'uppercase', color: 'var(--ink-2)', marginBottom: '6px' }}>Core Strengths</div>
-                  <div className="ag-tags">
-                    {selectedAg.strengths.map(st => <span key={st}>{st}</span>)}
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {selectedAg.strengths.map(st => <span key={st} className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded px-2 py-0.5">{st}</span>)}
                   </div>
                 </div>
 
-                <div className="ag-note" style={{ fontSize: '12px', color: 'var(--ink-2)', marginTop: '14px' }}>
+                <div className="text-[12px] text-[var(--ink-2)] mt-3.5 text-left">
                   <b>Known for:</b> {selectedAg.known}
                 </div>
               </div>
@@ -1052,90 +1119,96 @@ const NewProjectsView = () => {
 
       case 'docs':
         return (
-          <div className="animate-fade-in">
-            <div className={`acc ${openAccordions.has('m-vwba') ? 'open' : ''}`}>
-              <button onClick={() => toggleAccordion('m-vwba')}>
+          <div className="animate-[fadeInUp_0.3s_ease-out_forwards] text-left">
+            <div className={`border border-[var(--line)] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-vwba') ? 'open' : ''}`}>
+              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-vwba')}>
                 <div>
-                  <span className="k">Methodology</span>
-                  <h4>WRI Volumetric Water Benefit Accord (VWBA)</h4>
+                  <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Methodology</span>
+                  <h4 className="text-sm font-bold text-[var(--ink)] mt-0.5">WRI Volumetric Water Benefit Accord (VWBA)</h4>
                 </div>
-                <span className="chev">→</span>
+                <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-vwba') ? 'rotate-90' : ''}`}>→</span>
               </button>
-              <div className="body">
-                <p>
-                  The Volumetric Water Benefit Accord (VWBA) provides a standard framework to quantify how water stewardship activities contribute to local water resilience.
-                </p>
-                <h5>Key Quantified Benefits</h5>
-                <ul>
-                  <li><b>In-Lake Storage Restored:</b> Restoring lake capacity (e.g. through desilting) provides direct storm-water buffering.</li>
-                  <li><b>Runoff Retention:</b> Catchment interventions (bioswales, wetlands, reforestation) reduce peak stormwater runoff by lowering the Curve Number (CN).</li>
-                  <li><b>Aquifer Recharge:</b> Directed recharge well fields divert stormwater into shallow aquifers rather than leaving it to flood surface roads.</li>
-                </ul>
-              </div>
+              {openAccordions.has('m-vwba') && (
+                <div className="p-4 border-t border-[var(--line)] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                  <p>
+                    The Volumetric Water Benefit Accord (VWBA) provides a standard framework to quantify how water stewardship activities contribute to local water resilience.
+                  </p>
+                  <h5 className="text-xs font-bold text-[var(--ink)] m-0 uppercase tracking-wider mt-1 text-left">Key Quantified Benefits</h5>
+                  <ul className="pl-[18px] margin-0 flex flex-col gap-1.5 list-disc text-left">
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>In-Lake Storage Restored:</b> Restoring lake capacity (e.g. through desilting) provides direct storm-water buffering.</li>
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>Runoff Retention:</b> Catchment interventions (bioswales, wetlands, reforestation) reduce peak stormwater runoff by lowering the Curve Number (CN).</li>
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>Aquifer Recharge:</b> Directed recharge well fields divert stormwater into shallow aquifers rather than leaving it to flood surface roads.</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
-            <div className={`acc ${openAccordions.has('m-scs') ? 'open' : ''}`}>
-              <button onClick={() => toggleAccordion('m-scs')}>
+            <div className={`border border-[var(--line)] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-scs') ? 'open' : ''}`}>
+              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-scs')}>
                 <div>
-                  <span className="k">Hydrology</span>
-                  <h4>Soil Conservation Service (SCS) Curve Number Model</h4>
+                  <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Hydrology</span>
+                  <h4 className="text-sm font-bold text-[var(--ink)] mt-0.5">Soil Conservation Service (SCS) Curve Number Model</h4>
                 </div>
-                <span className="chev">→</span>
+                <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-scs') ? 'rotate-90' : ''}`}>→</span>
               </button>
-              <div className="body">
-                <p>
-                  The SCS Curve Number (CN) model is a widely accepted empirical method for predicting storm runoff from a catchment based on soil types, land cover, and imperviousness.
-                </p>
-                <h5>Runoff Equation</h5>
-                <pre className="formula">
+              {openAccordions.has('m-scs') && (
+                <div className="p-4 border-t border-[var(--line)] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                  <p>
+                    The SCS Curve Number (CN) model is a widely accepted empirical method for predicting storm runoff from a catchment based on soil types, land cover, and imperviousness.
+                  </p>
+                  <h5 className="text-xs font-bold text-[var(--ink)] m-0 uppercase tracking-wider mt-1 text-left">Runoff Equation</h5>
+                  <pre className="bg-slate-50 border border-slate-200 rounded-lg p-3 font-mono text-xs text-[var(--ink-2)] overflow-x-auto m-0">
 {`S = (25400 / CN) - 254
 Ia = 0.2 * S
 Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
-                </pre>
-                <p>Where:</p>
-                <ul>
-                  <li><b>P:</b> Design storm rainfall (mm)</li>
-                  <li><b>CN:</b> Curve Number (reflecting permeability)</li>
-                  <li><b>Ia:</b> Initial abstraction (mm)</li>
-                  <li><b>S:</b> Soil water retention parameter (mm)</li>
-                  <li><b>Q:</b> Direct storm runoff depth (mm)</li>
-                </ul>
-              </div>
+                  </pre>
+                  <p>Where:</p>
+                  <ul className="pl-[18px] margin-0 flex flex-col gap-1.5 list-disc text-left">
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>P:</b> Design storm rainfall (mm)</li>
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>CN:</b> Curve Number (reflecting permeability)</li>
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>Ia:</b> Initial abstraction (mm)</li>
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>S:</b> Soil water retention parameter (mm)</li>
+                    <li className="text-xs md:text-sm leading-relaxed text-[var(--ink-2)]"><b>Q:</b> Direct storm runoff depth (mm)</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
-            <div className={`acc ${openAccordions.has('m-dpr') ? 'open' : ''}`}>
-              <button onClick={() => toggleAccordion('m-dpr')}>
+            <div className={`border border-[var(--line)] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-dpr') ? 'open' : ''}`}>
+              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-dpr')}>
                 <div>
-                  <span className="k">Financials</span>
-                  <h4>Detailed Project Report (DPR) Costing</h4>
+                  <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Financials</span>
+                  <h4 className="text-sm font-bold text-[var(--ink)] mt-0.5">Detailed Project Report (DPR) Costing</h4>
                 </div>
-                <span className="chev">→</span>
+                <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-dpr') ? 'rotate-90' : ''}`}>→</span>
               </button>
-              <div className="body">
-                <p>
-                  Detailed Project Reports outline the engineering design and costed milestones for every asset.
-                </p>
-                <table className="acc-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: 'left', padding: '8px' }}>Asset Item</th>
-                      <th style={{ textAlign: 'left', padding: '8px' }}>Type</th>
-                      <th style={{ textAlign: 'left', padding: '8px' }}>Cost (Lakhs)</th>
-                      <th style={{ textAlign: 'left', padding: '8px' }}>Target Phase</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {p.assets.map((a, idx) => (
-                      <tr key={idx} style={{ borderTop: '1px solid var(--line)' }}>
-                        <td style={{ padding: '8px' }}>{a.n}</td>
-                        <td className="m" style={{ padding: '8px' }}>{a.t.toUpperCase()}</td>
-                        <td className="m" style={{ padding: '8px' }}>₹{a.cost.toFixed(1)} L</td>
-                        <td className="m" style={{ padding: '8px' }}>Phase {a.phase}</td>
+              {openAccordions.has('m-dpr') && (
+                <div className="p-4 border-t border-[var(--line)] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                  <p>
+                    Detailed Project Reports outline the engineering design and costed milestones for every asset.
+                  </p>
+                  <table className="w-full border-collapse text-xs md:text-sm mt-3" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Target Phase</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {p.assets.map((a, idx) => (
+                        <tr key={idx} style={{ borderTop: '1px solid var(--line)' }}>
+                          <td style={{ padding: '8px' }} className="py-2 text-[var(--ink-2)]">{a.n}</td>
+                          <td style={{ padding: '8px' }} className="py-2 text-[var(--ink-2)]">{a.t.toUpperCase()}</td>
+                          <td style={{ padding: '8px' }} className="py-2 text-[var(--ink-2)] font-mono">₹{a.cost.toFixed(1)} L</td>
+                          <td style={{ padding: '8px' }} className="py-2 text-[var(--ink-2)]">Phase {a.phase}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -1149,43 +1222,60 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
   const leadAg = AG[p.team[0]];
 
   return (
-    <div className="bgg-project-explorer">
-      {/* Platform context strip */}
-      <section className="strip">
-        <div className="wrap">
-          <div>
-            <div className="eyebrow">Corporate water stewardship · Bengaluru</div>
-            <h1>Fund flood-mitigation lakes, <em>asset by asset.</em></h1>
-            <div className="lede">Each lake is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.</div>
+    <div className="w-full min-h-screen bg-slate-50 text-slate-900 font-sans antialiased text-[15px] leading-relaxed pb-12">
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      {/* Hero header strip */}
+      <section className="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white overflow-hidden relative">
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-teal-400/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="max-w-[1240px] mx-auto px-6 py-8 pb-9 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+          <div className="text-left max-w-2xl">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-teal-300/80 bg-teal-500/10 border border-teal-400/20 px-3 py-1 rounded-full mb-4">
+              🌊 Corporate water stewardship · Bengaluru
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Fund flood-mitigation lakes,{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-300">
+                asset by asset.
+              </span>
+            </h1>
+            <p className="text-slate-300/80 max-w-[60ch] mt-3 text-sm md:text-base leading-relaxed">
+              Each lake is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.
+            </p>
           </div>
-          <div className="agg">
-            <div className="s">
-              <b>{totalProjects}</b>
-              <span>Projects listed</span>
-            </div>
-            <div className="s">
-              <b>{(totalVwb / 1e6).toFixed(2)}M m³</b>
-              <span>Annual flood VWB</span>
-            </div>
-            <div className="s">
-              <b>₹{(totalCost / 100).toFixed(1)} Cr</b>
-              <span>Total cost</span>
-            </div>
-            <div className="s">
-              <b>{totalPeople.toLocaleString('en-IN')}</b>
-              <span>People in scope</span>
-            </div>
+          <div className="flex gap-4 flex-wrap text-left shrink-0">
+            {[
+              { v: totalProjects, l: 'Projects listed' },
+              { v: `${(totalVwb / 1e6).toFixed(2)}M m³`, l: 'Annual VWB' },
+              { v: `₹${(totalCost / 100).toFixed(1)} Cr`, l: 'Total cost' },
+              { v: totalPeople.toLocaleString('en-IN'), l: 'People in scope' },
+            ].map(({ v, l }) => (
+              <div key={l} className="flex flex-col text-left bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-5 py-4 min-w-[100px]">
+                <b className="font-bold text-xl md:text-2xl text-white tracking-tight">{v}</b>
+                <span className="font-mono text-[10px] tracking-wider uppercase text-teal-200/60 mt-1">{l}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Main app grid */}
-      <main className="wrap">
-        <div className="app">
+      <main className="max-w-[1240px] mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 py-7 pb-14 items-start">
+
           {/* Left sidebar rail */}
-          <aside className="rail">
-            <div className="search">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flex: 'none', color: 'var(--ink-2)' }}>
+          <aside className="md:sticky md:top-5 flex flex-col gap-3">
+
+            {/* Search */}
+            <div className="flex items-center gap-2.5 bg-white rounded-2xl px-4 py-3 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="text-slate-400 shrink-0">
                 <circle cx="11" cy="11" r="7" />
                 <path d="M21 21l-4-4" />
               </svg>
@@ -1194,22 +1284,37 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Search lakes or catchments"
-                style={{ border: 'none', outline: 'none', width: '100%', fontSize: '14px', background: 'none' }}
+                className="border-none outline-none w-full text-sm bg-transparent text-slate-700 placeholder:text-slate-400"
+                style={{ border: 'none', outline: 'none' }}
               />
             </div>
-            <div className="filters">
+
+            {/* Filter pills */}
+            <div className="flex gap-1.5 flex-wrap">
               {['All', 'Diagnosis', 'Design', 'Implementation', 'New'].map(f => (
-                <button key={f} className={selectedFilter === f ? 'on' : ''} onClick={() => setSelectedFilter(f)}>
+                <button
+                  key={f}
+                  className={`font-mono text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full transition-all duration-150 cursor-pointer ${
+                    selectedFilter === f
+                      ? 'bg-teal-600 text-white shadow-[0_2px_8px_rgba(13,148,136,0.35)]'
+                      : 'bg-white text-slate-500 hover:text-slate-800 shadow-[0_1px_4px_rgba(0,0,0,0.07)]'
+                  }`}
+                  onClick={() => setSelectedFilter(f)}
+                >
                   {f}
                 </button>
               ))}
             </div>
-            <div className="railhead">
+
+            {/* Count label */}
+            <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 px-0.5 mt-0.5">
               {railMatches.length} of {totalProjects} projects
             </div>
-            <div className="rlist">
+
+            {/* Project cards */}
+            <div className="flex flex-col gap-2 max-h-[calc(100vh-250px)] overflow-y-auto px-1 pb-1 -mx-1">
               {railMatches.length === 0 ? (
-                <div style={{ color: 'var(--ink-2)', fontSize: '13px', padding: '10px' }}>No projects match.</div>
+                <div className="text-sm text-slate-400 italic p-3">No projects match.</div>
               ) : (
                 railMatches.map(proj => {
                   const zero = proj.committedPct === 0;
@@ -1217,22 +1322,31 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                   return (
                     <button
                       key={proj.id}
-                      className={`prow ${isSelected ? 'sel' : ''}`}
+                      className={`grid grid-cols-[40px_1fr] gap-3 items-center text-left rounded-2xl px-4 py-3.5 transition-all duration-200 cursor-pointer w-full border-2 ${
+                        isSelected
+                          ? 'bg-teal-50 border-teal-400/60 shadow-[0_4px_16px_rgba(13,148,136,0.14)]'
+                          : 'bg-white border-transparent shadow-[0_1px_6px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.1)] hover:-translate-y-px'
+                      }`}
                       onClick={() => {
                         setSelectedProjectId(proj.id);
                         setActiveTab('overview');
                         setSelectedPicks(new Set());
                       }}
                     >
-                      <span className="mini">{renderGauge(proj.committedPct)}</span>
-                      <span className="info">
-                        <b>{proj.name}{zero && <span className="newtag">new</span>}</b>
-                        <span className="st">
-                          <i className={zero ? 'zero' : ''}></i>
+                      <span className="w-[40px] h-[32px] rounded-xl overflow-hidden shrink-0">{renderGauge(proj.committedPct)}</span>
+                      <span className="flex flex-col gap-0.5 text-left min-w-0">
+                        <b className={`text-sm font-semibold flex items-center gap-1.5 truncate ${isSelected ? 'text-teal-800' : 'text-slate-800'}`}>
+                          {proj.name}
+                          {zero && (
+                            <span className="text-[8px] font-bold uppercase bg-orange-500 text-white px-1.5 py-0.5 rounded-full shrink-0">new</span>
+                          )}
+                        </b>
+                        <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+                          <i className={`w-1.5 h-1.5 rounded-full shrink-0 ${zero ? 'bg-orange-400' : 'bg-teal-500'}`}></i>
                           {proj.status}
                         </span>
-                        <span className="pc">
-                          <b>{Math.round(proj.committedPct * 100)}%</b> committed · {cr(proj.total)}
+                        <span className="text-[11px] text-slate-400 mt-0.5">
+                          <b className="text-slate-600">{Math.round(proj.committedPct * 100)}%</b> · {cr(proj.total)}
                         </span>
                       </span>
                     </button>
@@ -1242,53 +1356,90 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
             </div>
           </aside>
 
-          {/* Right workspace details panel */}
-          <section className="ws">
-            <div className="wshead">
-              <div className="top">
+          {/* Right details panel */}
+          <section className="bg-white rounded-3xl shadow-[0_4px_32px_rgba(0,0,0,0.08)] overflow-hidden text-left">
+
+            {/* Panel header */}
+            <div className="px-7 pt-7 pb-0 bg-gradient-to-br from-slate-50 to-white">
+              <div className="flex justify-between items-start flex-wrap gap-4 mb-5">
                 <div>
-                  <h2>{p.name}</h2>
-                  <div className="loc">{p.loc}</div>
+                  <h2 className="text-2xl font-bold text-slate-900 m-0 tracking-tight">{p.name}</h2>
+                  <div className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400 shrink-0">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    {p.loc}
+                  </div>
                 </div>
-                <div className="badges">
-                  <span className={`pill ${isZero ? 'zero' : 'live'}`}>
-                    <i></i>
+                <div className="flex gap-2 flex-wrap">
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold ${isZero ? 'bg-orange-50 text-orange-700' : 'bg-teal-50 text-teal-700'}`}>
+                    <i className={`w-1.5 h-1.5 rounded-full shrink-0 ${isZero ? 'bg-orange-400' : 'bg-teal-500'}`}></i>
                     {isZero ? 'Open · 0% committed' : `${Math.round(p.committedPct * 100)}% committed`}
                   </span>
-                  <span className="pill">{p.funders.length} funder{p.funders.length !== 1 ? 's' : ''}</span>
-                  <span className="pill">Lead · {leadAg.name}</span>
+                  <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 rounded-full px-3.5 py-1.5 text-xs font-semibold">
+                    {p.funders.length} funder{p.funders.length !== 1 ? 's' : ''}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 rounded-full px-3.5 py-1.5 text-xs font-semibold">
+                    Lead · {leadAg.name}
+                  </span>
                 </div>
               </div>
-              <nav className="wstabs">
+
+              {/* Tab nav */}
+              <nav className="flex gap-1 overflow-x-auto overflow-y-hidden pb-0">
                 {TABS.map(([k, label]) => (
-                  <button key={k} className={activeTab === k ? 'on' : ''} onClick={() => setActiveTab(k)}>
+                  <button
+                    key={k}
+                    className={`text-[13px] font-semibold px-4 py-2.5 whitespace-nowrap rounded-t-xl border-b-2 -mb-[1px] cursor-pointer transition-all duration-150 bg-transparent ${
+                      activeTab === k
+                        ? 'text-teal-700 border-b-teal-600 bg-teal-50/60'
+                        : 'text-slate-500 border-transparent hover:text-slate-800 hover:bg-slate-50'
+                    }`}
+                    onClick={() => setActiveTab(k)}
+                  >
                     {label}
                   </button>
                 ))}
               </nav>
+              <div className="h-px bg-slate-100 -mx-7"></div>
             </div>
-            
-            <div className="panel">
+
+            {/* Panel content */}
+            <div className="p-7 text-left">
               {renderActivePanel()}
             </div>
 
-            <div className="disclaimer">
-              <b>Indicative figures · sample funders.</b> Costs, depths and volumetric benefits are planning-stage estimates confirmed by the DPR. Funder names shown are illustrative sample CSR partners, not real commitments. Impact follows WRI VWBA (SCS Curve Number); agency listing is subject to due diligence.
+            {/* Disclaimer */}
+            <div className="bg-slate-50/80 text-[11px] text-slate-400 leading-relaxed px-7 py-4 text-left">
+              <b className="text-slate-500">Indicative figures · sample funders.</b> Costs, depths and volumetric benefits are planning-stage estimates confirmed by the DPR. Funder names shown are illustrative sample CSR partners, not real commitments. Impact follows WRI VWBA (SCS Curve Number); agency listing is subject to due diligence.
             </div>
           </section>
+
         </div>
       </main>
 
-      {/* Modal Dialog */}
+      {/* Commitment modal */}
       {showCommitDialog && (
-        <div className="bgg-dialog-overlay" onClick={() => setShowCommitDialog(false)}>
-          <div className="bgg-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="dlg-head">
-              <div className="k">Funding term sheet</div>
-              <h3>Review your commitment</h3>
-              <button className="close" onClick={() => setShowCommitDialog(false)} aria-label="Close">×</button>
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          onClick={() => setShowCommitDialog(false)}
+        >
+          <div
+            className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[520px] overflow-hidden animate-[fadeInUp_0.25s_ease-out_forwards]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-7 pt-6 pb-5 bg-gradient-to-br from-slate-50 to-white relative text-left">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 mb-1">Funding term sheet</div>
+              <h3 className="text-xl font-bold text-slate-900 m-0">Review your commitment</h3>
+              <button
+                className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full text-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors duration-150 cursor-pointer border-none bg-transparent leading-none"
+                onClick={() => setShowCommitDialog(false)}
+                aria-label="Close"
+              >×</button>
             </div>
-            <div className="dlg-body">
+            <div className="h-px bg-slate-100"></div>
+            <div className="p-7 text-left">
               {renderCommitBody()}
             </div>
           </div>

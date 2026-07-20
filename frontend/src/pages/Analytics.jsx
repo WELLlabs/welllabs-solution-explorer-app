@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import api from '../config/api';
-import './Analytics.css';
 
 const Analytics = () => {
   const [loading, setLoading] = useState(true);
@@ -46,19 +45,19 @@ const Analytics = () => {
 
   if (loading) {
     return (
-      <div className="analytics-loading animate-pulse">
-        <div className="analytics-spinner"></div>
-        <p>Analyzing and aggregating hydrological data...</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-slate-500 animate-pulse">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="text-sm font-semibold">Analyzing and aggregating hydrological data...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="analytics-error">
-        <div className="error-icon">⚠️</div>
-        <h3>Analysis Offline</h3>
-        <p>{error}</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center border border-red-200 bg-red-50/30 rounded-2xl max-w-[480px] mx-auto my-10">
+        <div className="text-5xl mb-4">⚠️</div>
+        <h3 className="text-xl font-bold text-red-500 mb-2">Analysis Offline</h3>
+        <p className="text-slate-500 text-sm">{error}</p>
       </div>
     );
   }
@@ -96,9 +95,9 @@ const Analytics = () => {
     const circumference = 2 * Math.PI * radius;
 
     return (
-      <div className="donut-chart-wrapper">
-        <svg viewBox="0 0 140 140" className="donut-svg">
-          <circle cx="70" cy="70" r={radius} fill="transparent" stroke="#1e293b" strokeWidth={strokeWidth} />
+      <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center justify-around gap-6 py-2">
+        <svg viewBox="0 0 140 140" className="w-[130px] h-[130px] shrink-0">
+          <circle cx="70" cy="70" r={radius} fill="transparent" stroke="#f1f5f9" strokeWidth={strokeWidth} />
           {data.map((item, idx) => {
             const key = item.status || item.type || 'unknown';
             const val = item.count;
@@ -122,7 +121,6 @@ const Analytics = () => {
                 strokeDasharray={`${strokeLength} ${circumference}`}
                 strokeDashoffset={strokeOffset}
                 transform="rotate(-90 70 70)"
-                className="donut-segment"
                 onMouseEnter={() => setHoveredSlice(`${hoverKey}-${idx}`)}
                 onMouseLeave={() => setHoveredSlice(null)}
                 style={{
@@ -133,17 +131,17 @@ const Analytics = () => {
               />
             );
           })}
-          <g className="donut-center-text">
-            <text x="70" y="68" textAnchor="middle" className="donut-num">
+          <g className="fill-slate-900">
+            <text x="70" y="68" textAnchor="middle" className="text-[22px] font-extrabold fill-slate-900">
               {total}
             </text>
-            <text x="70" y="85" textAnchor="middle" className="donut-lbl">
+            <text x="70" y="85" textAnchor="middle" className="text-[8px] font-bold fill-slate-400 tracking-wider">
               TOTAL
             </text>
           </g>
         </svg>
 
-        <div className="donut-legend">
+        <div className="flex flex-col gap-1.5 grow w-full">
           {data.map((item, idx) => {
             const key = item.status || item.type || 'unknown';
             const val = item.count;
@@ -154,13 +152,13 @@ const Analytics = () => {
             return (
               <div 
                 key={idx} 
-                className={`legend-item ${isHovered ? 'active' : ''}`}
+                className={`flex items-center gap-2.5 text-xs text-slate-600 px-2.5 py-1.5 rounded-lg transition-all duration-200 font-semibold cursor-pointer ${isHovered ? 'bg-slate-100/80 text-slate-900' : 'hover:bg-slate-50 hover:text-slate-900'}`}
                 onMouseEnter={() => setHoveredSlice(`${hoverKey}-${idx}`)}
                 onMouseLeave={() => setHoveredSlice(null)}
               >
-                <span className="legend-dot" style={{ backgroundColor: color }}></span>
-                <span className="legend-name">{key.toUpperCase()}</span>
-                <span className="legend-val">{val} ({percentage}%)</span>
+                <span className="w-2 h-2 rounded-[3px] shrink-0" style={{ backgroundColor: color }}></span>
+                <span className="font-bold capitalize">{key}</span>
+                <span className="ml-auto text-[11px] text-slate-400 font-bold">{val} ({percentage}%)</span>
               </div>
             );
           })}
@@ -181,80 +179,78 @@ const Analytics = () => {
   );
 
   return (
-    <div className="custom-analytics-container">
+    <div className="w-full max-w-[1280px] mx-auto py-2 pb-8 flex flex-col gap-6 text-left">
       {/* 1. TOP STATS CARDS */}
-      <div className="analytics-kpi-grid">
-        <div className="kpi-card glassmorphic glow-blue">
-          <div className="kpi-icon-wrapper blue">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="bg-blue-50/40 hover:bg-blue-50/60 border border-blue-100/70 rounded-2xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-blue-500/10 text-blue-500 border border-blue-500/20 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2L2 7L12 12L22 7L12 2Z" />
               <path d="M2 17L12 22L22 17" />
               <path d="M2 12L17.5 14.8" />
             </svg>
           </div>
-          {/* KPI CARD: Rainwater & Lake Projects Count Display */}
-          <div className="kpi-info">
-            <span className="kpi-label">Rainwater & Lake Projects</span>
-            <h3 className="kpi-value">{overview?.totalProjects || 0}</h3>
-            <span className="kpi-subtext">Mapped assets in Bangalore</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">Rainwater & Lake Projects</span>
+            <h3 className="text-4xl font-extrabold text-slate-900 leading-none tracking-tight">{overview?.totalProjects || 0}</h3>
+            <span className="text-[11px] text-slate-400 font-semibold">Mapped assets in Bangalore</span>
           </div>
         </div>
 
-        <div className="kpi-card glassmorphic glow-emerald">
-          <div className="kpi-icon-wrapper emerald">
+        <div className="bg-emerald-50/40 hover:bg-emerald-50/60 border border-emerald-100/70 rounded-2xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 8v8" />
               <path d="M8 12h8" />
             </svg>
           </div>
-          {/* KPI CARD: Monitored Ground Wells Count Display */}
-          <div className="kpi-info">
-            <span className="kpi-label">Monitored Ground Wells</span>
-            <h3 className="kpi-value">{overview?.totalWells || 0}</h3>
-            <span className="kpi-subtext">Active telemetry and surveys</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">Monitored Ground Wells</span>
+            <h3 className="text-4xl font-extrabold text-slate-900 leading-none tracking-tight">{overview?.totalWells || 0}</h3>
+            <span className="text-[11px] text-slate-400 font-semibold">Active telemetry and surveys</span>
           </div>
         </div>
 
-        <div className="kpi-card glassmorphic glow-purple">
-          <div className="kpi-icon-wrapper purple">
+        <div className="bg-purple-50/40 hover:bg-purple-50/60 border border-purple-100/70 rounded-2xl p-6 flex items-center gap-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-purple-500/10 text-purple-500 border border-purple-500/20 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
             </svg>
           </div>
-          <div className="kpi-info">
-            <span className="kpi-label">Active GBA Regions</span>
-            <h3 className="kpi-value">{corporationData.length}</h3>
-            <span className="kpi-subtext">Zones with project clusters</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">Active GBA Regions</span>
+            <h3 className="text-4xl font-extrabold text-slate-900 leading-none tracking-tight">{corporationData.length}</h3>
+            <span className="text-[11px] text-slate-400 font-semibold">Zones with project clusters</span>
           </div>
         </div>
       </div>
 
       {/* 2. MAIN CHARTS GRID */}
-      <div className="charts-main-layout">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         {/* LEFT COLUMN: GBA CORPORATION BAR CHART */}
-        <div className="chart-card glassmorphic corporation-chart-card">
-          <div className="chart-card-header">
+        <div className="lg:col-span-3 bg-sky-50/30 border border-sky-100/60 rounded-2xl p-6 flex flex-col gap-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
-              <h3>Hydrological Assets by GBA Region</h3>
-              <p>Comparing projects and wells across regional corporations</p>
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Hydrological Assets by GBA Region</h3>
+              <p className="text-xs text-slate-500 font-semibold">Comparing projects and wells across regional corporations</p>
             </div>
-            <div className="metric-toggle-group">
+            <div className="flex bg-slate-200/60 border border-slate-300/40 rounded-xl p-1 shrink-0">
               <button 
-                className={`toggle-btn ${activeChartMetric === 'both' ? 'active' : ''}`}
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all duration-200 ${activeChartMetric === 'both' ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
                 onClick={() => setActiveChartMetric('both')}
               >
                 Both
               </button>
               <button 
-                className={`toggle-btn ${activeChartMetric === 'projects' ? 'active' : ''}`}
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all duration-200 ${activeChartMetric === 'projects' ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
                 onClick={() => setActiveChartMetric('projects')}
               >
                 Projects
               </button>
               <button 
-                className={`toggle-btn ${activeChartMetric === 'wells' ? 'active' : ''}`}
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all duration-200 ${activeChartMetric === 'wells' ? 'text-slate-900 bg-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
                 onClick={() => setActiveChartMetric('wells')}
               >
                 Wells
@@ -262,39 +258,43 @@ const Analytics = () => {
             </div>
           </div>
 
-          <div className="bar-chart-body">
+          <div className="flex flex-col gap-4 py-2">
             {corporationData.map((corp, index) => {
               const projWidth = `${(corp.projectsCount / maxCorpVal) * 85}%`;
               const wellWidth = `${(corp.wellsCount / maxCorpVal) * 85}%`;
 
               return (
-                <div key={index} className="bar-row">
-                  <div className="bar-label">{corp.corporation}</div>
-                  <div className="bar-track-wrapper">
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-[140px_1fr] items-center gap-4">
+                  <div className="text-xs font-bold text-slate-600 truncate">{corp.corporation}</div>
+                  <div className="flex flex-col gap-2 w-full">
                     {/* Projects Bar */}
                     {(activeChartMetric === 'both' || activeChartMetric === 'projects') && (
-                      <div className="bar-container">
+                      <div className="w-full h-3 bg-slate-200/50 rounded-full relative overflow-visible">
                         <div 
-                          className="bar bar-project" 
+                          className="group h-full rounded-full relative cursor-pointer transition-all duration-500 bg-gradient-to-r from-blue-500 to-blue-400 hover:brightness-105 shadow-sm hover:shadow"
                           style={{ width: projWidth }}
                           onMouseEnter={() => setHoveredBar({ type: 'projects', index, val: corp.projectsCount })}
                           onMouseLeave={() => setHoveredBar(null)}
                         >
-                          <span className="bar-val-popup">{corp.projectsCount}</span>
+                          <span className="absolute right-0 -top-7 translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md opacity-0 pointer-events-none group-hover:opacity-100 group-hover:-translate-y-0.5 transition-all duration-200 z-10">
+                            {corp.projectsCount}
+                          </span>
                         </div>
                       </div>
                     )}
 
                     {/* Wells Bar */}
                     {(activeChartMetric === 'both' || activeChartMetric === 'wells') && (
-                      <div className="bar-container">
+                      <div className="w-full h-3 bg-slate-200/50 rounded-full relative overflow-visible">
                         <div 
-                          className="bar bar-well" 
+                          className="group h-full rounded-full relative cursor-pointer transition-all duration-500 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:brightness-105 shadow-sm hover:shadow"
                           style={{ width: wellWidth }}
                           onMouseEnter={() => setHoveredBar({ type: 'wells', index, val: corp.wellsCount })}
                           onMouseLeave={() => setHoveredBar(null)}
                         >
-                          <span className="bar-val-popup">{corp.wellsCount}</span>
+                          <span className="absolute right-0 -top-7 translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md opacity-0 pointer-events-none group-hover:opacity-100 group-hover:-translate-y-0.5 transition-all duration-200 z-10">
+                            {corp.wellsCount}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -304,38 +304,38 @@ const Analytics = () => {
             })}
 
             {/* X-Axis Scale Indicator */}
-            <div className="chart-scale-line">
-              <div className="scale-lbl">0</div>
-              <div className="scale-lbl">25%</div>
-              <div className="scale-lbl">50%</div>
-              <div className="scale-lbl">75%</div>
-              <div className="scale-lbl">100%</div>
+            <div className="flex justify-between ml-0 sm:ml-[156px] border-t border-dashed border-slate-200 pt-2">
+              <div className="text-[10px] text-slate-400 font-bold">0</div>
+              <div className="text-[10px] text-slate-400 font-bold">25%</div>
+              <div className="text-[10px] text-slate-400 font-bold">50%</div>
+              <div className="text-[10px] text-slate-400 font-bold">75%</div>
+              <div className="text-[10px] text-slate-400 font-bold">100%</div>
             </div>
             
             {/* Tooltip display */}
-            <div className="bar-tooltip-zone">
+            <div className="min-height-[38px] flex items-center justify-center border-t border-slate-100 pt-3">
               {hoveredBar ? (
-                <div className="active-tooltip animate-fade-in">
-                  <span className={`indicator-dot ${hoveredBar.type}`}></span>
+                <div className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-1.5 rounded-full text-xs text-slate-600 shadow-sm transition-all duration-300">
+                  <span className={`w-2 h-2 rounded-full ${hoveredBar.type === 'projects' ? 'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.6)]' : 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]'}`}></span>
                   <strong>{hoveredBar.type === 'projects' ? 'Projects' : 'Wells'}: </strong>
                   <span>{hoveredBar.val} units in this corporation</span>
                 </div>
               ) : (
-                <p className="tooltip-helper-text">*Hover over any bar to view the exact count</p>
+                <p className="text-[10px] text-slate-400 italic font-semibold">*Hover over any bar to view the exact count</p>
               )}
             </div>
           </div>
         </div>
 
         {/* RIGHT COLUMN: DISTRIBUTION DONUTS */}
-        <div className="donut-charts-column">
-          <div className="chart-card glassmorphic">
-            <h3>Project Status Distribution</h3>
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <div className="bg-indigo-50/20 border border-indigo-100/60 rounded-2xl p-6 flex flex-col gap-5 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Project Status Distribution</h3>
             {renderDonutChart(projectStatusData, totalProjCount, statusColors, 'status')}
           </div>
 
-          <div className="chart-card glassmorphic">
-            <h3>Well Type Distribution</h3>
+          <div className="bg-teal-50/20 border border-teal-100/60 rounded-2xl p-6 flex flex-col gap-5 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Well Type Distribution</h3>
             {renderDonutChart(wellTypeData, totalWellCount, wellTypeColors, 'well')}
           </div>
         </div>
@@ -343,14 +343,14 @@ const Analytics = () => {
       </div>
 
       {/* 3. DETAILED WARD TABLE */}
-      <div className="chart-card glassmorphic ward-data-card">
-        <div className="chart-card-header table-header">
+      <div className="bg-zinc-50/50 border border-zinc-200/80 rounded-2xl p-6 flex flex-col gap-5 shadow-sm mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h3>Detailed Ward Analytics</h3>
-            <p>Aggregated assets count across wards in Bangalore</p>
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Detailed Ward Analytics</h3>
+            <p className="text-xs text-slate-500 font-semibold">Aggregated assets count across wards in Bangalore</p>
           </div>
-          <div className="table-search-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <div className="flex items-center bg-white border border-slate-300 rounded-xl px-3.5 py-2 gap-2.5 w-full sm:w-[280px] focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/12 transition-all">
+            <svg className="text-slate-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -359,45 +359,43 @@ const Analytics = () => {
               placeholder="Search by Ward Name..." 
               value={wardSearch}
               onChange={(e) => setWardSearch(e.target.value)}
+              className="bg-transparent border-none text-slate-900 text-sm font-semibold outline-none w-full placeholder-slate-400"
             />
           </div>
         </div>
 
-        <div className="table-wrapper">
-          <table className="analytics-table">
+        <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table className="w-full border-collapse text-left">
             <thead>
               <tr>
-                <th>Ward Name</th>
-                <th>Projects Count</th>
-                <th>Wells Count</th>
-                <th>Total Assets</th>
-
+                <th className="bg-slate-50 px-4 py-3 text-[10px] font-bold text-slate-500 border-b border-slate-200 uppercase tracking-wider">Ward Name</th>
+                <th className="bg-slate-50 px-4 py-3 text-[10px] font-bold text-slate-500 border-b border-slate-200 uppercase tracking-wider">Projects Count</th>
+                <th className="bg-slate-50 px-4 py-3 text-[10px] font-bold text-slate-500 border-b border-slate-200 uppercase tracking-wider">Wells Count</th>
+                <th className="bg-slate-50 px-4 py-3 text-[10px] font-bold text-slate-500 border-b border-slate-200 uppercase tracking-wider">Total Assets</th>
               </tr>
             </thead>
             <tbody>
               {filteredWards.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="empty-table-state">
+                  <td colSpan="4" className="text-center py-10 text-slate-400 italic">
                     No wards matching "{wardSearch}" found.
                   </td>
                 </tr>
               ) : (
                 filteredWards.map((ward, idx) => {
                   const total = ward.projectsCount + ward.wellsCount;
-                  const maxTotal = Math.max(...wardData.map(w => w.projectsCount + w.wellsCount), 1);
-                  const loadSharePercent = (total / maxTotal) * 100;
 
                   return (
-                    <tr key={idx}>
-                      <td className="ward-name-cell">{ward.wardName}</td>
-                      <td>
-                        <span className="badge-count proj">{ward.projectsCount}</span>
+                    <tr key={idx} className="hover:bg-slate-50/50">
+                      <td className="px-4 py-3 text-xs text-slate-900 font-bold border-b border-slate-100">{ward.wardName}</td>
+                      <td className="px-4 py-3 text-xs border-b border-slate-100">
+                        <span className="inline-block px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/12 text-xs font-bold">{ward.projectsCount}</span>
                       </td>
-                      <td>
-                        <span className="badge-count well">{ward.wellsCount}</span>
+                      <td className="px-4 py-3 text-xs border-b border-slate-100">
+                        <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/12 text-xs font-bold">{ward.wellsCount}</span>
                       </td>
-                      <td>
-                        <strong>{total}</strong>
+                      <td className="px-4 py-3 text-xs border-b border-slate-100 font-extrabold text-slate-800">
+                        {total}
                       </td>
                     </tr>
                   );

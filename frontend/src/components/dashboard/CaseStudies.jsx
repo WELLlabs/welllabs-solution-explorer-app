@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './CaseStudies.css';
 
 const CASE_STUDIES = [
   {
@@ -189,26 +188,32 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
   const active = CASE_STUDIES.find(cs => cs.id === activeId);
 
   return (
-    <div className="cs-page animate-fade-in" id="cs-top">
+    <div className="flex flex-col gap-8 animate-[fadeInUp_0.4s_ease_both]" id="cs-top">
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       {/* Page Header */}
-      <div className="cs-page-header">
-        <h2 className="cs-page-title">Global Case Studies</h2>
-        <p className="cs-page-subtitle">
+      <div className="border-b-1.5 border-slate-200 pb-5 text-left">
+        <h2 className="text-[26px] font-extrabold text-slate-900 m-0 mb-1.5 tracking-tight">Global Case Studies</h2>
+        <p className="text-[15px] text-slate-500 m-0 leading-relaxed">
           Three cities. Three flood crises solved. One proven strategy: Blue-Green-Grey infrastructure.
         </p>
       </div>
 
       {/* City Tab Switcher */}
-      <div className="cs-tab-bar">
+      <div className="flex gap-1 border-b-2 border-slate-200 pb-0">
         {CASE_STUDIES.map(cs => (
           <button
             key={cs.id}
-            className={`cs-tab ${activeId === cs.id ? 'cs-tab-active' : ''}`}
+            className={`flex items-center gap-2 px-6 py-3 bg-transparent border-none border-b-3 -mb-[2px] text-[15px] font-semibold transition-all duration-200 cursor-pointer rounded-t-lg ${activeId === cs.id ? 'bg-slate-50' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
             style={activeId === cs.id ? { borderBottomColor: cs.color, color: cs.color } : {}}
             onClick={() => setActiveId(cs.id)}
           >
-            <span className="cs-tab-emoji">{cs.emoji}</span>
+            <span className="text-lg">{cs.emoji}</span>
             <span>{cs.city}</span>
           </button>
         ))}
@@ -216,99 +221,99 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
 
       {/* Active Case Study Document */}
       {active && (
-        <div className="cs-document animate-fade-in" key={active.id}>
+        <div className="flex flex-col gap-7 animate-[fadeInUp_0.4s_ease_both]" key={active.id}>
 
           {/* Document Hero */}
-          <div className="cs-doc-hero" style={{ borderLeftColor: active.color, background: active.colorLight }}>
-            <div className="cs-doc-hero-top">
-              <span className="cs-doc-emoji">{active.emoji}</span>
+          <div className="border-l-5 rounded-2xl p-8 flex flex-col gap-5 text-left" style={{ borderLeftColor: active.color, background: active.colorLight }}>
+            <div className="flex items-center gap-5 md:flex-row flex-col text-left md:items-center items-start">
+              <span className="text-[48px] leading-none shrink-0">{active.emoji}</span>
               <div>
-                <div className="cs-doc-programme" style={{ color: active.color }}>{active.programme}</div>
-                <h2 className="cs-doc-city">{active.city}: {active.programme}</h2>
-                <div className="cs-doc-project">📍 {active.project}</div>
+                <div className="text-[13px] font-bold tracking-wider uppercase mb-1" style={{ color: active.color }}>{active.programme}</div>
+                <h2 className="text-2xl font-extrabold text-slate-900 m-0 mb-1.5 tracking-tight">{active.city}: {active.programme}</h2>
+                <div className="text-sm text-slate-500 font-medium">📍 {active.project}</div>
               </div>
             </div>
 
-            <div className="cs-doc-tags">
+            <div className="flex gap-2 flex-wrap">
               {active.tags.map((tag, i) => (
-                <span key={i} className="cs-doc-tag" style={{ background: active.color + '18', color: active.color }}>
+                <span key={i} className="px-3 py-1 rounded-[20px] text-[12.5px] font-semibold" style={{ background: active.color + '18', color: active.color }}>
                   {tag}
                 </span>
               ))}
             </div>
 
             {/* Hero Stats Row */}
-            <div className="cs-hero-stats">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-black/7 pt-5">
               {active.heroStats.map((s, i) => (
-                <div key={i} className="cs-hero-stat">
-                  <div className="cs-hero-stat-val" style={{ color: active.color }}>{s.value}</div>
-                  <div className="cs-hero-stat-label">{s.label}</div>
+                <div key={i} className="flex flex-col gap-1 text-left">
+                  <div className="text-[26px] font-extrabold leading-tight" style={{ color: active.color }}>{s.value}</div>
+                  <div className="text-xs text-slate-500 font-medium leading-normal">{s.label}</div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Challenge + Solution */}
-          <div className="cs-two-col">
-            <div className="cs-section cs-challenge">
-              <div className="cs-section-icon">⚠️</div>
-              <h3 className="cs-section-title">{active.challenge.title}</h3>
-              <p className="cs-section-text">{active.challenge.text}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="bg-white border border-slate-200 rounded-2xl p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-amber-500">
+              <div className="text-[22px]">⚠️</div>
+              <h3 className="text-base font-bold text-slate-900 m-0">{active.challenge.title}</h3>
+              <p className="text-[14.5px] text-slate-600 leading-relaxed m-0">{active.challenge.text}</p>
             </div>
-            <div className="cs-section cs-solution">
-              <div className="cs-section-icon">✅</div>
-              <h3 className="cs-section-title">{active.solution.title}</h3>
-              <p className="cs-section-text">{active.solution.text}</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-emerald-500">
+              <div className="text-[22px]">✅</div>
+              <h3 className="text-base font-bold text-slate-900 m-0">{active.solution.title}</h3>
+              <p className="text-[14.5px] text-slate-600 leading-relaxed m-0">{active.solution.text}</p>
             </div>
           </div>
 
           {/* Image Gallery */}
           {active.images && active.images.length > 0 && (
-            <div className={`cs-image-gallery cs-gallery-${active.images.length}`}>
+            <div className={`grid gap-4 rounded-2xl overflow-hidden ${active.images.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
               {active.images.map((img, i) => (
-                <figure key={i} className="cs-gallery-figure">
+                <figure key={i} className="m-0 flex flex-col gap-2 rounded-xl overflow-hidden border border-slate-200 group text-left">
                   <img
                     src={img.src}
                     alt={img.caption}
-                    className="cs-gallery-img"
+                    className="w-full h-auto block transition-transform duration-400 group-hover:scale-[1.02]"
                   />
-                  <figcaption className="cs-gallery-caption">{img.caption}</figcaption>
+                  <figcaption className="text-[12.5px] text-slate-500 px-3.5 py-2.5 bg-slate-50 leading-relaxed italic">{img.caption}</figcaption>
                 </figure>
               ))}
             </div>
           )}
 
           {/* Key Project Data */}
-          <div className="cs-full-section">
-            <h3 className="cs-section-title cs-with-icon">🏗️ Key Project Data</h3>
-            <div className="cs-key-data-grid">
+          <div className="bg-white border border-slate-200 rounded-2xl p-7 md:px-8 text-left shadow-sm">
+            <h3 className="text-base md:text-[17px] font-bold text-slate-900 m-0 mb-4">🏗️ Key Project Data</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {active.keyData.map((item, i) => (
-                <div key={i} className="cs-key-data-item">
-                  <div className="cs-key-data-label">{item.label}</div>
-                  <div className="cs-key-data-value">{item.value}</div>
+                <div key={i} className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col gap-1 text-left">
+                  <div className="text-[11.5px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</div>
+                  <div className="text-sm font-semibold text-slate-900 leading-snug">{item.value}</div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Measured Outcomes Table */}
-          <div className="cs-full-section">
-            <h3 className="cs-section-title cs-with-icon">📊 Measured Outcomes</h3>
-            <div className="cs-table-wrap">
-              <table className="cs-outcomes-table">
-                <thead>
+          <div className="bg-white border border-slate-200 rounded-2xl p-7 md:px-8 text-left shadow-sm">
+            <h3 className="text-base md:text-[17px] font-bold text-slate-900 m-0 mb-4">📊 Measured Outcomes</h3>
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full border-collapse text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     {active.outcomeColumns.map((col, i) => (
-                      <th key={i} style={i === 2 ? { color: active.color } : {}}>{col}</th>
+                      <th key={i} className="px-4 py-3 text-left text-[12.5px] font-bold text-slate-500 uppercase tracking-wider" style={i === 2 ? { color: active.color } : {}}>{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {active.outcomes.map((row, i) => (
-                    <tr key={i}>
-                      <td><strong>{row.col1}</strong></td>
-                      <td>{row.col2}</td>
-                      <td className="cs-outcome-result" style={{ color: active.color }}>{row.col3}</td>
+                    <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50 last:border-none">
+                      <td className="px-4 py-3.5 text-slate-700 leading-relaxed text-left"><strong>{row.col1}</strong></td>
+                      <td className="px-4 py-3.5 text-slate-700 leading-relaxed text-left">{row.col2}</td>
+                      <td className="px-4 py-3.5 leading-relaxed text-left font-bold" style={{ color: active.color }}>{row.col3}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -316,20 +321,19 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
             </div>
           </div>
 
-
           {/* Sources & References */}
-          <div className="cs-full-section cs-sources-section">
-            <h3 className="cs-section-title cs-with-icon">📚 Sources & References</h3>
-            <ul className="cs-sources-list">
+          <div className="bg-white border border-slate-200 rounded-2xl p-7 md:px-8 flex flex-col gap-4 text-left shadow-sm">
+            <h3 className="text-base md:text-[17px] font-bold text-slate-900 m-0 mb-4">📚 Sources & References</h3>
+            <ul className="list-none p-0 m-0 flex flex-col gap-2 text-left">
               {active.sources.map((src, i) => (
-                <li key={i}>{src.text}</li>
+                <li key={i} className="text-[13.5px] text-slate-600 leading-relaxed p-2.5 bg-slate-50 rounded-lg border-l-3 border-slate-200">{src.text}</li>
               ))}
             </ul>
             <a
               href={active.sourceLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="cs-source-link"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-white text-[13.5px] font-semibold hover:opacity-85 transition-opacity self-start no-underline"
               style={{ background: active.color }}
             >
               View Primary Source →
