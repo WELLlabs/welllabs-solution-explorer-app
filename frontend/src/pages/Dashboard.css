@@ -211,13 +211,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Glassmorphism General Rules */
-.glassmorphic {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
-}
 
 /* Fade In Animation */
 .animate-fade-in {
@@ -285,24 +278,6 @@
   text-align: left;
 }
 
-.data-layers-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1.5px solid #f1f5f9;
-  padding-bottom: 20px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.data-layers-header-row h2 {
-  font-size: 26px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 6px 0;
-  letter-spacing: -0.5px;
-}
 
 .tab-description-subtitle {
   font-size: 15px;

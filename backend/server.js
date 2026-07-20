@@ -37,6 +37,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 console.log('🔐 Auth routes mounted');
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 console.log('📊 Analytics routes mounted');
+app.use('/api/sites', require('./routes/sitesRoutes'));
+console.log('🗺️  Sites routes mounted');
 
 // Basic Route
 app.get('/', (req, res) => {
