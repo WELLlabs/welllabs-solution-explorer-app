@@ -13,13 +13,12 @@ Welcome to the **Bangalore Solution Explorer**, a comprehensive, premium MERN (M
 
 ## 📚 Open-Source Documentation Suite
 
-To support open collaboration and enable developers, researchers, and partners to build upon this platform, we maintain a complete open-source documentation suite:
+To support open collaboration and enable developers, researchers, and partners to build upon this platform, we maintain a complete open-source documentation suite matching our organizational standards:
 
-* 🏛️ **[Solution Architecture & Tech Stack](docs/ARCHITECTURE.md)**: Detailed breakdown of the React, Node.js, Express, MongoDB, and GIS map rendering architecture.
-* 🗄️ **[Database Schemas & Data Dictionary](docs/DATABASE_SCHEMA.md)**: Entity relationship models and field definitions for `SiteProject`, `Intervention`, `Well`, `Project`, and `User`.
-* 🔄 **[Workflow & Dataflow Systems](docs/WORKFLOW_DATAFLOW.md)**: Sequence diagrams and dataflow models for Google Sheets ETL ingestion, REST APIs, and GIS user interaction.
-* 🎯 **[Use-Case Mapping Document](docs/USE_CASE_MAPPING.md)**: Persona mapping, problem statements, and real-world impact goals.
-* 🌐 **Git Repository**: [`WELLlabs/welllabs-solution-explorer-app`](https://github.com/WELLlabs/welllabs-solution-explorer-app)
+1. 🏛️ **[Architecture of the Solution (Tech Stack)](docs/ARCHITECTURE.md)**: System design, high-level architecture diagram, React 18, Node.js, Express 5.x, and MongoDB `2dsphere` engine.
+2. 🗄️ **[Schema of the Solution (Database Schema, Workflow, Dataflow)](docs/SCHEMA_WORKFLOW_DATAFLOW.md)**: Consolidated database schemas, entity linkage ERD, Google Sheets ETL workflow, API dataflow, and GIS user interaction flows.
+3. 🌐 **[Git Repo of the Solution](docs/GIT_REPOSITORY.md)**: Repository details, branch strategy (`main`/`dev`), local setup guide, environment secrets, and open-source contribution guidelines.
+4. 🎯 **[Use-Case Mapping Document](docs/USE_CASE_MAPPING.md)**: Persona mapping (Admin, WELL Labs, GBA, Consultant, Donor), Admin role assignment lifecycle, and core platform capabilities.
 
 ---
 

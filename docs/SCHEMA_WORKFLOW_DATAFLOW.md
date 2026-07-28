@@ -1,10 +1,10 @@
-# Database Schema & Data Dictionary — Solution Explorer
+# Schema, Workflow & Dataflow — Solution Explorer
 
-The **Solution Explorer** database uses **MongoDB** managed via **Mongoose**. It relies on GeoJSON standards and geospatial `2dsphere` indexes to query location-based infrastructure and groundwater data.
+This document consolidates the complete **Database Schemas**, **Operational Workflows**, and **Dataflow Systems** for the **WELL Labs Solution Explorer**.
 
 ---
 
-## 🗄 Entity Relationship & Linkage Model
+## 🗄️ Part 1: Database Entity Relationship & Linkage Model
 
 ```mermaid
 erDiagram
@@ -76,7 +76,7 @@ erDiagram
 
 ---
 
-## 📋 Collection Schemas
+## 📋 Part 2: Collection Schemas & Data Dictionary
 
 ### 1. `SiteProject` Collection
 Represents physical sites where Blue-Green-Grey interventions are planned or deployed.
@@ -151,3 +151,85 @@ Stores user authentication credentials and Role-Based Access Control (RBAC).
 | `email` | String | Unique, Required | User email address. |
 | `password` | String | Required | Encrypted password string. |
 | `role` | String | Enum, Default: `'Pending'` | Access level: `'Admin'`, `'Pending'`, `'WELL Labs1'`, `'WELL Labs2'`, `'Consultant'`, `'GBA'`, `'Donor'`. |
+
+---
+
+## 🔄 Part 3: Data Ingestion & ETL Workflow (Google Sheets → MongoDB)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant GS as Google Sheet (Shared CSV)
+    participant Script as ETL Script (importFromGoogleSheets.js)
+    participant Log as Review Log (review-log.json)
+    participant Mongo as MongoDB Atlas
+
+    Note over Script: Execution: npm run import:sheets [-- --write] [-- --drop]
+    Script->>GS: Fetch public CSV via HTTPS Export URL
+    GS-->>Script: Raw CSV string response
+    Script->>Script: Detect header row & column index matching
+    
+    loop For each row in CSV
+        Script->>Script: Parse DMS/Decimal coordinates (e.g. 12°59'11"N → 12.986)
+        Script->>Script: Map site type & intervention type enums
+        alt Parsing issue detected
+            Script->>Log: Push issue to review-log.json
+        else Valid Record
+            Script->>Script: Transform to SiteProject & Intervention schemas
+        end
+    end
+
+    alt Dry-Run Mode (No --write flag)
+        Script->>Log: Save review-log.json & print summary statistics
+        Note over Script: Exit without modifying MongoDB
+    else Write Mode (--write flag)
+        opt --drop flag provided
+            Script->>Mongo: Clear SiteProject & Intervention collections
+        end
+        Script->>Mongo: Upsert SiteProject documents ($set, upsert: true)
+        Script->>Mongo: Upsert Intervention documents ($set, upsert: true)
+        Mongo-->>Script: Operation confirmation
+    end
+```
+
+---
+
+## 🌐 Part 4: API Request Dataflow (Frontend → Backend → DB)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as React Client Component (DataLayersView / NewProjectsView)
+    participant API as Express Router (/api/sites, /api/analytics)
+    participant Auth as Auth Middleware (protect)
+    participant DB as MongoDB Instance
+
+    UI->>API: GET /api/sites
+    API->>DB: SiteProject.find({}).lean()
+    DB-->>API: Array of SiteProjects
+    API->>DB: Intervention.find({ site_id: { $in: siteIds } }).lean()
+    DB-->>API: Array of Interventions
+    API->>API: Group & embed interventions into site objects
+    API-->>UI: JSON Payload (Sites with embedded Interventions array)
+
+    UI->>UI: Update React state & re-render spatial GIS map markers
+```
+
+---
+
+## 🗺️ Part 5: GIS Interactive User Workflow
+
+```mermaid
+graph TD
+    A["User Opens Solution Explorer Web App"] --> B["Default View: GIS Map loaded with Ward Boundaries & BGG Layers"]
+    
+    B --> C{"User Interaction"}
+    
+    C -->|Toggle Layers| D["Show/Hide Blue Lakes, Green Parks, Grey Drains, Groundwater Wells"]
+    C -->|Select Administrative Filter| E["Filter View by Corporation / Ward Name"]
+    C -->|Click Map Marker| F["Open Site Detail Modal"]
+    
+    D --> G["Client-Side Spatial Filtering & Leaflet Marker Re-render"]
+    E --> H["Trigger /api/analytics/ward API Call & Update Summary Metrics"]
+    F --> I["Display Site Impact, Linked Interventions, Quantity & Dimensions"]
+```
