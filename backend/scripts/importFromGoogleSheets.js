@@ -92,6 +92,7 @@ async function loadConfig() {
   return config;
 }
 
+
 // Raw site-type text → our SiteProject.type enum
 const SITE_TYPE_MAP = {
   'green':          'park',
