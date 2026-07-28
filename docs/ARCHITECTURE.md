@@ -9,25 +9,25 @@ The **WELL Labs Solution Explorer** is an open-source geospatial decision-suppor
 ```mermaid
 graph TD
     subgraph Data Sources & Ingestion
-        GS[Google Sheets Data] -->|CSV Export| ETL[Node.js Import Script /importFromGoogleSheets.js]
+        GS["Google Sheets Data"] -->|CSV Export| ETL["Node.js Import Script (importFromGoogleSheets.js)"]
     end
 
     subgraph Database Layer
-        ETL -->|Upsert Documents| Mongo[(MongoDB Atlas / AWS DocumentDB)]
+        ETL -->|Upsert Documents| Mongo[("MongoDB Atlas / AWS DocumentDB")]
     end
 
     subgraph Backend API Services
-        Mongo <-->|Mongoose 2dsphere Queries| Express[Node.js + Express 5.x REST API]
-        Express --> Auth[JWT & Auth Middleware]
-        Express --> SitesAPI[/api/sites - SiteProjects & Interventions]
-        Express --> AnalyticsAPI[/api/analytics - Overview, Wards & Projects]
+        Mongo <-->|Mongoose 2dsphere Queries| Express["Node.js + Express 5.x REST API"]
+        Express --> Auth["JWT & Auth Middleware"]
+        Express --> SitesAPI["/api/sites - SiteProjects & Interventions"]
+        Express --> AnalyticsAPI["/api/analytics - Overview, Wards & Projects"]
     end
 
     subgraph Frontend Application
-        Express <-->|JSON REST Endpoints| React[React 18 + Vite SPA]
-        React --> MapEngine[Leaflet / GIS Map Layer Renderers]
-        React --> Dashboards[DataLayersView / NewProjectsView / BGG Intro]
-        React --> StateManager[React Context API]
+        Express <-->|JSON REST Endpoints| React["React 18 + Vite SPA"]
+        React --> MapEngine["Leaflet / GIS Map Layer Renderers"]
+        React --> Dashboards["DataLayersView / NewProjectsView / BGG Intro"]
+        React --> StateManager["React Context API"]
     end
 ```
 
