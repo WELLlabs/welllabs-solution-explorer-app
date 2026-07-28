@@ -11,6 +11,17 @@ Welcome to the **Bangalore Solution Explorer**, a comprehensive, premium MERN (M
 
 ---
 
+## 📚 Open-Source Documentation Suite
+
+To support open collaboration and enable developers, researchers, and partners to build upon this platform, we maintain a complete open-source documentation suite matching our organizational standards:
+
+1. 🏛️ **[Architecture of the Solution (Tech Stack)](docs/ARCHITECTURE.md)**: System design, high-level architecture diagram, React 18, Node.js, Express 5.x, and MongoDB `2dsphere` engine.
+2. 🗄️ **[Schema of the Solution (Database Schema, Workflow, Dataflow)](docs/SCHEMA_WORKFLOW_DATAFLOW.md)**: Consolidated database schemas, entity linkage ERD, Google Sheets ETL workflow, API dataflow, and GIS user interaction flows.
+3. 🌐 **[Git Repo of the Solution](docs/GIT_REPOSITORY.md)**: Repository details, branch strategy (`main`/`dev`), local setup guide, environment secrets, and open-source contribution guidelines.
+4. 🎯 **[Use-Case Mapping Document](docs/USE_CASE_MAPPING.md)**: Persona mapping (Admin, WELL Labs, GBA, Consultant, Donor), Admin role assignment lifecycle, and core platform capabilities.
+
+---
+
 ## 🗺️ Project Overview
 
 The **Bangalore MERN Application** is built to bridge the gap between field surveyors, data analysts, organization leaders, and donors. It enables:

@@ -1611,18 +1611,15 @@ const DataLayersView = () => {
           fillOpacity: 0.92
         });
 
-        const viewMoreBtn = `<a href="/newprojects?id=${site.site_id}" target="_blank" style="display:block;margin-top:8px;text-decoration:none;background-color:${color};color:white!important;text-align:center;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:750;box-shadow:0 2px 4px rgba(0,0,0,0.1);">View in Projects Explorer →</a>`;
+        const viewMoreBtn = `<a href="/newprojects?id=${site.site_id}" target="_blank" style="display:block;margin-top:8px;text-decoration:none;background-color:${color};color:white!important;text-align:center;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:750;box-shadow:0 2px 4px rgba(0,0,0,0.1);">View More Details →</a>`;
 
         marker.bindPopup(`
-          <div style="display:flex;flex-direction:column;text-align:left;padding:4px;font-family:system-ui,-apple-system,sans-serif;min-width:200px">
+          <div style="display:flex;flex-direction:column;text-align:left;padding:4px;font-family:system-ui,-apple-system,sans-serif;min-width:180px">
             <span style="font-size:8.5px;font-weight:800;letter-spacing:0.5px;padding:3px 6px;border-radius:4px;align-self:flex-start;margin-bottom:6px;text-transform:uppercase;background-color:${color}20;color:${color}">${typeIcon} ${(site.type || 'SITE').toUpperCase()}</span>
             <h4 style="font-size:13.5px;font-weight:750;color:#0f172a;margin:0 0 4px 0">${site.name}</h4>
             ${site.watershed ? `<p style="font-size:11px;color:#64748b;margin:0 0 4px 0">🌊 ${site.watershed}</p>` : ''}
             <p style="font-size:11px;color:#475569;margin:0 0 6px 0">🔧 <strong>${ivCount}</strong> intervention${ivCount !== 1 ? 's' : ''}</p>
-            ${ivCount > 0 ? `<ul style="margin:0 0 6px 0;padding-left:16px;font-size:10.5px;color:#64748b">${ivList}</ul>` : ''}
-            ${site.site_level_impact ? `<p style="font-size:10.5px;color:#15803d;margin:0 0 6px 0;font-style:italic">📊 ${site.site_level_impact}</p>` : ''}
             ${viewMoreBtn}
-            <span style="font-size:9.5px;color:#94a3b8;display:block;margin-top:8px;font-weight:600">Click marker for full details in console</span>
           </div>
         `);
 

@@ -323,6 +323,35 @@ const NewProjectsView = () => {
     }
   }, [location.search, window.location.search, PROJECTS]);
 
+  const [simulationCatchment, setSimulationCatchment] = useState(0);
+  const [simulationCnBase, setSimulationCnBase] = useState(0);
+  const [simulationCnProj, setSimulationCnProj] = useState(0);
+
+  // Keep simulation states synced with active project / picks unless manually adjusted
+  useEffect(() => {
+    if (PROJECTS.length === 0) return;
+    const p = PROJECTS.find(x => x.id === selectedProjectId) || PROJECTS[0];
+    const activeSet = new Set([...p.fundedIdx, ...selectedPicks]);
+    // Safety check in case impactOf is not defined or fails
+    try {
+      const activeImpact = impactOf(p, activeSet);
+      setSimulationCatchment(p.catchment || 0);
+      setSimulationCnBase(p.cnBase || 0);
+      setSimulationCnProj(activeImpact?.cnEff || 0);
+      setSimulationRainfall(p.P || 90);
+    } catch (e) {
+      console.warn("Impact calculation failed during sync", e);
+    }
+  }, [selectedProjectId, selectedPicks, PROJECTS]);
+
+  // Initialize phase when active project changes
+  useEffect(() => {
+    if (PROJECTS.length === 0) return;
+    const p = PROJECTS.find(x => x.id === selectedProjectId) || PROJECTS[0];
+    setActivePhase(p.group === 'Implementation' ? 2 : p.group === 'Design' ? 1 : 0);
+    setSelectedAgencyId(p.team && p.team.length > 0 ? p.team[0] : null);
+  }, [selectedProjectId, PROJECTS]);
+
   // Guard: while loading or if PROJECTS is empty, render a loading state
   if (loading) {
     return (
@@ -363,24 +392,6 @@ const NewProjectsView = () => {
   const activeSet = new Set([...p.fundedIdx, ...selectedPicks]);
   const unfunded = p.assets.map((_, i) => i).filter(i => !p.fundedIdx.has(i));
   const activeImpact = impactOf(p, activeSet);
-
-  const [simulationCatchment, setSimulationCatchment] = useState(p.catchment);
-  const [simulationCnBase, setSimulationCnBase] = useState(p.cnBase);
-  const [simulationCnProj, setSimulationCnProj] = useState(activeImpact.cnEff);
-
-  // Keep simulation states synced with active project / picks unless manually adjusted
-  useEffect(() => {
-    setSimulationCatchment(p.catchment);
-    setSimulationCnBase(p.cnBase);
-    setSimulationCnProj(activeImpact.cnEff);
-    setSimulationRainfall(p.P);
-  }, [selectedProjectId, selectedPicks, p.catchment, p.cnBase, activeImpact.cnEff, p.P]);
-
-  // Initialize phase when active project changes
-  useEffect(() => {
-    setActivePhase(p.group === 'Implementation' ? 2 : p.group === 'Design' ? 1 : 0);
-    setSelectedAgencyId(p.team[0]);
-  }, [selectedProjectId]);
 
   // Aggregate stats for the strip
   const totalProjects = PROJECTS.length;
@@ -514,9 +525,9 @@ const NewProjectsView = () => {
           <table className="w-full border-collapse text-xs md:text-sm mt-3">
             <thead className="bg-[#FAFBF9]">
               <tr>
-                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
-                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
-                <th className="border-b border-[var(--line)] pb-2 text-right text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
+                <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
+                <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
+                <th className="border-b border-slate-200 pb-2 text-right text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
               </tr>
             </thead>
             <tbody>
@@ -529,7 +540,7 @@ const NewProjectsView = () => {
                   <td className="py-2.5 text-[var(--ink-2)] text-right font-mono">{rs(a.cost)}</td>
                 </tr>
               ))}
-              <tr style={{ fontWeight: 'bold', borderTop: '2px solid var(--ink)' }}>
+              <tr style={{ fontWeight: 'bold', borderTop: '2px solid #e2e8f0' }}>
                 <td className="py-3 text-left">Total Commitment</td>
                 <td className="py-3 text-left">—</td>
                 <td className="py-3 text-right font-mono text-[var(--teal)]">{rs(totalCost)}</td>
@@ -538,7 +549,7 @@ const NewProjectsView = () => {
           </table>
           <div className="flex gap-3 flex-wrap justify-start mt-6">
             <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#C8743C] text-white" onClick={() => { alert('Commitment submitted successfully! Thank you for your support.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
-            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[var(--line)] text-[var(--ink)] hover:bg-slate-50 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
+            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-slate-200 text-[var(--ink)] hover:bg-slate-50 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
           </div>
         </div>
       );
@@ -565,9 +576,9 @@ const NewProjectsView = () => {
           <table className="w-full border-collapse text-xs md:text-sm mt-3">
             <thead className="bg-[#FAFBF9]">
               <tr>
-                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
-                <th className="border-b border-[var(--line)] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Allocation</th>
-                <th className="border-b border-[var(--line)] pb-2 text-right text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Status</th>
+                <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
+                <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Allocation</th>
+                <th className="border-b border-slate-200 pb-2 text-right text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -588,7 +599,7 @@ const NewProjectsView = () => {
           </table>
           <div className="flex gap-3 flex-wrap justify-start mt-6">
             <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#C8743C] text-white" onClick={() => { alert('CSR Commitment registered successfully! Thank you.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
-            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[var(--line)] text-[var(--ink)] hover:bg-slate-50 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
+            <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-slate-200 text-[var(--ink)] hover:bg-slate-50 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
           </div>
         </div>
       );
@@ -780,30 +791,30 @@ const NewProjectsView = () => {
                   </div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
                     <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.storage)}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">in-lake storage</span>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">in-lake storage</span>
                     <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Restored live volume for flood buffer</span>
                   </div>
-                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
                     <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.eventRetained)}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">event retention</span>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">event retention</span>
                     <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Retained in catchment at {p.P}mm storm</span>
                   </div>
-                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
                     <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.annual)}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">annual benefit</span>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">annual benefit</span>
                     <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Total annual water recharged and retained</span>
                   </div>
-                  <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col text-left shadow-sm">
+                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
                     <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{activeImpact.people.toLocaleString('en-IN')}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-[var(--line)] pb-2 mb-2">people in scope</span>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">people in scope</span>
                     <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Local population benefiting from recharge</span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-[#FAFBF9] border border-[var(--line)] rounded-xl p-5 flex flex-col gap-4 text-left shadow-sm">
+              <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col gap-4 text-left shadow-sm">
                 <h4 className="text-base font-bold text-[var(--ink)] m-0">SCS Curve Number Runoff Calculator</h4>
                 <div className="text-[11px] text-[var(--ink-2)] leading-relaxed">Interactively simulate storm runoff benefits based on catchment curve numbers.</div>
                 
@@ -923,19 +934,19 @@ const NewProjectsView = () => {
         return (
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 items-start text-left animate-[fadeInUp_0.3s_ease-out_forwards]">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="w-full max-w-[200px] h-[300px] rounded-2xl overflow-hidden border border-[var(--line)] mx-auto shrink-0">{tankSVG}</div>
+              <div className="w-full max-w-[200px] h-[300px] rounded-2xl overflow-hidden border border-slate-200 mx-auto shrink-0">{tankSVG}</div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--ink-2)', marginTop: '8px', textAlign: 'center' }}>
                 <b>{Math.round(currentFundedPct * 100)}%</b> committed {fundingMode === 'assets' && picksSum > 0 ? <span>+ <b>{Math.round(addedFundedPct * 100)}%</b> selected</span> : ''}
               </div>
             </div>
 
             <div>
-              <div className="flex gap-1 border border-[var(--line)] bg-slate-50 p-1 rounded-xl mb-6">
+              <div className="flex gap-1 border border-slate-200 bg-slate-50 p-1 rounded-xl mb-6">
                 <button className={`flex-1 py-2 px-3 border-none rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${fundingMode === 'assets' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900 bg-transparent'}`} onClick={() => setFundingMode('assets')}>Asset-based funding</button>
                 <button className={`flex-1 py-2 px-3 border-none rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${fundingMode === 'custom' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900 bg-transparent'}`} onClick={() => setFundingMode('custom')}>Custom CSR amount</button>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 border border-[var(--line)] rounded-2xl p-4 bg-[#FAFBF9] mb-6">
+              <div className="grid grid-cols-3 gap-4 border border-slate-200 rounded-2xl p-4 bg-[#FAFBF9] mb-6">
                 <div className="flex flex-col text-left">
                   <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(p.total)}</b>
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">total project cost</span>
@@ -978,7 +989,7 @@ const NewProjectsView = () => {
                   <p style={{ fontSize: '14px', color: 'var(--ink-2)', marginBottom: '12px' }}>
                     Enter your desired CSR funding amount. The system will automatically allocate it to the next pending asset in sequence.
                   </p>
-                  <div className="flex items-center gap-2.5 bg-white border border-[var(--line)] px-3 py-2.5 rounded-xl">
+                  <div className="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2.5 rounded-xl">
                     <span style={{ fontFamily: 'var(--mono)', color: 'var(--ink-2)' }}>₹</span>
                     <input
                       type="number"
@@ -996,12 +1007,12 @@ const NewProjectsView = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-left">
                       <div>
                         <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3 text-left">Your custom allocation</div>
-                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-[var(--line)] rounded-xl bg-slate-50/50 p-2 text-left">
+                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/50 p-2 text-left">
                           {customAllocated.length === 0 ? (
                             <div className="text-xs text-[var(--ink-2)] italic p-4 text-center w-full">Enter an amount to see how it allocates to assets.</div>
                           ) : (
                             customAllocated.map((item, idx) => (
-                              <div key={idx} className="grid grid-cols-[1fr_auto] gap-3 items-center bg-white border border-[var(--line)] rounded-lg p-2.5 text-left">
+                              <div key={idx} className="grid grid-cols-[1fr_auto] gap-3 items-center bg-white border border-slate-200 rounded-lg p-2.5 text-left">
                                 <div className="flex flex-col text-left">
                                   <b className="text-xs font-bold text-[var(--ink)]">{item.n}</b>
                                   <span style={{ color: 'var(--teal-d)', fontFamily: 'var(--mono)', fontSize: '11px', display: 'block' }}>
@@ -1017,12 +1028,12 @@ const NewProjectsView = () => {
 
                       <div>
                         <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3 text-left">Existing funders ledger</div>
-                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-[var(--line)] rounded-xl bg-slate-50/50 p-2 text-left">
+                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/50 p-2 text-left">
                           {p.funders.length === 0 ? (
                             <div className="text-xs text-[var(--ink-2)] italic p-4 text-center w-full">No commitments for this project yet. Be the first!</div>
                           ) : (
                             p.funders.map((f, idx) => (
-                              <div key={idx} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center bg-white border border-[var(--line)] rounded-lg p-2.5 text-left">
+                              <div key={idx} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center bg-white border border-slate-200 rounded-lg p-2.5 text-left">
                                 <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-mono text-slate-500 border border-slate-200 shrink-0">{initials(f.name)}</div>
                                 <div className="flex flex-col text-left">
                                   <b className="text-xs font-bold text-[var(--ink)]">{f.name}</b>
@@ -1071,7 +1082,7 @@ const NewProjectsView = () => {
                 const isTeam = p.team.includes(id);
                 const isSel = activeAgId === id;
                 return (
-                  <button key={id} className={`bg-white border rounded-xl p-4 text-left flex flex-col hover:border-[var(--teal)] transition-colors duration-150 cursor-pointer ${isSel ? 'border-[var(--teal)] ring-1 ring-[var(--teal)] bg-[#f7f9f6]' : 'border-[var(--line)]'}`} onClick={() => setSelectedAgencyId(id)}>
+                  <button key={id} className={`bg-white border rounded-xl p-4 text-left flex flex-col hover:border-[var(--teal)] transition-colors duration-150 cursor-pointer ${isSel ? 'border-[var(--teal)] ring-1 ring-[var(--teal)] bg-[#f7f9f6]' : 'border-slate-200'}`} onClick={() => setSelectedAgencyId(id)}>
                     <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--ink-2)]">{isLead ? 'Lead Agency' : isTeam ? 'Team Partner' : 'Available Partner'}</span>
                     <h4 className="text-sm font-bold text-[var(--ink)] mt-1.5">{ag.name}</h4>
                     <p className="text-[11px] text-[var(--ink-2)] mt-1 leading-snug">{ag.role}</p>
@@ -1081,7 +1092,7 @@ const NewProjectsView = () => {
             </div>
 
             {selectedAg && (
-              <div className="bg-white border border-[var(--line)] rounded-2xl p-6 text-left shadow-sm mt-5">
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 text-left shadow-sm mt-5">
                 <div className="flex justify-between items-start flex-wrap gap-4 text-left">
                   <div>
                     <h3 className="text-lg font-bold text-[var(--ink)] m-0">{selectedAg.name}</h3>
@@ -1120,7 +1131,7 @@ const NewProjectsView = () => {
       case 'docs':
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards] text-left">
-            <div className={`border border-[var(--line)] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-vwba') ? 'open' : ''}`}>
+            <div className={`border border-slate-200 rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-vwba') ? 'open' : ''}`}>
               <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-vwba')}>
                 <div>
                   <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Methodology</span>
@@ -1129,7 +1140,7 @@ const NewProjectsView = () => {
                 <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-vwba') ? 'rotate-90' : ''}`}>→</span>
               </button>
               {openAccordions.has('m-vwba') && (
-                <div className="p-4 border-t border-[var(--line)] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                <div className="p-4 border-t border-slate-200 bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
                   <p>
                     The Volumetric Water Benefit Accord (VWBA) provides a standard framework to quantify how water stewardship activities contribute to local water resilience.
                   </p>
@@ -1143,7 +1154,7 @@ const NewProjectsView = () => {
               )}
             </div>
 
-            <div className={`border border-[var(--line)] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-scs') ? 'open' : ''}`}>
+            <div className={`border border-slate-200 rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-scs') ? 'open' : ''}`}>
               <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-scs')}>
                 <div>
                   <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Hydrology</span>
@@ -1152,7 +1163,7 @@ const NewProjectsView = () => {
                 <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-scs') ? 'rotate-90' : ''}`}>→</span>
               </button>
               {openAccordions.has('m-scs') && (
-                <div className="p-4 border-t border-[var(--line)] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                <div className="p-4 border-t border-slate-200 bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
                   <p>
                     The SCS Curve Number (CN) model is a widely accepted empirical method for predicting storm runoff from a catchment based on soil types, land cover, and imperviousness.
                   </p>
@@ -1174,7 +1185,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               )}
             </div>
 
-            <div className={`border border-[var(--line)] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-dpr') ? 'open' : ''}`}>
+            <div className={`border border-slate-200 rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-dpr') ? 'open' : ''}`}>
               <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-dpr')}>
                 <div>
                   <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Financials</span>
@@ -1183,17 +1194,17 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                 <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-dpr') ? 'rotate-90' : ''}`}>→</span>
               </button>
               {openAccordions.has('m-dpr') && (
-                <div className="p-4 border-t border-[var(--line)] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                <div className="p-4 border-t border-slate-200 bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
                   <p>
                     Detailed Project Reports outline the engineering design and costed milestones for every asset.
                   </p>
                   <table className="w-full border-collapse text-xs md:text-sm mt-3" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                     <thead>
                       <tr>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[var(--line)] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Target Phase</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Target Phase</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1357,7 +1368,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
           </aside>
 
           {/* Right details panel */}
-          <section className="bg-white rounded-3xl shadow-[0_4px_32px_rgba(0,0,0,0.08)] overflow-hidden text-left">
+          <section className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden text-left flex flex-col h-full">
 
             {/* Panel header */}
             <div className="px-7 pt-7 pb-0 bg-gradient-to-br from-slate-50 to-white">
