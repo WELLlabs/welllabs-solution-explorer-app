@@ -2007,7 +2007,7 @@ const DataLayersView = () => {
                   onChange={(e) => setShowNewProjects(e.target.checked)}
                   className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-[#3b82f6] mt-0.5"
                 />
-                <span>Projects v1</span>
+                <span>Projects v2</span>
               </label>
 
               <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
