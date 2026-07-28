@@ -1,51 +1,92 @@
-# Use-Case Mapping Document — Solution Explorer
+# Use-Case & Role-Based Access Mapping — Solution Explorer
 
-The **WELL Labs Solution Explorer** serves multiple stakeholders involved in urban climate resilience, rainwater harvesting, flood risk reduction, and groundwater management in Bengaluru.
+The **WELL Labs Solution Explorer** enforces a strict Role-Based Access Control (RBAC) architecture. This document maps the application's exact user roles, the Admin approval & role assignment lifecycle, and the corresponding platform capabilities for each persona.
 
 ---
 
-## 🎯 Target User Personas & Use-Case Matrix
+## 🔐 System User Roles & Access Control Matrix
 
-| Target Persona | Key Pain Points | Platform Solutions & Capabilities | Relevant Modules / Views |
+When a new user creates an account, they enter a **`Pending`** status by default. An **`Admin`** user must approve and assign them one of the 4 primary organization roles via the User Management panel (`PUT /api/auth/users/:id/role`).
+
+| System Role | Primary Target Users | Description & System Permissions | Key Capabilities & Platform Access |
 | :--- | :--- | :--- | :--- |
-| **Urban Planners & Engineers** | Difficulty identifying optimal locations for nature-based interventions (bioswales, rain gardens). | Spatial mapping of existing Blue-Green-Grey infrastructure with watershed impact metrics. | `DataLayersView.jsx`, `BggIntroduction.jsx` |
-| **Municipal Authorities (BBMP / GBA)** | Fragmented tracking of rainwater harvesting projects, budgets, and ward-level coverage. | Ward-level aggregated analytics dashboard, project budget tracking, and status reports. | `NewProjectsView.jsx`, `/api/analytics/ward` |
-| **Environmental Researchers & Hydrologists** | Lack of consolidated groundwater quality data (pH, TDS, Fluoride, Arsenic contamination). | Spatial GIS layer mapping open wells and borewells with chemical quality parameters. | `DataLayersView.jsx` (Wells Layer), `/api/analytics/wells` |
-| **Donors, CSR & NGO Partners** | Need transparent verification of site interventions and measurable catchment impacts. | Case study showcases, site-level & subcatchment-level impact documentation. | `CaseStudies.jsx`, `Interventions.jsx` |
-| **Field Surveyors & Data Teams** | Difficulty syncing spreadsheet survey data with production databases. | Automated Google Sheets ETL importer with dry-run verification logs. | `backend/scripts/importFromGoogleSheets.js` |
+| 🛡️ **Admin** | System Administrator | Full administrative privileges. Manages user registration requests, assigns roles, and overrides system settings. | • **User Management Panel**: Approve, reject, or reassign user roles.<br>• Access all analytical dashboards & GIS map layers.<br>• Data import & ETL management. |
+| 🧪 **WELL Labs**<br>*(WELL Labs1 / WELL Labs2)* | Core Organization Team & Researchers | Internal researchers, hydrologists, and GIS data analysts at WELL Labs. | • Full access to GIS map visualizers (Green, Blue, Grey, Wells).<br>• Watershed & subcatchment impact analysis.<br>• Data ingestion verification & dry-run inspection. |
+| 🏛️ **GBA** | Greater Bengaluru Authority & Municipal Reps | Municipal officers, ward engineers, and government planning authorities. | • **Ward & Corporation Dashboards**: Track project progress, budget allocations, and drain lengths.<br>• Filter analytics by municipal ward/corporation. |
+| 📐 **Consultant** | Technical Consultants & Field Surveyors | External environmental consultants, field surveyors, and technical partners. | • View site-level interventions, spatial dimensions, and quantity metrics.<br>• Open well water quality data access (pH, TDS, EC, salinity, contaminants). |
+| 🤝 **Donor** | CSR Partners & Financial Donors | External funding partners, philanthropic organizations, and CSR executives. | • Transparent project budget, timeline, and status monitoring.<br>• Case study showcase & impact summary views. |
+| ⏳ **Pending** | Newly Registered Users | Default state upon registration until an Admin reviews and assigns a role. | • Restricted access: Awaits Admin role assignment before unlocking platform capabilities. |
 
 ---
 
-## 💡 Detailed Core Use Cases
+## 🔄 User Role Assignment & Approval Lifecycle
 
-### 1. Spatial Infrastructure & GIS Layer Discovery
-* **Description**: Users can interactively toggle overlay layers across Bengaluru:
-  * 🟢 **Green Infrastructure**: Parks, urban campus greens, rain gardens, bioswales.
-  * 🔵 **Blue Infrastructure**: Lakes, wetlands, retention/detention basins.
-  * ⚪ **Grey Infrastructure**: Stormwater drains (SWDs), permeable pathways, ecobloc underground tanks.
-  * 🚰 **Groundwater Wells**: Open wells and bore wells with quality metrics.
-* **Value Provided**: Eliminates data silos and provides holistic spatial context.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as New User
+    actor Admin as System Admin
+    participant System as Auth System (/api/auth)
+    participant DB as User Database
+
+    User->>System: POST /api/auth/register (Name, Email, Password)
+    alt Email is ADMIN_EMAIL
+        System->>DB: Create User with role: "Admin"
+    else Email domain is @ifmr.ac.in
+        System->>DB: Create User with auto-approved role: "WELL Labs1"
+    else All other users
+        System->>DB: Create User with default role: "Pending"
+    end
+    System-->>User: Account created (Pending Approval)
+
+    Note over Admin: Admin logs in & opens Admin Console
+    Admin->>System: GET /api/auth/users
+    System-->>Admin: Returns list of pending & active users
+    Admin->>System: PUT /api/auth/users/:id/role { role: "WELL Labs" | "GBA" | "Consultant" | "Donor" }
+    System->>DB: Update user.role field
+    System-->>Admin: Role successfully assigned
+    Note over User: User can now access role-specific features upon login
+```
 
 ---
 
-### 2. Ward-Level & Catchment Impact Analytics
-* **Description**: Municipal administrators can filter projects by **Corporation** or **Ward ID / Name** to view:
-  * Total number of active and completed projects.
-  * Aggregate financial budget allocated and spent.
-  * Catchment area covered and drain length constructed.
-* **Value Provided**: Enables evidence-based municipal budgeting and resource allocation.
+## 💡 Core Use-Case Mapping by Role
+
+### 1. Admin Role Assignment & Governance
+* **Persona**: System Administrator
+* **Workflow**:
+  1. Admin logs into the dashboard and accesses the **User Management** tab.
+  2. Views all registered users with their current status (`Pending`, `WELL Labs`, `GBA`, `Consultant`, `Donor`).
+  3. Selects the appropriate role from the dropdown menu and confirms the update (`PUT /api/auth/users/:id/role`).
+  4. The updated role immediately grants the user access to their corresponding dashboard capabilities.
 
 ---
 
-### 3. Open Well Water Quality Monitoring
-* **Description**: Provides detailed field survey data on open wells across wards:
-  * Chemical health indicators: pH level, Total Dissolved Solids (TDS), Electrical Conductivity (EC), Salinity.
-  * Contamination flags: Fluoride and Arsenic presence.
-  * Well physical attributes: Depth (ft), diameter (ft), lining, water level.
-* **Value Provided**: Assists public health and water security interventions.
+### 2. Spatial Infrastructure & GIS Layer Discovery (WELL Labs & Consultants)
+* **Persona**: WELL Labs Team & Technical Consultants
+* **Workflow**:
+  * Interactively toggle spatial overlays across Bengaluru:
+    * 🟢 **Green Infrastructure**: Parks, campus greens, rain gardens, bioswales.
+    * 🔵 **Blue Infrastructure**: Lakes, wetlands, retention/detention basins.
+    * ⚪ **Grey Infrastructure**: Stormwater drains (SWDs), permeable pathways, ecobloc tanks.
+    * 🚰 **Groundwater Wells**: Open wells and bore wells.
+  * Inspect site-level and subcatchment-level environmental impact descriptions.
 
 ---
 
-### 4. Open-Source Data Contribution & Automation
-* **Description**: Allows non-technical field workers to update Google Sheets, which can then be safely ingested into MongoDB with validation logs.
-* **Value Provided**: Reduces software maintenance overhead and empowers non-developer team members.
+### 3. Municipal Ward Analytics & Project Tracking (GBA & Donors)
+* **Persona**: GBA Municipal Authorities & CSR Donors
+* **Workflow**:
+  * Filter projects by **Corporation** or **Ward ID / Name**.
+  * Track financial budget allocation, drain length constructed, and catchment area covered.
+  * Monitor project implementation timelines and statuses (`Planning`, `In Progress`, `Completed`).
+
+---
+
+### 4. Groundwater Quality & Field Data Inspection (Consultants & WELL Labs)
+* **Persona**: Field Surveyors & Hydrologists
+* **Workflow**:
+  * Query chemical water parameters for open wells across wards:
+    * pH, Total Dissolved Solids (TDS), Electrical Conductivity (EC), Salinity.
+    * Contamination indicators: Fluoride (`hasFluoride`) and Arsenic (`hasArsenic`).
+  * Review physical attributes: Depth (ft), diameter (ft), lining, water level.
