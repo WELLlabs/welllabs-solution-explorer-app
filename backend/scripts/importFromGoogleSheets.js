@@ -26,13 +26,17 @@
  * ============================================================================
  */
 
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
-
-const fs   = require('fs');
+require('dotenv').config();
 const path = require('path');
+const fs = require('fs');
 const mongoose = require('mongoose');
 const { google } = require('googleapis');
 const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
+
+console.log('=============================================================================');
+console.log('🚀 [START] INIT: importFromGoogleSheets.js executing...');
+console.log(`⏱️  Timestamp: ${new Date().toISOString()}`);
+console.log('=============================================================================');
 
 const SiteProject  = require('../models/SiteProject');
 const Intervention = require('../models/Intervention');
@@ -42,6 +46,7 @@ const Intervention = require('../models/Intervention');
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 async function loadConfig() {
+  console.log('⚙️  [PHASE 1] Loading Configuration...');
   let config = {
     MONGO_URI: process.env.MONGO_URI,
     DB_USER: process.env.DB_USER,
@@ -53,24 +58,40 @@ async function loadConfig() {
 
   const secretName = process.env.AWS_SECRET_NAME;
   if (secretName) {
-    console.log(`\n☁️  Attempting to fetch secrets from AWS Secrets Manager (${secretName})...`);
+    console.log(`☁️  [AWS] Attempting to fetch secrets from AWS Secrets Manager (${secretName})...`);
     try {
       const client = new SecretsManagerClient({ region: process.env.AWS_REGION || 'ap-south-1' });
       const response = await client.send(
         new GetSecretValueCommand({ SecretId: secretName })
       );
       if (response.SecretString) {
-        const secret = JSON.parse(response.SecretString);
-        config = { ...config, ...secret };
-        console.log('    ✅ AWS Secrets loaded successfully.');
+        console.log('☁️  [AWS] Successfully retrieved secret from AWS! Parsing...');
+        const secrets = JSON.parse(response.SecretString);
+        config = { ...config, ...secrets };
+      } else {
+        console.warn('☁️  [AWS] Secret fetched but was empty/not a string.');
       }
-    } catch (error) {
-      console.warn(`    ⚠️ Could not fetch secret ${secretName} from AWS:`, error.message);
-      console.log('    Falling back to .env configuration...');
+    } catch (err) {
+      console.error(`☁️  [AWS ERROR] Failed to fetch from Secrets Manager: ${err.message}`);
+      console.log('☁️  [AWS] Falling back to standard .env variables...');
     }
+  } else {
+    console.log('ℹ️  [CONFIG] AWS_SECRET_NAME not provided in environment. Relying purely on .env.');
   }
+
+  // Mask sensitive credentials for logging
+  const maskedSA = config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS ? 'HIDDEN/PRESENT' : 'MISSING';
+  const maskedURI = config.MONGO_URI ? 'HIDDEN/PRESENT' : 'MISSING';
+  
+  console.log(`ℹ️  [CONFIG SUMMARY]`);
+  console.log(`    MONGO_URI: ${maskedURI}`);
+  console.log(`    GOOGLE_SHEET_ID: ${config.GOOGLE_SHEET_ID || 'MISSING'}`);
+  console.log(`    GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${maskedSA}`);
+  console.log(`    GOOGLE_SHEET_TAB_NAME: ${config.GOOGLE_SHEET_TAB_NAME}`);
+  
   return config;
 }
+
 
 // Raw site-type text → our SiteProject.type enum
 const SITE_TYPE_MAP = {
@@ -353,8 +374,12 @@ function transform(rows) {
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 async function main() {
+  console.log('▶️  [MAIN] Starting main execution block...');
+  
   const shouldWrite = process.argv.includes('--write');
   const shouldDrop  = process.argv.includes('--drop');
+  
+  console.log(`ℹ️  [FLAGS] --write: ${shouldWrite}, --drop: ${shouldDrop}`);
 
   // Load config from AWS Secrets Manager (or fallback to .env)
   const config = await loadConfig();
@@ -362,7 +387,7 @@ async function main() {
   // ── Validate config ─────────────────────────────────────────────────────────
   if (!config.GOOGLE_SHEET_ID || !config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) {
     console.error(
-      '\n❌  Missing Google credentials or Sheet ID.\n' +
+      '❌  [ERROR] Missing Google credentials or Sheet ID.\n' +
       '    Ensure GOOGLE_SHEET_ID and GOOGLE_SERVICE_ACCOUNT_CREDENTIALS\n' +
       '    are set in backend/.env or provided via AWS Secrets Manager.\n'
     );
@@ -370,12 +395,15 @@ async function main() {
   }
 
   // ── Fetch Rows via Google API ───────────────────────────────────────────────
-  console.log(`\n📥  Fetching sheet using Google Sheets API...`);
+  console.log(`\n📥  [PHASE 2] Fetching sheet using Google Sheets API...`);
   let rows = [];
   try {
+    console.log('    Parsing Service Account JSON...');
     const creds = typeof config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS === 'string'
       ? JSON.parse(config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
       : config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS;
+
+    console.log('    Authenticating with Google...');
 
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -389,37 +417,40 @@ async function main() {
     
     let range = config.GOOGLE_SHEET_TAB_NAME;
     if (!range || range === '0') {
+      console.log('    Fetching spreadsheet metadata to find first sheet name...');
       // Find the name of the first sheet
       const sheetMeta = await sheets.spreadsheets.get({ spreadsheetId: config.GOOGLE_SHEET_ID });
       range = sheetMeta.data.sheets[0].properties.title;
+      console.log(`    Discovered first sheet name: "${range}"`);
     }
 
+    console.log(`    Downloading cell values from range: "${range}"...`);
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: config.GOOGLE_SHEET_ID,
       range: range,
     });
     
     rows = response.data.values || [];
+    console.log(`✅  [PHASE 2] Successfully fetched ${rows.length} rows from Google Sheets.\n`);
   } catch (err) {
     console.error(
-      '\n❌  Could not fetch the sheet. Common causes:\n' +
+      '\n❌  [ERROR] Could not fetch the sheet. Common causes:\n' +
       '    • The Service Account does not have read access to the sheet\n' +
       '    • GOOGLE_SHEET_ID is wrong\n' +
       '    • GOOGLE_SERVICE_ACCOUNT_CREDENTIALS JSON is malformed\n\n' +
-      `    Error: ${err.message}\n`
+      `    Error details: ${err.message}\n`
     );
     process.exit(1);
   }
 
-  console.log(`✅  Fetched ${rows.length} rows.\n`);
-
   // ── Transform ───────────────────────────────────────────────────────────────
+  console.log('⚙️  [PHASE 3] Transforming raw rows into DB models...');
   const { sites, interventions, reviewLog } = transform(rows);
 
-  console.log(`\n📊  Summary:`);
-  console.log(`    ${sites.length} sites`);
-  console.log(`    ${interventions.length} interventions`);
-  console.log(`    ${reviewLog.length} rows flagged for review`);
+  console.log(`📊  [SUMMARY] Parsing Results:`);
+  console.log(`    ${sites.length} sites parsed.`);
+  console.log(`    ${interventions.length} interventions parsed.`);
+  console.log(`    ${reviewLog.length} rows flagged for review.`);
 
   // Always write the review log
   const logPath = path.join(__dirname, 'review-log.json');
@@ -442,21 +473,32 @@ async function main() {
   }
 
   // ── Connect + write ─────────────────────────────────────────────────────────
-  const mongoUri = config.MONGO_URI || 'mongodb://127.0.0.1:27017/welllabs';
+  const mongoUri = config.MONGO_URI;
   if (!mongoUri) {
-    console.error('\n❌  MONGO_URI is not set in backend/.env or Secrets Manager\n');
+    console.error('❌  [ERROR] MONGO_URI is not set. Cannot connect to MongoDB.');
     process.exit(1);
   }
 
-  console.log('\n📡  Connecting to MongoDB...');
+  console.log('\n📡  [PHASE 4] Connecting to MongoDB...');
+  console.log(`    URI: ${mongoUri.substring(0, 20)}... (truncated for security)`);
+  
   const mongooseOpts = {};
   if (config.DB_USER && config.DB_PASSWORD) {
+    console.log('    Using explicit DB_USER and DB_PASSWORD authentication.');
     mongooseOpts.user = config.DB_USER;
     mongooseOpts.pass = config.DB_PASSWORD;
     mongooseOpts.authSource = 'admin'; // As specified by AWS mongosh instructions
+  } else {
+    console.log('    No explicit DB_USER provided in config, assuming standard connection string.');
   }
-  await mongoose.connect(mongoUri, mongooseOpts);
-  console.log('✅  Connected!\n');
+
+  try {
+    await mongoose.connect(mongoUri, mongooseOpts);
+    console.log('✅  [PHASE 4] Connected to MongoDB successfully!\n');
+  } catch (err) {
+    console.error(`❌  [ERROR] Failed to connect to MongoDB: ${err.message}`);
+    process.exit(1);
+  }
 
   if (shouldDrop) {
     console.log('🗑   --drop flag set: clearing existing collections...');
@@ -497,13 +539,17 @@ async function main() {
       intFail++;
     }
   }
-  console.log(`    ✅  ${intOk} interventions upserted${intFail ? `, ${intFail} failed` : ''}.`);
+  console.log('✅  [PHASE 5] Upserting interventions complete.');
+  console.log(`    ${intOk} interventions upserted, ${intFail} failed.\n`);
 
-  console.log('\n🎉  Import complete!\n');
-  await mongoose.disconnect();
+  console.log('=============================================================================');
+  console.log('🏁 [END] script importFromGoogleSheets.js completed successfully.');
+  console.log('=============================================================================');
+  process.exit(0);
 }
 
 main().catch((err) => {
-  console.error('\n❌  Unexpected error:', err);
+  console.error('\n❌  [FATAL UNCAUGHT ERROR] importFromGoogleSheets.js crashed:');
+  console.error(err);
   process.exit(1);
 });
