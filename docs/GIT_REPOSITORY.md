@@ -1,6 +1,6 @@
 # Git Repository & Open-Source Collaboration — Solution Explorer
 
-This document provides complete details about the **WELL Labs Solution Explorer** source code repository, branching model, local environment setup, and open-source contribution guidelines.
+This document provides complete details about the **WELL Labs Solution Explorer** source code repository, branching model, local environment setup, AWS deployment workflow, and open-source contribution guidelines.
 
 ---
 
@@ -16,30 +16,66 @@ This document provides complete details about the **WELL Labs Solution Explorer*
 
 ---
 
-## 🌿 2. Branching & Deployment Strategy
+## 🌿 2. Branching & AWS Deployment Workflow
+
+In this repository, the **`dev` branch is directly connected to the AWS deployment server**, while active code changes are committed and pushed to **`main`**.
 
 ```mermaid
-gitGraph
-    commit id: "Initial commit"
-    branch dev
-    checkout dev
-    commit id: "Feature: Spatial ETL script"
-    commit id: "Feature: Ward analytics API"
-    checkout main
-    merge dev id: "Release v1.0.0"
-    checkout dev
-    commit id: "Feature: Role-based auth update"
-    checkout main
-    merge dev id: "Release v1.1.0"
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant Main as Git Branch (main)
+    participant PR as GitHub Pull Request
+    participant DevBranch as Git Branch (dev)
+    participant AWS as AWS Cloud Instance
+
+    Dev->>Main: git push origin main
+    Note over Dev,Main: Local features & documentation pushed to main
+    
+    Dev->>PR: Create Pull Request (main → dev)
+    Dev->>PR: Review & Merge Pull Request
+    PR->>DevBranch: Code merged into dev branch
+    
+    DevBranch->>AWS: Automated / Manual Git Pull on AWS Server
+    Note over AWS: AWS instance updates live application
 ```
 
-* **`main` Branch**: Production-ready, stable codebase. Deployed directly to cloud environments (AWS EC2 / App Platform).
-* **`dev` Branch**: Active development and staging branch where features are integrated before production releases.
-* **Feature Branches** (`feature/<feature-name>`): Individual developer branches cut from `dev` for specific components or bug fixes.
+### Branch Definitions
+* **`main` Branch**: Primary development branch where code changes, features, and documentation updates are initially committed and pushed.
+* **`dev` Branch**: **AWS Connected Deployment Branch**. Merging code into `dev` triggers or updates the live AWS server instance.
 
 ---
 
-## 💻 3. Local Repository Setup Guide
+## 🚀 3. Step-by-Step Deployment Guide (main → dev → AWS)
+
+To deploy new changes to the AWS environment:
+
+1. **Commit and Push to `main`**:
+   ```bash
+   git add .
+   git commit -m "Your descriptive feature commit message"
+   git push origin main
+   ```
+
+2. **Merge `main` into `dev` via Git CLI or GitHub Pull Request**:
+   * **Option A: Via GitHub Web UI**:
+     * Open a Pull Request from `main` into `dev`.
+     * Click **Merge Pull Request**.
+   * **Option B: Via Git Command Line**:
+     ```bash
+     git checkout dev
+     git pull origin dev
+     git merge main
+     git push origin dev
+     git checkout main
+     ```
+
+3. **AWS Live Server Sync**:
+   * Once merged into `dev`, the AWS server pulls the updated `dev` branch to update the live production web application.
+
+---
+
+## 💻 4. Local Repository Setup Guide
 
 ### Step 1: Clone the Repository
 ```bash
@@ -75,7 +111,7 @@ The application will launch locally at `http://localhost:5173`.
 
 ---
 
-## 👥 4. Git User & Author Configuration
+## 👥 5. Git User & Author Configuration
 
 To ensure your contributions are correctly credited to your profile, configure Git locally or globally:
 
@@ -86,7 +122,7 @@ git config --global user.email "your.email@example.com"
 
 ---
 
-## 🤝 5. Open-Source Contribution Workflow
+## 🤝 6. Open-Source Contribution Guidelines
 
 We welcome contributions from researchers, hydrologists, GIS developers, and community members:
 
@@ -94,4 +130,4 @@ We welcome contributions from researchers, hydrologists, GIS developers, and com
 2. **Create** your branch (`git checkout -b feature/YourFeatureName`).
 3. **Commit** your changes cleanly (`git commit -m 'Add support for new GeoJSON layer'`).
 4. **Push** to your branch (`git push origin feature/YourFeatureName`).
-5. **Open a Pull Request** targeting the `dev` branch with a clear summary of your changes.
+5. **Open a Pull Request** targeting the `main` branch.
