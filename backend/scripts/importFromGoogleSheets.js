@@ -30,20 +30,47 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
 const fs   = require('fs');
 const path = require('path');
-const https = require('https');
 const mongoose = require('mongoose');
+const { google } = require('googleapis');
+const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
 
 const SiteProject  = require('../models/SiteProject');
 const Intervention = require('../models/Intervention');
 
 /* ─────────────────────────────────────────────────────────────────────────── */
-/*  CONFIG                                                                     */
+/*  CONFIG & SECRETS MANAGER                                                   */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-const SHEET_ID  = process.env.GOOGLE_SHEET_ID;
-// If your data is on a specific tab, set GOOGLE_SHEET_TAB_ID to that tab's gid
-// (visible in the URL after #gid=XXXXXX). Leave blank to use the first/default tab.
-const TAB_GID   = process.env.GOOGLE_SHEET_TAB_ID || '0';
+async function loadConfig() {
+  let config = {
+    MONGO_URI: process.env.MONGO_URI,
+    DB_USER: process.env.DB_USER,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+    GOOGLE_SHEET_ID: process.env.GOOGLE_SHEET_ID,
+    GOOGLE_SHEET_TAB_NAME: process.env.GOOGLE_SHEET_TAB_NAME || '0',
+    GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS,
+  };
+
+  const secretName = process.env.AWS_SECRET_NAME;
+  if (secretName) {
+    console.log(`\n☁️  Attempting to fetch secrets from AWS Secrets Manager (${secretName})...`);
+    try {
+      const client = new SecretsManagerClient({ region: process.env.AWS_REGION || 'ap-south-1' });
+      const response = await client.send(
+        new GetSecretValueCommand({ SecretId: secretName })
+      );
+      if (response.SecretString) {
+        const secret = JSON.parse(response.SecretString);
+        config = { ...config, ...secret };
+        console.log('    ✅ AWS Secrets loaded successfully.');
+      }
+    } catch (error) {
+      console.warn(`    ⚠️ Could not fetch secret ${secretName} from AWS:`, error.message);
+      console.log('    Falling back to .env configuration...');
+    }
+  }
+  return config;
+}
 
 // Raw site-type text → our SiteProject.type enum
 const SITE_TYPE_MAP = {
@@ -74,79 +101,6 @@ const INTERVENTION_TYPE_MAP = {
   'tree trenches':                  'tree_trench',
   'swd inlet placements':           'swd_inlet',
 };
-
-/* ─────────────────────────────────────────────────────────────────────────── */
-/*  STEP 1 — Fetch CSV from Google Sheets                                     */
-/* ─────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Builds the public CSV export URL for a Google Sheet.
- * The sheet must be shared as "Anyone with the link can view".
- */
-function buildCsvUrl(sheetId, tabGid) {
-  return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${tabGid}`;
-}
-
-/**
- * Fetches a URL and returns the body as a string.
- * Follows up to 5 redirects (Google Sheets redirects the export URL).
- */
-function fetchUrl(url, redirectsLeft = 5) {
-  return new Promise((resolve, reject) => {
-    if (redirectsLeft === 0) {
-      return reject(new Error('Too many redirects'));
-    }
-    https.get(url, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return resolve(fetchUrl(res.headers.location, redirectsLeft - 1));
-      }
-      if (res.statusCode !== 200) {
-        return reject(new Error(`HTTP ${res.statusCode} for ${url}`));
-      }
-      const chunks = [];
-      res.on('data', (c) => chunks.push(c));
-      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-      res.on('error', reject);
-    }).on('error', reject);
-  });
-}
-
-/* ─────────────────────────────────────────────────────────────────────────── */
-/*  STEP 2 — Parse CSV                                                         */
-/* ─────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Very simple CSV parser that handles quoted fields (including fields with
- * commas and newlines inside quotes). Returns an array of row-arrays.
- */
-function parseCsv(text) {
-  const rows = [];
-  let row = [];
-  let field = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const next = text[i + 1];
-
-    if (inQuotes) {
-      if (ch === '"' && next === '"') { field += '"'; i++; }
-      else if (ch === '"')            { inQuotes = false; }
-      else                            { field += ch; }
-    } else {
-      if (ch === '"')  { inQuotes = true; }
-      else if (ch === ',') { row.push(field.trim()); field = ''; }
-      else if (ch === '\r' && next === '\n') {
-        row.push(field.trim()); rows.push(row); row = []; field = ''; i++;
-      } else if (ch === '\n') {
-        row.push(field.trim()); rows.push(row); row = []; field = '';
-      } else { field += ch; }
-    }
-  }
-  if (field || row.length) { row.push(field.trim()); rows.push(row); }
-
-  return rows;
-}
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  STEP 3 — Map CSV rows → column indices                                     */
@@ -402,39 +356,62 @@ async function main() {
   const shouldWrite = process.argv.includes('--write');
   const shouldDrop  = process.argv.includes('--drop');
 
+  // Load config from AWS Secrets Manager (or fallback to .env)
+  const config = await loadConfig();
+
   // ── Validate config ─────────────────────────────────────────────────────────
-  if (!SHEET_ID) {
+  if (!config.GOOGLE_SHEET_ID || !config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) {
     console.error(
-      '\n❌  GOOGLE_SHEET_ID is not set in backend/.env\n' +
-      '    1. Open your Google Sheet\n' +
-      '    2. Copy the ID from the URL:\n' +
-      '       https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit\n' +
-      '    3. Add this line to backend/.env:\n' +
-      '       GOOGLE_SHEET_ID=<your-sheet-id>\n'
+      '\n❌  Missing Google credentials or Sheet ID.\n' +
+      '    Ensure GOOGLE_SHEET_ID and GOOGLE_SERVICE_ACCOUNT_CREDENTIALS\n' +
+      '    are set in backend/.env or provided via AWS Secrets Manager.\n'
     );
     process.exit(1);
   }
 
-  // ── Fetch CSV ───────────────────────────────────────────────────────────────
-  const url = buildCsvUrl(SHEET_ID, TAB_GID);
-  console.log(`\n📥  Fetching sheet from:\n    ${url}\n`);
-
-  let csv;
+  // ── Fetch Rows via Google API ───────────────────────────────────────────────
+  console.log(`\n📥  Fetching sheet using Google Sheets API...`);
+  let rows = [];
   try {
-    csv = await fetchUrl(url);
+    const creds = typeof config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS === 'string'
+      ? JSON.parse(config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+      : config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS;
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: creds.client_email,
+        private_key: creds.private_key,
+      },
+      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+    });
+
+    const sheets = google.sheets({ version: 'v4', auth });
+    
+    let range = config.GOOGLE_SHEET_TAB_NAME;
+    if (!range || range === '0') {
+      // Find the name of the first sheet
+      const sheetMeta = await sheets.spreadsheets.get({ spreadsheetId: config.GOOGLE_SHEET_ID });
+      range = sheetMeta.data.sheets[0].properties.title;
+    }
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: config.GOOGLE_SHEET_ID,
+      range: range,
+    });
+    
+    rows = response.data.values || [];
   } catch (err) {
     console.error(
       '\n❌  Could not fetch the sheet. Common causes:\n' +
-      '    • The sheet is NOT shared as "Anyone with the link → Viewer"\n' +
+      '    • The Service Account does not have read access to the sheet\n' +
       '    • GOOGLE_SHEET_ID is wrong\n' +
-      '    • GOOGLE_SHEET_TAB_ID points to a non-existent tab\n\n' +
+      '    • GOOGLE_SERVICE_ACCOUNT_CREDENTIALS JSON is malformed\n\n' +
       `    Error: ${err.message}\n`
     );
     process.exit(1);
   }
 
-  const rows = parseCsv(csv);
-  console.log(`✅  Fetched ${rows.length} raw CSV rows.\n`);
+  console.log(`✅  Fetched ${rows.length} rows.\n`);
 
   // ── Transform ───────────────────────────────────────────────────────────────
   const { sites, interventions, reviewLog } = transform(rows);
@@ -465,13 +442,20 @@ async function main() {
   }
 
   // ── Connect + write ─────────────────────────────────────────────────────────
-  if (!process.env.MONGO_URI) {
-    console.error('\n❌  MONGO_URI is not set in backend/.env\n');
+  const mongoUri = config.MONGO_URI || 'mongodb://127.0.0.1:27017/welllabs';
+  if (!mongoUri) {
+    console.error('\n❌  MONGO_URI is not set in backend/.env or Secrets Manager\n');
     process.exit(1);
   }
 
   console.log('\n📡  Connecting to MongoDB...');
-  await mongoose.connect(process.env.MONGO_URI);
+  const mongooseOpts = {};
+  if (config.DB_USER && config.DB_PASSWORD) {
+    mongooseOpts.user = config.DB_USER;
+    mongooseOpts.pass = config.DB_PASSWORD;
+    mongooseOpts.authSource = 'admin'; // As specified by AWS mongosh instructions
+  }
+  await mongoose.connect(mongoUri, mongooseOpts);
   console.log('✅  Connected!\n');
 
   if (shouldDrop) {
