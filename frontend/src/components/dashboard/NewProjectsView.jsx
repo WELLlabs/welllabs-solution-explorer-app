@@ -249,7 +249,12 @@ const NewProjectsView = () => {
   const [fetchErr, setFetchErr]   = useState(null);
 
   useEffect(() => {
-    fetch('/api/sites')
+    // Dynamic URL: Use Vite proxy locally, and absolute URL on AWS to prevent HTML routing errors
+    const url = import.meta.env.DEV 
+      ? '/api/sites' 
+      : 'https://api.climatesolutions.ai/api/sites';
+
+    fetch(url)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -1319,7 +1324,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
 
             {/* Count label */}
             <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 px-0.5 mt-0.5">
-              {railMatches.length} of {totalProjects} projects
+              {railMatches.length} of {totalProjects} projects v1
             </div>
 
             {/* Project cards */}
