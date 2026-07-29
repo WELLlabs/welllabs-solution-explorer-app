@@ -705,9 +705,9 @@ const DataLayersView = () => {
   const [sitesData, setSitesData] = useState([]);
 
   useEffect(() => {
-    api.get('/sites')
-      .then(res => {
-        const data = res.data;
+    fetch('/api/sites')
+      .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+      .then(data => {
         console.log(`%c🗺️ [SITES LAYER] Loaded ${data.length} sites from /api/sites`, 'color:#3b82f6;font-weight:bold;font-size:13px;');
         console.log('All fetched sites details (full list):', data);
         setSitesData(data);
