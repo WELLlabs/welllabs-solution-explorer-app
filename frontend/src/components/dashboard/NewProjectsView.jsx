@@ -1324,7 +1324,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
 
             {/* Count label */}
             <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 px-0.5 mt-0.5">
-              {railMatches.length} of {totalProjects} projects
+              {railMatches.length} of {totalProjects} projects v1
             </div>
 
             {/* Project cards */}
