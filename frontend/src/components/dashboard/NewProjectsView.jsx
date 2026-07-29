@@ -1433,7 +1433,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
       {/* Commitment modal */}
       {showCommitDialog && (
         <div
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[100] flex items-center justify-center p-4"
           onClick={() => setShowCommitDialog(false)}
         >
           <div
