@@ -705,9 +705,9 @@ const DataLayersView = () => {
   const [sitesData, setSitesData] = useState([]);
 
   useEffect(() => {
-    api.get('/sites')
-      .then(res => {
-        const data = res.data;
+    fetch('/api/sites')
+      .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+      .then(data => {
         console.log(`%c🗺️ [SITES LAYER] Loaded ${data.length} sites from /api/sites`, 'color:#3b82f6;font-weight:bold;font-size:13px;');
         console.log('All fetched sites details (full list):', data);
         setSitesData(data);
@@ -2007,7 +2007,7 @@ const DataLayersView = () => {
                   onChange={(e) => setShowNewProjects(e.target.checked)}
                   className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-[#3b82f6] mt-0.5"
                 />
-                <span>Projects v3</span>
+                <span>Projects</span>
               </label>
 
               <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
