@@ -1246,7 +1246,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
         {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-teal-400/5 rounded-full blur-2xl pointer-events-none"></div>
-        <div className="max-w-[1240px] mx-auto px-6 py-8 pb-9 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+        <div className="w-full px-6 md:px-10 py-8 pb-9 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
           <div className="text-left max-w-2xl">
             <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-teal-300/80 bg-teal-500/10 border border-teal-400/20 px-3 py-1 rounded-full mb-4">
               🌊 Corporate water stewardship · Bengaluru
@@ -1278,7 +1278,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
       </section>
 
       {/* Main app grid */}
-      <main className="max-w-[1240px] mx-auto px-6">
+      <main className="w-full px-6 md:px-10">
         <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 py-7 pb-14 items-start">
 
           {/* Left sidebar rail */}
