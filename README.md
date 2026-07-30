@@ -1,4 +1,4 @@
-# 🌊 Bangalore MERN Application - Solution Explorer
+# 🌊 Bangalore MERN Application - Climate Solutions Explorer
 
 [![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B-green.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![React Version](https://img.shields.io/badge/React-v19-blue.svg?style=flat-square&logo=react)](https://react.dev/)
@@ -7,7 +7,7 @@
 [![Express Version](https://img.shields.io/badge/Express-v5-000000.svg?style=flat-square&logo=express)](https://expressjs.com/)
 [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg?style=flat-square)](https://opensource.org/licenses/ISC)
 
-Welcome to the **Bangalore Solution Explorer**, a comprehensive, premium MERN (MongoDB, Express, React, Node.js) web application designed for mapping, analyzing, and managing water resources, groundwater wells, and sustainability projects. The application incorporates a fully-featured interactive dashboard, advanced analytical tools, secure role-based authorization, and high-performance geospatial aggregation.
+Welcome to the **Climate Solutions Explorer**, a comprehensive, premium MERN (MongoDB, Express, React, Node.js) web application designed for mapping, analyzing, and managing water resources, groundwater wells, and sustainability projects. The application incorporates a fully-featured interactive dashboard, advanced analytical tools, secure role-based authorization, and high-performance geospatial aggregation.
 
 ---
 
