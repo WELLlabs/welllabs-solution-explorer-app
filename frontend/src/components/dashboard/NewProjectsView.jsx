@@ -3,8 +3,19 @@ import { useLocation } from 'react-router-dom';
 
 /* ============ helpers ============ */
 const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
-const lk = v => '₹' + v.toFixed(0) + ' L';
+const lk = v => '₹' + (v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)) + ' L';
 const rs = v => v >= 100 ? cr(v) : lk(v);
+const parseCostNum = val => {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  const str = String(val).trim();
+  const match = str.match(/[\d.]+/);
+  if (!match) return 0;
+  let num = parseFloat(match[0]);
+  if (isNaN(num)) return 0;
+  if (/cr/i.test(str)) num = num * 100;
+  return num;
+};
 const m3 = n => n >= 1e6 ? (n / 1e6).toFixed(2) + 'M m³' : n >= 1e3 ? Math.round(n / 1e3) + 'k m³' : Math.round(n) + ' m³';
 const runoff = (P, CN) => {
   const S = 25400 / CN - 254;
@@ -132,10 +143,15 @@ function normaliseProject(site) {
       iv.details?.area     ? `A:${iv.details.area}`      : null,
     ].filter(Boolean).join(' ');
 
+    const rawCost = iv.details?.tentative_cost ?? iv.tentative_cost ?? iv.cost ?? null;
+    const rawTimeline = iv.details?.tentative_timeline ?? iv.tentative_timeline ?? iv.timeline ?? '—';
+
     return {
       n:     `${qty}${label}${dims ? ` (${dims})` : ''}`,
       t:     colour,
-      cost:  0,          // cost data not in sheet — shown as TBD
+      cost:  0,          // cost processed in preprocessProject
+      rawCost: rawCost,
+      timeline: rawTimeline,
       phase: 3,          // implementation phase by default
       vwb:   colour === 'blue' ? 5000 : 0,  // rough placeholder
       cn:    colour === 'green' ? 0.3 : colour === 'blue' ? 0.2 : 0,
@@ -169,6 +185,8 @@ function normaliseProject(site) {
     annualVWB:  assets.reduce((s, a) => s + (a.vwb || 0), 0),
     people:     500,
     recharge:   0,
+    site_level_impact: site.site_level_impact || 'No site-level impact details specified.',
+    subcatchment_level_impact: site.subcatchment_level_impact || 'No subcatchment-level impact details specified.',
     short:      site.site_level_impact
                   || site.subcatchment_level_impact
                   || `${site.name} — a ${site.type} site in the ${site.watershed || 'Nallurhalli'} micro-watershed. ${interventions.length} intervention(s) proposed.`,
@@ -183,7 +201,25 @@ function normaliseProject(site) {
 
 /** Compute derived totals on a project object (works for both old & new shape) */
 function preprocessProject(p) {
-  p.total      = p.assets.reduce((s, a) => s + a.cost, 0);
+  const rawCosts = p.assets.map(a => parseCostNum(a.rawCost || a.cost));
+  const nonZeroCosts = rawCosts.filter(c => c > 0);
+  const allEqual = nonZeroCosts.length > 0 && nonZeroCosts.every(c => Math.abs(c - nonZeroCosts[0]) < 0.001);
+
+  if (allEqual && nonZeroCosts.length > 0) {
+    const projectTotal = nonZeroCosts[0];
+    const assetCount = p.assets.length || 1;
+    const splitCost = projectTotal / assetCount;
+    p.assets.forEach(a => {
+      a.cost = splitCost;
+    });
+    p.total = projectTotal;
+  } else {
+    p.assets.forEach((a, i) => {
+      a.cost = rawCosts[i] || 0;
+    });
+    p.total = p.assets.reduce((s, a) => s + a.cost, 0);
+  }
+
   p.fundedIdx  = new Set(p.funders.flatMap(f => f.idx || []));
   p.funders.forEach(f => {
     if (f.idx) f.amount = f.idx.reduce((s, i) => s + (p.assets[i]?.cost || 0), 0);
@@ -232,8 +268,7 @@ const PHASES = [
 
 const TABS = [
   ['overview', 'Overview'],
-  ['timeline', 'Timeline'],
-  ['assets', 'Assets'],
+  ['assets', 'Assets and Timelines'],
   ['impact', 'Impact'],
   ['funding', 'Funding'],
   ['agency', 'Agency'],
@@ -620,7 +655,7 @@ const NewProjectsView = () => {
         const maxFlood = impactOf(p, p.assets.map((_, i) => i)).storage;
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            {/* <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
                 <b className="text-lg font-bold text-slate-800">{cr(p.total)}</b>
                 <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Intervention cost</span>
@@ -637,17 +672,17 @@ const NewProjectsView = () => {
                 <b className="text-lg font-bold text-slate-800">{p.imperv}%</b>
                 <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Built-up</span>
               </div>
-            </div>
+            </div> */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-8 items-center text-left">
               <div>
                 <p className="text-base md:text-lg text-[var(--ink)] font-medium leading-relaxed mb-4">{p.short}</p>
-                <div className="flex flex-col gap-2 mb-6 text-left">
+                {/* <div className="flex flex-col gap-2 mb-6 text-left">
                   <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{m3(maxFlood)} max flood storage</span>
                   <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{(p.annualVWB / 1e6).toFixed(2)}M m³/yr potential VWB</span>
                   <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{p.people.toLocaleString('en-IN')} people</span>
                   <span className="inline-flex items-center gap-2 text-sm text-[var(--ink-2)] before:content-['•'] before:text-[var(--teal)] before:font-bold">{p.funders.length ? (`Backed by ${p.funders.length} partner${p.funders.length > 1 ? 's' : ''}`) : 'Open — no commitments yet'}</span>
-                </div>
-                <div className="flex gap-3 flex-wrap text-left">
+                </div> */}
+                <div className="flex gap-3 flex-wrap text-left mt-20">
                   <button
                     className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#b8602c] text-white hover:opacity-90"
                     style={{ backgroundColor: '#C8743C' }}
@@ -669,6 +704,8 @@ const NewProjectsView = () => {
           </div>
         );
 
+      /* 
+      // Timeline tab code commented out as per request
       case 'timeline':
         const i = activePhase;
         const built = i >= 2;
@@ -706,10 +743,17 @@ const NewProjectsView = () => {
             </div>
           </div>
         );
+      */
 
       case 'assets':
         const pickCost = [...selectedPicks].reduce((s, idx) => s + p.assets[idx].cost, 0);
         const funderOf = idx => p.funders.find(f => f.idx.includes(idx));
+        const totalMonths = p.assets.reduce((sum, a) => {
+          const match = String(a.timeline || '').match(/[\d.]+/);
+          const num = match ? parseFloat(match[0]) : 0;
+          return sum + (isNaN(num) ? 0 : num);
+        }, 0);
+
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
             <div className="flex flex-wrap gap-4 text-xs font-mono text-[var(--ink-2)] mb-4 text-left">
@@ -717,6 +761,15 @@ const NewProjectsView = () => {
               <span className="flex items-center gap-2"><i className="w-3 h-3 rounded-full shrink-0 bg-[var(--green)]"></i> Green — wetlands &amp; vegetation</span>
               <span className="flex items-center gap-2"><i className="w-3 h-3 rounded-full shrink-0 bg-[var(--grey)]"></i> Grey — engineered structures</span>
             </div>
+
+            {/* Table Header */}
+            <div className="hidden md:grid grid-cols-[auto_1fr_140px_120px] gap-4 items-center px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200 mb-2 text-left">
+              <div className="w-5"></div>
+              <div>Intervention Type &amp; Details</div>
+              <div className="text-right">Tentative Timeline</div>
+              <div className="text-right">Tentative Cost</div>
+            </div>
+
             <div className="flex flex-col gap-2">
               {p.assets.map((a, idx) => {
                 const f = funderOf(idx);
@@ -725,7 +778,7 @@ const NewProjectsView = () => {
                 return (
                   <div
                     key={idx}
-                    className={`grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center rounded-xl p-3.5 transition-all duration-150 text-left border-2 ${
+                    className={`grid grid-cols-1 md:grid-cols-[auto_1fr_140px_120px] gap-3 md:gap-4 items-center rounded-xl p-3.5 transition-all duration-150 text-left border-2 ${
                       funded
                         ? 'bg-slate-50 border-transparent cursor-default opacity-90'
                         : pick
@@ -755,17 +808,35 @@ const NewProjectsView = () => {
                       </b>
                       <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}{funded && <span> · <b style={{ color: 'var(--ink)' }}>Funded by {f.name}</b></span>}</span>
                     </div>
-                    <div className="text-xs font-mono text-[var(--ink-2)] text-right">
-                      {a.vwb ? <span><b className="font-bold">{m3(a.vwb)}</b> storage</span> : a.cn ? <span><b className="font-bold">↓CN</b> retention</span> : <span><b>—</b> enabling</span>}
+                    <div className="text-xs font-mono font-semibold text-slate-700 text-left md:text-right bg-slate-100/80 px-2.5 py-1 rounded-md w-fit md:w-auto md:bg-transparent">
+                      <span className="md:hidden text-[10px] text-slate-400 mr-1 uppercase">Timeline:</span>
+                      {a.timeline && a.timeline !== '—' ? (
+                        <span>{a.timeline} {/^\d+(\.\d+)?$/.test(String(a.timeline).trim()) ? (parseFloat(a.timeline) === 1 ? 'month' : 'months') : ''}</span>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
                     </div>
-                    <div className="text-sm font-mono font-bold text-[var(--ink)] text-right min-w-[70px]">{rs(a.cost)}</div>
+                    <div className="text-sm font-mono font-bold text-[var(--ink)] text-left md:text-right min-w-[70px]">
+                      {a.cost > 0 ? rs(a.cost) : <span className="text-slate-400 font-normal">TBD</span>}
+                    </div>
                   </div>
                 );
               })}
             </div>
-            <div className="flex justify-between items-center bg-slate-100/70 rounded-xl px-5 py-3.5 mt-4 text-sm font-mono text-slate-600">
-              <div>Selected assets: <b className="font-bold text-slate-800">{selectedPicks.size}</b></div>
-              <div>Estimated cost: <b className="font-bold text-slate-800">{rs(pickCost)}</b></div>
+            <div className="flex justify-between items-center bg-slate-100/70 rounded-xl px-5 py-3.5 mt-4 text-sm font-mono text-slate-600 flex-wrap gap-3">
+              <div>Selected assets: <b className="font-bold text-slate-800">{selectedPicks.size}</b> / {p.assets.length}</div>
+              <div className="flex items-center gap-6 flex-wrap">
+                {totalMonths > 0 && (
+                  <div>Total Duration: <b className="font-bold text-slate-800 text-sm md:text-base">{totalMonths % 1 === 0 ? totalMonths.toFixed(0) : totalMonths.toFixed(1)} Months</b></div>
+                )}
+                <div>
+                  {selectedPicks.size > 0 ? (
+                    <span>Selected Cost: <b className="font-bold text-teal-700 text-sm md:text-base">{rs(pickCost)}</b> (of {rs(p.total)} total)</span>
+                  ) : (
+                    <span>Total Project Cost: <b className="font-bold text-teal-700 text-sm md:text-base">{rs(p.total)}</b></span>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="flex gap-3 flex-wrap justify-end mt-4">
               <button
@@ -778,135 +849,43 @@ const NewProjectsView = () => {
         );
 
       case 'impact':
-        // Slider simulation values using local state overrides
-        const baseRunoff = runoff(simulationRainfall, simulationCnBase) / 1000 * simulationCatchment * 1e6;
-        const projRunoff = runoff(simulationRainfall, simulationCnProj) / 1000 * simulationCatchment * 1e6;
-        const eventRetainedValue = Math.max(0, baseRunoff - projRunoff);
+        const siteImpact = p.site_level_impact || p._raw?.site_level_impact || 'No site-level impact details available.';
+        const subcatchmentImpact = p.subcatchment_level_impact || p._raw?.subcatchment_level_impact || 'No subcatchment-level impact details available.';
 
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_296px] gap-8 items-start text-left">
-              <div>
-                <div className="font-mono text-xs uppercase tracking-wider text-[var(--ink-2)] mb-4 text-left">
-                  <b>Project volumetric benefits</b> · SCS Curve Number
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              {/* Site Level Impact Card */}
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>
+                  <span className="font-mono text-xs uppercase tracking-wider font-bold text-teal-700">Site Level Impact</span>
                 </div>
-                {!activeImpact.enablerOK && (
-                  <div className="bg-[#fee2e2] border border-[#fca5a5] text-red-800 rounded-xl p-4 text-xs font-semibold mb-5 text-left">
-                    <b>Sewage diversion is pending.</b> In-lake storage benefit is blocked until raw sewage inflow is intercepted.
-                  </div>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
-                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.storage)}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">in-lake storage</span>
-                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Restored live volume for flood buffer</span>
-                  </div>
-                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
-                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.eventRetained)}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">event retention</span>
-                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Retained in catchment at {p.P}mm storm</span>
-                  </div>
-                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
-                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{m3(activeImpact.annual)}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">annual benefit</span>
-                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Total annual water recharged and retained</span>
-                  </div>
-                  <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col text-left shadow-sm">
-                    <b className="text-2xl font-bold text-[var(--ink)] leading-none mb-1">{activeImpact.people.toLocaleString('en-IN')}</b>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)] border-b border-slate-200 pb-2 mb-2">people in scope</span>
-                    <span className="text-[11px] text-[var(--ink-2)] leading-relaxed">Local population benefiting from recharge</span>
-                  </div>
-                </div>
+                {/* <h3 className="text-base font-bold text-slate-800 mb-2">Site Level Impact Summary</h3> */}
+                <p className="text-sm text-slate-600 leading-relaxed font-normal whitespace-pre-line">
+                  {siteImpact}
+                </p>
               </div>
 
-              <div className="bg-[#FAFBF9] border border-slate-200 rounded-xl p-5 flex flex-col gap-4 text-left shadow-sm">
-                <h4 className="text-base font-bold text-[var(--ink)] m-0">SCS Curve Number Runoff Calculator</h4>
-                <div className="text-[11px] text-[var(--ink-2)] leading-relaxed">Interactively simulate storm runoff benefits based on catchment curve numbers.</div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-                  <div>
-                    <label htmlFor="calc-area" style={{ display: 'block', marginBottom: '4px' }}>
-                      Catchment area: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{simulationCatchment.toFixed(1)} km²</span>
-                    </label>
-                    <input
-                      type="range"
-                      id="calc-area"
-                      min="1.0"
-                      max="50.0"
-                      step="0.1"
-                      value={simulationCatchment}
-                      onChange={(e) => setSimulationCatchment(parseFloat(e.target.value))}
-                      style={{ width: '100%', accentColor: '#5BC8B8' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="calc-base-cn" style={{ display: 'block', marginBottom: '4px' }}>
-                      Baseline CN: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{simulationCnBase}</span>
-                    </label>
-                    <input
-                      type="range"
-                      id="calc-base-cn"
-                      min="30"
-                      max="100"
-                      step="1"
-                      value={simulationCnBase}
-                      onChange={(e) => setSimulationCnBase(parseInt(e.target.value))}
-                      style={{ width: '100%', accentColor: '#5BC8B8' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="calc-proj-cn" style={{ display: 'block', marginBottom: '4px' }}>
-                      Current project CN: <span className="val" style={{ float: 'right', color: '#5BC8B8', fontWeight: 'bold' }}>{simulationCnProj.toFixed(1)}</span>
-                    </label>
-                    <input
-                      type="range"
-                      id="calc-proj-cn"
-                      min="30.0"
-                      max="100.0"
-                      step="0.1"
-                      value={simulationCnProj}
-                      onChange={(e) => setSimulationCnProj(parseFloat(e.target.value))}
-                      style={{ width: '100%', accentColor: '#5BC8B8' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="calc-p" style={{ display: 'block', marginBottom: '4px' }}>
-                      Design storm rainfall: <span className="val" style={{ float: 'right', fontWeight: 'bold' }}>{simulationRainfall} mm</span>
-                    </label>
-                    <input
-                      type="range"
-                      id="calc-p"
-                      min="20"
-                      max="150"
-                      step="1"
-                      value={simulationRainfall}
-                      onChange={(e) => setSimulationRainfall(parseInt(e.target.value))}
-                      style={{ width: '100%', accentColor: '#5BC8B8' }}
-                    />
-                  </div>
+              {/* Subcatchment Level Impact Card */}
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
+                  <span className="font-mono text-xs uppercase tracking-wider font-bold text-blue-700">Subcatchment Level Impact</span>
                 </div>
-
-                <div className="flex justify-between items-baseline text-xs font-mono text-[var(--ink-2)]">
-                  <span>Baseline runoff:</span>
-                  <b className="text-sm font-bold text-[var(--ink)]">{m3(baseRunoff)}</b>
-                </div>
-                <div className="flex justify-between items-baseline text-xs font-mono text-[var(--ink-2)] mt-1">
-                  <span>Project runoff:</span>
-                  <b className="text-sm font-bold text-[var(--ink)]">{m3(projRunoff)}</b>
-                </div>
-                <div className="flex justify-between items-baseline text-xs font-mono text-[var(--ink-2)] border-t border-[var(--teal)] pt-2.5 mt-2.5">
-                  <span>Runoff retained:</span>
-                  <b className="text-sm font-bold text-[var(--teal)]">{m3(eventRetainedValue)}</b>
-                </div>
+                {/* <h3 className="text-base font-bold text-slate-800 mb-2">Subcatchment Level Impact Summary</h3> */}
+                <p className="text-sm text-slate-600 leading-relaxed font-normal whitespace-pre-line">
+                  {subcatchmentImpact}
+                </p>
               </div>
             </div>
-            
+
             <div className="flex gap-3 flex-wrap justify-end mt-6">
-              <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#b8602c] text-white hover:opacity-90"
-                    style={{ backgroundColor: '#C8743C' }} onClick={() => setActiveTab('funding')}>Proceed to Funding →</button>
+              <button
+                className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#b8602c] text-white hover:opacity-90"
+                style={{ backgroundColor: '#C8743C' }}
+                onClick={() => setActiveTab('funding')}
+              >Proceed to Funding →</button>
             </div>
           </div>
         );
