@@ -58,7 +58,7 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
   ];
 
   return (
-    <div className="flex flex-col gap-12 animate-[fadeIn_0.5s_ease-out_forwards]">
+    <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-12 animate-[fadeIn_0.5s_ease-out_forwards]">
       <style>{`
         @keyframes floatIcon {
           0% { transform: translateY(0px); }

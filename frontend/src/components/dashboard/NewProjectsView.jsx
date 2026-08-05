@@ -275,7 +275,7 @@ const TABS = [
   ['docs', 'Docs']
 ];
 
-const NewProjectsView = () => {
+const NewProjectsView = ({ initialProjectId, onBack }) => {
   const location = useLocation();
 
   // ── Live data from MongoDB ──────────────────────────────────────────────
@@ -328,7 +328,7 @@ const NewProjectsView = () => {
   };
 
   // React Component State
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId || null);
   const [activeTab, setActiveTab] = useState('overview');
   const [activePhase, setActivePhase] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -344,11 +344,13 @@ const NewProjectsView = () => {
   // Once data loads, set the initial selected project
   useEffect(() => {
     if (PROJECTS.length === 0) return;
-    if (!selectedProjectId) {
+    if (initialProjectId && PROJECTS.some(p => p.id === initialProjectId)) {
+      setSelectedProjectId(initialProjectId);
+    } else if (!selectedProjectId) {
       const queryId = getQueryProjectId(PROJECTS);
       setSelectedProjectId(queryId || PROJECTS[0].id);
     }
-  }, [PROJECTS]);
+  }, [PROJECTS, initialProjectId]);
 
   // Sync state with URL parameter if it changes
   useEffect(() => {
@@ -649,30 +651,40 @@ const NewProjectsView = () => {
   // Render Inner Workspace Tab Panels
   const renderActivePanel = () => {
     const activeImpact = impactOf(p, activeSet);
+    const totalMonths = p.assets.reduce((sum, a) => {
+      const match = String(a.timeline || '').match(/[\d.]+/);
+      const num = match ? parseFloat(match[0]) : 0;
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
 
     switch (activeTab) {
       case 'overview':
-        const maxFlood = impactOf(p, p.assets.map((_, i) => i)).storage;
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
-            {/* <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-lg font-bold text-slate-800">{cr(p.total)}</b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Intervention cost</span>
+                <b className="text-lg font-bold text-slate-800">{rs(p.total)}</b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Total Cost</span>
               </div>
               <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-lg font-bold text-slate-800">{p.area} ha</b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Water spread</span>
+                <b className="text-lg font-bold text-slate-800">
+                  {totalMonths > 0 ? `${totalMonths % 1 === 0 ? totalMonths.toFixed(0) : totalMonths.toFixed(1)} Months` : '—'}
+                </b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Tentative Timeline</span>
               </div>
               <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-lg font-bold text-slate-800">{p.catchment} km²</b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Catchment</span>
+                <b className="text-xs font-bold text-slate-800 line-clamp-3" title={p.site_level_impact || p._raw?.site_level_impact}>
+                  {p.site_level_impact || p._raw?.site_level_impact || '—'}
+                </b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 mt-auto pt-1">Site Level Impact</span>
               </div>
               <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-lg font-bold text-slate-800">{p.imperv}%</b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Built-up</span>
+                <b className="text-xs font-bold text-slate-800 line-clamp-3" title={p.subcatchment_level_impact || p._raw?.subcatchment_level_impact}>
+                  {p.subcatchment_level_impact || p._raw?.subcatchment_level_impact || '—'}
+                </b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 mt-auto pt-1">Subcatchment Level Impact</span>
               </div>
-            </div> */}
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-8 items-center text-left">
               <div>
                 <p className="text-base md:text-lg text-[var(--ink)] font-medium leading-relaxed mb-4">{p.short}</p>
@@ -748,11 +760,6 @@ const NewProjectsView = () => {
       case 'assets':
         const pickCost = [...selectedPicks].reduce((s, idx) => s + p.assets[idx].cost, 0);
         const funderOf = idx => p.funders.find(f => f.idx.includes(idx));
-        const totalMonths = p.assets.reduce((sum, a) => {
-          const match = String(a.timeline || '').match(/[\d.]+/);
-          const num = match ? parseFloat(match[0]) : 0;
-          return sum + (isNaN(num) ? 0 : num);
-        }, 0);
 
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
@@ -1230,19 +1237,27 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
         {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-teal-400/5 rounded-full blur-2xl pointer-events-none"></div>
-        <div className="max-w-[1240px] mx-auto px-6 py-8 pb-9 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-9 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
           <div className="text-left max-w-2xl">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 rounded-lg text-xs font-mono font-bold border border-teal-400/30 transition-all cursor-pointer mb-4 shadow-sm"
+              >
+                ← Back to Map Explorer
+              </button>
+            )}
             <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-teal-300/80 bg-teal-500/10 border border-teal-400/20 px-3 py-1 rounded-full mb-4">
               🌊 Corporate water stewardship · Bengaluru
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Fund flood-mitigation lakes,{' '}
+              Fund flood-mitigation interventions,{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-300">
                 asset by asset.
               </span>
             </h1>
             <p className="text-slate-300/80 max-w-[60ch] mt-3 text-sm md:text-base leading-relaxed">
-              Each lake is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.
+              Each intervention is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.
             </p>
           </div>
           <div className="flex gap-4 flex-wrap text-left shrink-0">
@@ -1262,7 +1277,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
       </section>
 
       {/* Main app grid */}
-      <main className="max-w-[1240px] mx-auto px-6">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 py-7 pb-14 items-start">
 
           {/* Left sidebar rail */}
