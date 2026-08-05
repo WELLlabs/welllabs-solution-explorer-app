@@ -188,7 +188,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
   const active = CASE_STUDIES.find(cs => cs.id === activeId);
 
   return (
-    <div className="flex flex-col gap-8 animate-[fadeInUp_0.4s_ease_both]" id="cs-top">
+    <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 animate-[fadeInUp_0.4s_ease_both]" id="cs-top">
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(12px); }

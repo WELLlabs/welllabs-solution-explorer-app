@@ -4,6 +4,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../../config/api';
 import Analytics from '../../pages/Analytics';
+import NewProjectsView from './NewProjectsView';
+import Interventions from './Interventions';
 
 // Fallback local datasets (both JSON and rich CSV v1 with ward mapping telemetry)
 import localProjects from '../../data/projects.json';
@@ -695,6 +697,30 @@ const DataLayersView = () => {
   const mapRef = useRef(null);
   const markersLayerGroupRef = useRef(null);
   const navigate = useNavigate();
+
+  const [activeDetailView, setActiveDetailView] = useState(null); // { type: 'site' | 'intervention', id: string }
+
+  const handleBackToMap = () => {
+    setActiveDetailView(null);
+    setTimeout(() => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
+    }, 100);
+  };
+
+  useEffect(() => {
+    window.openSiteDetailInPlace = (siteId) => {
+      setActiveDetailView({ type: 'site', id: siteId });
+    };
+    window.openInterventionDetailInPlace = () => {
+      setActiveDetailView({ type: 'intervention', id: null });
+    };
+    return () => {
+      delete window.openSiteDetailInPlace;
+      delete window.openInterventionDetailInPlace;
+    };
+  }, []);
 
   // Datasets
   const [projects, setProjects] = useState([]);
@@ -1558,9 +1584,9 @@ const DataLayersView = () => {
           <p style="font-size: 11px; color: #64748b; margin: 0;">📍 ${item.wardName || 'Unknown Ward'}</p>
           ${isProj ? `<p style="margin: 4px 0 8px 0; font-size: 11px; color: #475569;">🏷️ Category: <strong style="color: ${color};">${item.categoryInfo?.name}</strong></p>` : ''}
           ${isProj ? `
-            <a href="/interventions" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; margin-top: 10px; border: none; background-color: ${color}; color: white !important; text-align: center; padding: 8px; border-radius: 6px; font-size: 11.5px; font-weight: 750; cursor: pointer; text-decoration: none; box-sizing: border-box; box-shadow: 0 2px 4px ${color}20;">
-              View More Details
-            </a>
+            <button onclick="window.openInterventionDetailInPlace && window.openInterventionDetailInPlace()" style="display: block; width: 100%; margin-top: 10px; border: none; background-color: ${color}; color: white !important; text-align: center; padding: 8px; border-radius: 6px; font-size: 11.5px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 4px ${color}20;">
+              View Details →
+            </button>
           ` : ''}
           <span style="font-size: 9.5px; color: #94a3b8; display: block; margin-top: 8px; font-weight: 600;">Click point for full details</span>
         </div>
@@ -1616,7 +1642,7 @@ const DataLayersView = () => {
           fillOpacity: 0.92
         });
 
-        const viewMoreBtn = `<a href="/newprojects?id=${site.site_id}" target="_blank" style="display:block;margin-top:8px;text-decoration:none;background-color:${color};color:white!important;text-align:center;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:750;box-shadow:0 2px 4px rgba(0,0,0,0.1);">View More Details →</a>`;
+        const viewMoreBtn = `<button onclick="window.openSiteDetailInPlace && window.openSiteDetailInPlace('${site.site_id}')" style="display:block;width:100%;margin-top:8px;border:none;background-color:${color};color:white!important;text-align:center;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:750;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.1);">View Details →</button>`;
 
         marker.bindPopup(`
           <div style="display:flex;flex-direction:column;text-align:left;padding:4px;font-family:system-ui,-apple-system,sans-serif;min-width:180px">
@@ -1792,8 +1818,29 @@ const DataLayersView = () => {
   const categoryCounts = getCategoryCounts();
 
   return (
-    <div className="flex flex-col gap-6 w-full animate-[fadeIn_0.4s_ease-out_forwards]">
-      <style>{`
+    <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 text-left relative">
+      {activeDetailView && (
+        <div className="w-full text-left animate-[fadeIn_0.2s_ease-out_forwards]">
+          <button
+            onClick={handleBackToMap}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer mb-4"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back to Map</span>
+          </button>
+          {activeDetailView.type === 'site' ? (
+            <NewProjectsView initialProjectId={activeDetailView.id} />
+          ) : (
+            <Interventions />
+          )}
+        </div>
+      )}
+
+      <div className={activeDetailView ? 'hidden' : 'flex flex-col gap-6 w-full animate-[fadeIn_0.4s_ease-out_forwards]'}>
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes bounceIn {
           0% { opacity: 0; transform: scale(0.3) translateY(-100%); }
           50% { opacity: 0.8; transform: scale(1.1) translateY(10%); }
@@ -1832,7 +1879,7 @@ const DataLayersView = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #94a3b8;
         }
-      `}</style>
+      ` }} />
 
       <div>
         <p className="font-bold text-xl">Interactive Spatial Explorer</p>
@@ -2351,7 +2398,7 @@ const DataLayersView = () => {
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-                <p className="text-[13.5px] m-0 max-w-[380px] font-semibold">Tick the "Wells" or "Existing Interventions" layers and choose a location to view telemetry measurements here.</p>
+                <p className="text-[13.5px] m-0 max-w-[380px] font-semibold">Tick the &quot;Wells&quot; or &quot;Existing Interventions&quot; layers and choose a location to view telemetry measurements here.</p>
               </div>
             )}
           </div>
@@ -2361,7 +2408,8 @@ const DataLayersView = () => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default DataLayersView;

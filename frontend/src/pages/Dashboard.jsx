@@ -110,7 +110,7 @@ const Dashboard = () => {
       {/* 1. Header component */}
       <Header user={user} onLogout={logout} />
 
-      <main className="dashboard-main">
+      <main>
         {/* PENDING VIEW */}
         {user?.role === 'Pending' && (
           <PendingApproval />
@@ -118,7 +118,7 @@ const Dashboard = () => {
 
         {/* WORKSPACE NAVIGATION TABS */}
         {user?.role !== 'Pending' && activeTab !== 'interventions' && activeTab !== 'newprojects' && (
-          <div className="dashboard-navigation-tabs">
+          <div className="dashboard-navigation-tabs max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6">
             <button 
               className={`tab-btn ${activeTab === 'home' ? 'active' : ''}`}
               onClick={() => navigate('/home')}
