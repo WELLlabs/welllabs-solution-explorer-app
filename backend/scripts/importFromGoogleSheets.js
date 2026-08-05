@@ -29,9 +29,65 @@
 require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const mongoose = require('mongoose');
 const { google } = require('googleapis');
 const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*  PUBLIC CSV FETCH HELPERS                                                  */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+function buildCsvUrl(sheetId, tabGid) {
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${tabGid || '0'}`;
+}
+
+function fetchUrl(url, redirectsLeft = 5) {
+  return new Promise((resolve, reject) => {
+    if (redirectsLeft === 0) return reject(new Error('Too many redirects'));
+    https.get(url, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchUrl(res.headers.location, redirectsLeft - 1).then(resolve).catch(reject);
+      }
+      if (res.statusCode !== 200) {
+        return reject(new Error(`HTTP ${res.statusCode} ${res.statusMessage}`));
+      }
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => resolve(data));
+    }).on('error', reject);
+  });
+}
+
+function parseCsv(csvText) {
+  const lines = csvText.split(/\r?\n/);
+  const rows = [];
+  for (let line of lines) {
+    if (!line.trim()) continue;
+    const row = [];
+    let insideQuotes = false;
+    let cell = '';
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (insideQuotes && line[i + 1] === '"') {
+          cell += '"';
+          i++;
+        } else {
+          insideQuotes = !insideQuotes;
+        }
+      } else if (char === ',' && !insideQuotes) {
+        row.push(cell.trim());
+        cell = '';
+      } else {
+        cell += char;
+      }
+    }
+    row.push(cell.trim());
+    rows.push(row);
+  }
+  return rows;
+}
 
 console.log('=============================================================================');
 console.log('🚀 [START] INIT: importFromGoogleSheets.js executing...');
@@ -52,7 +108,7 @@ async function loadConfig() {
     DB_USER: process.env.DB_USER,
     DB_PASSWORD: process.env.DB_PASSWORD,
     GOOGLE_SHEET_ID: process.env.GOOGLE_SHEET_ID,
-    GOOGLE_SHEET_TAB_NAME: process.env.GOOGLE_SHEET_TAB_NAME || '0',
+    GOOGLE_SHEET_TAB_NAME: process.env.GOOGLE_SHEET_TAB_NAME || process.env.GOOGLE_SHEET_TAB_ID || '0',
     GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS,
   };
 
@@ -136,20 +192,20 @@ const INTERVENTION_TYPE_MAP = {
  * Extend this if your real sheet has slightly different header text.
  */
 const HEADER_PATTERNS = {
-  site_name:             /^site$/i,
+  site_name:             /site.?name|^site$/i,
   intervention_name:     /intervention/i,
   site_type_raw:         /site.?type/i,
-  quantity:              /quant/i,
+  quantity:              /quant|qty|nos?\.?|units?|count|number/i,
   length:                /^length$/i,
   width:                 /^width$/i,
   depth:                 /^depth/i,
   area:                  /^area$/i,
   latitude:              /^lat/i,
   longitude:             /^lon/i,
-  tentative_cost:        /cost/i,
-  tentative_timeline:    /timeline/i,
-  site_level_impact:     /site.?level/i,
-  subcatchment_impact:   /subcatch/i,
+  tentative_cost:        /cost|budget|amount/i,
+  tentative_timeline:    /timeline|duration|period/i,
+  site_level_impact:     /site.?level|site.?impact/i,
+  subcatchment_impact:   /subcatch|sub.?catchment/i,
 };
 
 function detectHeaderRow(rows) {
@@ -237,55 +293,67 @@ function transform(rows) {
 
   const dataRows = rows.slice(headerRowIdx + 1);
 
-  const sites       = new Map();   // site_id → doc
+  const sites         = new Map();   // site_id → doc
   const interventions = [];
-  const reviewLog   = [];
+  const reviewLog     = [];
 
-  // Forward-fill values that only appear on the first row of a merged group
   let lastSiteName  = '';
   let lastSiteType  = '';
   let lastLat       = null;
   let lastLng       = null;
   let lastImpact    = '';
   let lastSubImpact = '';
-  // Watershed heading rows look like "Nallurhalli Micro Watershed…"
+  let lastCost      = '';
+  let lastTimeline  = '';
   let currentWatershed = '';
 
   dataRows.forEach((row, i) => {
     const csvLine = headerRowIdx + 2 + i; // 1-based for logging
 
-    // ── Detect watershed/section heading rows ────────────────────────────────
-    // These rows have no site_type and the first recognisable cell spans across
-    // columns — the simplest heuristic: the row has a value in the very first
-    // non-empty cell but nothing in the intervention column and site column.
     const firstCell = (row[0] || row[1] || '').trim();
     const siteCell  = get(row, colIdx, 'site_name');
     const intCell   = get(row, colIdx, 'intervention_name');
 
+    // Detect watershed/section heading rows
     if (!siteCell && !intCell && firstCell && firstCell.length > 4) {
       currentWatershed = firstCell;
       return; // skip heading row
     }
 
-    // ── Forward-fill ─────────────────────────────────────────────────────────
-    const siteName   = siteCell  || lastSiteName;
-    const siteType   = get(row, colIdx, 'site_type_raw') || lastSiteType;
-    const latRaw     = get(row, colIdx, 'latitude');
-    const lngRaw     = get(row, colIdx, 'longitude');
-    const lat        = latRaw  ? parseCoord(latRaw)  : lastLat;
-    const lng        = lngRaw  ? parseCoord(lngRaw)  : lastLng;
-    const impact     = get(row, colIdx, 'site_level_impact')    || lastImpact;
-    const subImpact  = get(row, colIdx, 'subcatchment_impact')  || lastSubImpact;
+    // ── Forward-fill and Site Reset ──────────────────────────────────────────
+    // When an explicit new site_name cell is present and differs from previous:
+    if (siteCell && siteCell !== lastSiteName) {
+      lastSiteName  = siteCell;
+      lastSiteType  = get(row, colIdx, 'site_type_raw') || '';
+      const latRaw  = get(row, colIdx, 'latitude');
+      const lngRaw  = get(row, colIdx, 'longitude');
+      lastLat       = latRaw ? parseCoord(latRaw) : null;
+      lastLng       = lngRaw ? parseCoord(lngRaw) : null;
+      lastImpact    = get(row, colIdx, 'site_level_impact') || '';
+      lastSubImpact = get(row, colIdx, 'subcatchment_impact') || '';
+      lastCost      = get(row, colIdx, 'tentative_cost') || '';
+      lastTimeline  = get(row, colIdx, 'tentative_timeline') || '';
+    } else {
+      // Within the same site group, update carryovers if present
+      if (get(row, colIdx, 'site_type_raw')) lastSiteType = get(row, colIdx, 'site_type_raw');
+      if (get(row, colIdx, 'latitude'))      lastLat = parseCoord(get(row, colIdx, 'latitude'));
+      if (get(row, colIdx, 'longitude'))     lastLng = parseCoord(get(row, colIdx, 'longitude'));
+      if (get(row, colIdx, 'site_level_impact'))   lastImpact = get(row, colIdx, 'site_level_impact');
+      if (get(row, colIdx, 'subcatchment_impact')) lastSubImpact = get(row, colIdx, 'subcatchment_impact');
+      if (get(row, colIdx, 'tentative_cost'))      lastCost = get(row, colIdx, 'tentative_cost');
+      if (get(row, colIdx, 'tentative_timeline'))  lastTimeline = get(row, colIdx, 'tentative_timeline');
+    }
 
-    if (siteName)   lastSiteName  = siteName;
-    if (siteType)   lastSiteType  = siteType;
-    if (lat != null) lastLat = lat;
-    if (lng != null) lastLng = lng;
-    if (impact)     lastImpact    = impact;
-    if (subImpact)  lastSubImpact = subImpact;
+    const siteName  = lastSiteName;
+    const siteType  = lastSiteType;
+    const lat       = lastLat;
+    const lng       = lastLng;
+    const impact    = lastImpact;
+    const subImpact = lastSubImpact;
+    const cost      = get(row, colIdx, 'tentative_cost') || lastCost;
+    const timeline  = get(row, colIdx, 'tentative_timeline') || lastTimeline;
 
-    const interventionNameRaw = get(row, colIdx, 'intervention_name');
-    if (!siteName && !interventionNameRaw) return; // blank row
+    if (!siteName && !intCell) return; // blank row
 
     // ── Resolve site type ────────────────────────────────────────────────────
     const siteTypeKey = siteType.toLowerCase().trim();
@@ -320,16 +388,16 @@ function transform(rows) {
     }
 
     // ── Resolve intervention type ─────────────────────────────────────────────
-    if (!interventionNameRaw) return;
+    if (!intCell) return;
 
-    const intKey      = interventionNameRaw.toLowerCase().trim();
+    const intKey        = intCell.toLowerCase().trim();
     const mappedIntType = INTERVENTION_TYPE_MAP[intKey];
-    const interventionId = `${siteId}__${slugify(interventionNameRaw)}__${csvLine}`;
+    const interventionId = `${siteId}__${slugify(intCell)}__${csvLine}`;
 
     if (!mappedIntType) {
       reviewLog.push({
         csvLine,
-        issue: `Unrecognized intervention type "${interventionNameRaw}" at site "${siteName}"`,
+        issue: `Unrecognized intervention type "${intCell}" at site "${siteName}"`,
       });
     }
 
@@ -343,15 +411,15 @@ function transform(rows) {
       quantity:        toNumber(get(row, colIdx, 'quantity')),
       needs_review:    !mappedIntType,
       review_reason:   !mappedIntType
-        ? `Unmapped intervention "${interventionNameRaw}"`
+        ? `Unmapped intervention "${intCell}"`
         : undefined,
       details: {
         length_m:  get(row, colIdx, 'length') || null,
         width_m:   get(row, colIdx, 'width')  || null,
         depth_m:   get(row, colIdx, 'depth')  || null,
         area:      get(row, colIdx, 'area')   || null,
-        tentative_cost:     get(row, colIdx, 'tentative_cost')     || null,
-        tentative_timeline: get(row, colIdx, 'tentative_timeline') || null,
+        tentative_cost:     cost     || null,
+        tentative_timeline: timeline || null,
       },
     };
 
@@ -385,62 +453,71 @@ async function main() {
   const config = await loadConfig();
 
   // ── Validate config ─────────────────────────────────────────────────────────
-  if (!config.GOOGLE_SHEET_ID || !config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) {
+  if (!config.GOOGLE_SHEET_ID) {
     console.error(
-      '❌  [ERROR] Missing Google credentials or Sheet ID.\n' +
-      '    Ensure GOOGLE_SHEET_ID and GOOGLE_SERVICE_ACCOUNT_CREDENTIALS\n' +
-      '    are set in backend/.env or provided via AWS Secrets Manager.\n'
+      '❌  [ERROR] Missing GOOGLE_SHEET_ID.\n' +
+      '    Ensure GOOGLE_SHEET_ID is set in backend/.env or provided via AWS Secrets Manager.\n'
     );
     process.exit(1);
   }
 
-  // ── Fetch Rows via Google API ───────────────────────────────────────────────
-  console.log(`\n📥  [PHASE 2] Fetching sheet using Google Sheets API...`);
+  // ── Fetch Rows ──────────────────────────────────────────────────────────────
   let rows = [];
-  try {
-    console.log('    Parsing Service Account JSON...');
-    const creds = typeof config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS === 'string'
-      ? JSON.parse(config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
-      : config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS;
+  if (config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) {
+    console.log(`\n📥  [PHASE 2] Fetching sheet using Google Sheets API (Service Account)...`);
+    try {
+      console.log('    Parsing Service Account JSON...');
+      const creds = typeof config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS === 'string'
+        ? JSON.parse(config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+        : config.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS;
 
-    console.log('    Authenticating with Google...');
+      console.log('    Authenticating with Google...');
+      const auth = new google.auth.GoogleAuth({
+        credentials: {
+          client_email: creds.client_email,
+          private_key: creds.private_key,
+        },
+        scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+      });
 
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: creds.client_email,
-        private_key: creds.private_key,
-      },
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-    });
+      const sheets = google.sheets({ version: 'v4', auth });
+      let range = config.GOOGLE_SHEET_TAB_NAME;
+      if (!range || range === '0') {
+        console.log('    Fetching spreadsheet metadata to find first sheet name...');
+        const sheetMeta = await sheets.spreadsheets.get({ spreadsheetId: config.GOOGLE_SHEET_ID });
+        range = sheetMeta.data.sheets[0].properties.title;
+        console.log(`    Discovered first sheet name: "${range}"`);
+      }
 
-    const sheets = google.sheets({ version: 'v4', auth });
-    
-    let range = config.GOOGLE_SHEET_TAB_NAME;
-    if (!range || range === '0') {
-      console.log('    Fetching spreadsheet metadata to find first sheet name...');
-      // Find the name of the first sheet
-      const sheetMeta = await sheets.spreadsheets.get({ spreadsheetId: config.GOOGLE_SHEET_ID });
-      range = sheetMeta.data.sheets[0].properties.title;
-      console.log(`    Discovered first sheet name: "${range}"`);
+      console.log(`    Downloading cell values from range: "${range}"...`);
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: config.GOOGLE_SHEET_ID,
+        range: range,
+      });
+      rows = response.data.values || [];
+      console.log(`✅  [PHASE 2] Successfully fetched ${rows.length} rows via Google Sheets API.\n`);
+    } catch (err) {
+      console.error(`❌  [ERROR] Failed via Google Sheets API: ${err.message}`);
+      process.exit(1);
     }
-
-    console.log(`    Downloading cell values from range: "${range}"...`);
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: config.GOOGLE_SHEET_ID,
-      range: range,
-    });
-    
-    rows = response.data.values || [];
-    console.log(`✅  [PHASE 2] Successfully fetched ${rows.length} rows from Google Sheets.\n`);
-  } catch (err) {
-    console.error(
-      '\n❌  [ERROR] Could not fetch the sheet. Common causes:\n' +
-      '    • The Service Account does not have read access to the sheet\n' +
-      '    • GOOGLE_SHEET_ID is wrong\n' +
-      '    • GOOGLE_SERVICE_ACCOUNT_CREDENTIALS JSON is malformed\n\n' +
-      `    Error details: ${err.message}\n`
-    );
-    process.exit(1);
+  } else {
+    console.log(`\n📥  [PHASE 2] GOOGLE_SERVICE_ACCOUNT_CREDENTIALS not found.`);
+    console.log(`    Fetching publicly shared Google Sheet via CSV Export URL...`);
+    const csvUrl = buildCsvUrl(config.GOOGLE_SHEET_ID, config.GOOGLE_SHEET_TAB_NAME);
+    console.log(`    URL: ${csvUrl}`);
+    try {
+      const csvText = await fetchUrl(csvUrl);
+      rows = parseCsv(csvText);
+      console.log(`✅  [PHASE 2] Successfully fetched & parsed ${rows.length} rows from Public CSV Export.\n`);
+    } catch (err) {
+      console.error(
+        `❌  [ERROR] Could not fetch public CSV export. Common causes:\n` +
+        `    • The sheet is not shared as "Anyone with the link can view"\n` +
+        `    • GOOGLE_SHEET_ID or GOOGLE_SHEET_TAB_ID is wrong\n\n` +
+        `    Error details: ${err.message}\n`
+      );
+      process.exit(1);
+    }
   }
 
   // ── Transform ───────────────────────────────────────────────────────────────
