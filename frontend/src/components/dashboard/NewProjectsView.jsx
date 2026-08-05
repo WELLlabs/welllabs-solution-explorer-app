@@ -1236,13 +1236,13 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               🌊 Corporate water stewardship · Bengaluru
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Fund flood-mitigation lakes,{' '}
+              Fund flood-mitigation interventions,{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-300">
                 asset by asset.
               </span>
             </h1>
             <p className="text-slate-300/80 max-w-[60ch] mt-3 text-sm md:text-base leading-relaxed">
-              Each lake is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.
+              Each intervention is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.
             </p>
           </div>
           <div className="flex gap-4 flex-wrap text-left shrink-0">
