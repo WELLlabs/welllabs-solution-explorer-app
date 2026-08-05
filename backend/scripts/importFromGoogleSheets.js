@@ -195,7 +195,7 @@ const HEADER_PATTERNS = {
   site_name:             /site.?name|^site$/i,
   intervention_name:     /intervention/i,
   site_type_raw:         /site.?type/i,
-  quantity:              /quan|qty|nos?\.?|units?|count|number/i,
+  quantity:              /quant|qty|nos?\.?|units?|count|number/i,
   length:                /^length$/i,
   width:                 /^width$/i,
   depth:                 /^depth/i,
