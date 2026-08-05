@@ -329,8 +329,27 @@ function transform(rows) {
       const lngRaw  = get(row, colIdx, 'longitude');
       lastLat       = latRaw ? parseCoord(latRaw) : null;
       lastLng       = lngRaw ? parseCoord(lngRaw) : null;
-      lastImpact    = get(row, colIdx, 'site_level_impact') || '';
-      lastSubImpact = get(row, colIdx, 'subcatchment_impact') || '';
+
+      const newImpact    = get(row, colIdx, 'site_level_impact');
+      const newSubImpact = get(row, colIdx, 'subcatchment_impact');
+
+      const siteIdCheck = slugify(siteCell);
+      const noImpactSites = [
+        'gba_storm_water_drain_inlet_2_to_nallurhalli_lake',
+        'pattandur_agrahare_2',
+        'nallurhalli_main_road',
+        'borewell_road'
+      ];
+
+      if (noImpactSites.includes(siteIdCheck)) {
+        lastImpact    = '';
+        lastSubImpact = '';
+      } else if (newImpact) {
+        lastImpact    = newImpact;
+        lastSubImpact = newSubImpact || '';
+      }
+      // If newImpact is empty and not in noImpactSites, lastImpact carries over from the group header!
+
       lastCost      = get(row, colIdx, 'tentative_cost') || '';
       lastTimeline  = get(row, colIdx, 'tentative_timeline') || '';
     } else {
