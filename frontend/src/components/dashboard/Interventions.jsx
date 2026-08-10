@@ -83,8 +83,6 @@ const K100_TIMELINE_DATA = [
   }
 ];
 
-
-
 const K100_ASSETS = {
   publicRealm: [
     { title: 'Restored channel', desc: '9.6 km of desilted, re-graded waterway with restored gravity flow.', icon: '🌊' },
@@ -111,245 +109,280 @@ const SLIDER_PAIRS = [
   {
     id: 'channel',
     label: 'Channel Structure Restoration',
+    icon: '🌊',
     beforeSrc: '/images/channelised_drain.png',
     afterSrc: '/images/reopened_channel.png',
-    beforeAlt: 'Channelised Drain Before',
-    afterAlt: 'Reopened Planted Waterway After',
-    beforeCaption: 'The channelised drain — silted, sewage-fed, fenced off from the city.',
-    afterCaption: 'The reopened channel — native stone edges, planting, a walkable promenade.'
+    beforeAlt: 'K100 Channelised Drain Before Restoration',
+    afterAlt: 'K100 Reopened Planted Waterway After Restoration',
+    beforeLabel: 'Concrete Drain (Before)',
+    afterLabel: 'Planted Waterway (After)',
+    beforeCaption: 'The channelised drain — heavily silted, carrying raw sewage, and walled off from the city.',
+    afterCaption: 'The reopened channel — native granite edges, bio-filtering plants, and a walkable public promenade.'
   },
   {
     id: 'urban',
     label: 'Urban Context & Relationship',
+    icon: '🏙️',
     beforeSrc: '/images/Gray_Infrastructure.png',
     afterSrc: '/images/Ecological_corridor.png',
-    beforeAlt: 'Grey Infrastructure Before',
-    afterAlt: 'Ecological Corridor After',
-    beforeCaption: 'Grey infrastructure: the drain as the city\'s back-of-house.',
-    afterCaption: 'Ecological corridor: an open channel people can walk beside.'
+    beforeAlt: 'K100 Grey Infrastructure Barrier Before',
+    afterAlt: 'K100 Ecological Corridor Promenade After',
+    beforeLabel: 'Grey Barrier (Before)',
+    afterLabel: 'Ecological Corridor (After)',
+    beforeCaption: 'Grey infrastructure: the drain treated as the city’s back-of-house barrier and waste outlet.',
+    afterCaption: 'Ecological corridor: a vibrant, accessible green public realm reconnecting citizens with water.'
   }
 ];
 
-const BeforeAfterSlider = ({ beforeSrc, afterSrc, beforeAlt, afterAlt, beforeCaption, afterCaption }) => {
-  const [position, setPosition] = React.useState(0);
-  const [isDragging, setIsDragging] = React.useState(false);
-  const containerRef = React.useRef(null);
+const BeforeAfterSlider = ({ pair }) => {
+  const [position, setPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef(null);
 
-  const getPositionFromEvent = React.useCallback((clientX) => {
+  // Reset to 50% when changing pair
+  useEffect(() => {
+    setPosition(50);
+  }, [pair.id]);
+
+  const updatePosition = useCallback((clientX) => {
+    if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
-    return Math.min(100, Math.max(0, (x / rect.width) * 100));
+    const pct = Math.min(100, Math.max(0, (x / rect.width) * 100));
+    setPosition(pct);
   }, []);
 
-  const onMouseMove = React.useCallback((e) => {
+  const handlePointerDown = (e) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    updatePosition(e.clientX);
+  };
+
+  const handlePointerMove = (e) => {
     if (!isDragging) return;
-    setPosition(getPositionFromEvent(e.clientX));
-  }, [isDragging, getPositionFromEvent]);
+    updatePosition(e.clientX);
+  };
 
-  const onMouseUp = React.useCallback(() => setIsDragging(false), []);
-
-  const onTouchMove = React.useCallback((e) => {
-    if (!isDragging) return;
-    setPosition(getPositionFromEvent(e.touches[0].clientX));
-  }, [isDragging, getPositionFromEvent]);
-
-  const onTouchEnd = React.useCallback(() => setIsDragging(false), []);
-
-  React.useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-      document.addEventListener('touchmove', onTouchMove, { passive: false });
-      document.addEventListener('touchend', onTouchEnd);
+  const handlePointerUp = (e) => {
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
     }
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('touchend', onTouchEnd);
-    };
-  }, [isDragging, onMouseMove, onMouseUp, onTouchMove, onTouchEnd]);
+    setIsDragging(false);
+  };
 
-  const showBeforeLabel = position < 85;
-  const showAfterLabel = position > 15;
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      setPosition(prev => Math.max(0, prev - 5));
+    } else if (e.key === 'ArrowRight') {
+      setPosition(prev => Math.min(100, prev + 5));
+    } else if (e.key === 'Home') {
+      setPosition(0);
+    } else if (e.key === 'End') {
+      setPosition(100);
+    }
+  };
+
+  const showBeforeBadge = position > 8;
+  const showAfterBadge = position < 92;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {/* Slider image area */}
+    <div className="flex flex-col gap-4">
+      {/* Slider Controls Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="text-left">
+          <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+            {pair.label}
+          </span>
+          <p className="text-xs text-slate-500 m-0 mt-0.5">
+            Drag the vertical divider left or right to compare the before and after transformation
+          </p>
+        </div>
+
+        {/* Quick Position Presets */}
+        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setPosition(100)}
+            className={`px-2.5 py-1 text-xs font-semibold rounded transition-all duration-150 cursor-pointer ${position >= 98 ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Before
+          </button>
+          <button
+            type="button"
+            onClick={() => setPosition(50)}
+            className={`px-2.5 py-1 text-xs font-semibold rounded transition-all duration-150 cursor-pointer ${Math.abs(position - 50) < 3 ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            50 / 50
+          </button>
+          <button
+            type="button"
+            onClick={() => setPosition(0)}
+            className={`px-2.5 py-1 text-xs font-semibold rounded transition-all duration-150 cursor-pointer ${position <= 2 ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            After
+          </button>
+        </div>
+      </div>
+
+      {/* Main Image Slider Container */}
       <div
         ref={containerRef}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '16 / 9',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          cursor: isDragging ? 'grabbing' : 'ew-resize',
-          userSelect: 'none',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-          border: '1px solid #e2e8f0',
-          background: '#f8fafc',
-        }}
+        tabIndex={0}
+        role="slider"
+        aria-label="K100 Before and After comparison slider"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(position)}
+        onKeyDown={handleKeyDown}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-xl sm:rounded-2xl overflow-hidden cursor-ew-resize select-none bg-slate-900 border border-slate-200 shadow-md touch-none focus:outline-hidden focus:ring-2 focus:ring-indigo-500/50"
       >
-        {/* AFTER image — full background */}
+        {/* AFTER Image (Full Background) */}
         <img
-          src={afterSrc}
-          alt={afterAlt}
+          src={pair.afterSrc}
+          alt={pair.afterAlt}
           draggable={false}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none"
         />
 
-        {/* BEFORE image — clipped to left of slider */}
+        {/* BEFORE Image (Clipped overlay) */}
         <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            clipPath: `inset(0 ${100 - position}% 0 0)`,
-          }}
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         >
           <img
-            src={beforeSrc}
-            alt={beforeAlt}
+            src={pair.beforeSrc}
+            alt={pair.beforeAlt}
             draggable={false}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            className="w-full h-full object-cover block"
           />
         </div>
 
-        {/* BEFORE label */}
-        <span style={{
-          position: 'absolute', top: '12px', left: '12px', fontSize: '9px', fontWeight: 800,
-          letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: '6px',
-          background: 'rgba(254,226,226,0.92)', color: '#b91c1c', border: '1px solid rgba(239,68,68,0.15)',
-          backdropFilter: 'blur(4px)', opacity: showBeforeLabel ? 1 : 0, transition: 'opacity 0.2s ease',
-          pointerEvents: 'none', zIndex: 10,
-        }}>
-          BEFORE
-        </span>
-
-        {/* AFTER label */}
-        <span style={{
-          position: 'absolute', top: '12px', right: '12px', fontSize: '9px', fontWeight: 800,
-          letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: '6px',
-          background: 'rgba(209,250,229,0.92)', color: '#065f46', border: '1px solid rgba(16,185,129,0.15)',
-          backdropFilter: 'blur(4px)', opacity: showAfterLabel ? 1 : 0, transition: 'opacity 0.2s ease',
-          pointerEvents: 'none', zIndex: 10,
-        }}>
-          AFTER
-        </span>
-
-        {/* Vertical divider line */}
-        <div style={{
-          position: 'absolute', top: 0, bottom: 0,
-          left: `${position}%`, transform: 'translateX(-50%)',
-          width: '2px', background: 'rgba(255,255,255,0.95)',
-          boxShadow: '0 0 10px rgba(0,0,0,0.4)', zIndex: 20, pointerEvents: 'none',
-        }} />
-
-        {/* Drag handle circle */}
+        {/* Floating BEFORE Badge */}
         <div
-          onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); }}
-          onTouchStart={(e) => { setIsDragging(true); }}
-          style={{
-            position: 'absolute', top: '50%', left: `${position}%`,
-            transform: 'translate(-50%, -50%)',
-            width: '44px', height: '44px', borderRadius: '50%',
-            background: 'white',
-            boxShadow: isDragging ? '0 4px 24px rgba(0,0,0,0.45)' : '0 2px 16px rgba(0,0,0,0.28)',
-            border: '2px solid rgba(255,255,255,0.9)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: isDragging ? 'grabbing' : 'ew-resize', zIndex: 30,
-          }}
+          className="absolute top-3.5 left-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-red-600/90 text-white backdrop-blur-md shadow-md border border-white/20 pointer-events-none transition-opacity duration-200 z-10"
+          style={{ opacity: showBeforeBadge ? 1 : 0 }}
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M7 4L1 10L7 16" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M13 4L19 10L13 16" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          <span>BEFORE</span>
         </div>
 
-        {/* Initial hint */}
-        {position === 0 && (
-          <div style={{
-            position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
-            background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', color: 'white',
-            fontSize: '11px', fontWeight: 600, padding: '6px 14px', borderRadius: '20px',
-            whiteSpace: 'nowrap', zIndex: 10, pointerEvents: 'none',
-            animation: 'baHintPulse 2s ease-in-out infinite',
-          }}>
-            ← Drag to reveal After →
+        {/* Floating AFTER Badge */}
+        <div
+          className="absolute top-3.5 right-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-600/90 text-white backdrop-blur-md shadow-md border border-white/20 pointer-events-none transition-opacity duration-200 z-10"
+          style={{ opacity: showAfterBadge ? 1 : 0 }}
+        >
+          <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          <span>AFTER</span>
+        </div>
+
+        {/* Vertical Divider Stick */}
+        <div
+          className="absolute top-0 bottom-0 pointer-events-none z-20"
+          style={{
+            left: `${position}%`,
+            transform: 'translateX(-50%)',
+            width: '3px',
+            background: 'white',
+            boxShadow: '0 0 14px rgba(0,0,0,0.6)',
+          }}
+        />
+
+        {/* Central Drag Handle Button */}
+        <div
+          className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white shadow-xl flex items-center justify-center border-2 border-white transition-transform duration-100 ${isDragging ? 'scale-110 shadow-2xl ring-4 ring-indigo-500/50' : 'hover:scale-105'}`}
+          style={{
+            left: `${position}%`,
+            cursor: isDragging ? 'grabbing' : 'ew-resize',
+          }}
+        >
+          <div className="flex items-center gap-1 text-slate-700 font-bold text-xs">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+            <div className="w-[1.5px] h-3.5 bg-slate-300 rounded-full" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Drag Interaction Prompt */}
+        {!isDragging && position === 50 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium px-3.5 py-1 rounded-full pointer-events-none shadow-sm flex items-center gap-1.5 animate-pulse z-10">
+            <span>⟵ Drag stick to compare ⟶</span>
           </div>
         )}
       </div>
 
-      {/* Captions */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
-        <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b', lineHeight: 1.5, flex: 1,
-          opacity: showBeforeLabel ? 1 : 0.35, transition: 'opacity 0.3s ease' }}>
-          <span style={{ fontWeight: 700, color: '#dc2626' }}>Before: </span>{beforeCaption}
-        </p>
-        <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b', lineHeight: 1.5, flex: 1, textAlign: 'right',
-          opacity: showAfterLabel ? 1 : 0.35, transition: 'opacity 0.3s ease' }}>
-          <span style={{ fontWeight: 700, color: '#059669' }}>After: </span>{afterCaption}
-        </p>
+      {/* Before / After Captions Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-left">
+        <div
+          className={`p-3.5 rounded-xl border transition-all duration-200 ${position > 40 ? 'bg-amber-50/70 border-amber-200/80 shadow-xs' : 'bg-slate-50 border-slate-200 opacity-60'}`}
+        >
+          <div className="text-[11.5px] font-extrabold uppercase tracking-wider text-amber-800 flex items-center gap-1 mb-1">
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>{pair.beforeLabel || 'Before State'}</span>
+          </div>
+          <p className="text-xs sm:text-[13px] text-slate-700 m-0 leading-relaxed">
+            {pair.beforeCaption}
+          </p>
+        </div>
+
+        <div
+          className={`p-3.5 rounded-xl border transition-all duration-200 ${position < 60 ? 'bg-emerald-50/70 border-emerald-200/80 shadow-xs' : 'bg-slate-50 border-slate-200 opacity-60'}`}
+        >
+          <div className="text-[11.5px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1 mb-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>{pair.afterLabel || 'Transformed State'}</span>
+          </div>
+          <p className="text-xs sm:text-[13px] text-slate-700 m-0 leading-relaxed">
+            {pair.afterCaption}
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
 const BeforeAfterSection = () => {
-  const [activeSlider, setActiveSlider] = React.useState('channel');
-  const active = SLIDER_PAIRS.find(p => p.id === activeSlider);
+  const [activeSlider, setActiveSlider] = useState('channel');
+  const active = SLIDER_PAIRS.find(p => p.id === activeSlider) || SLIDER_PAIRS[0];
 
   return (
-    <div style={{
-      background: 'white', border: '1px solid #e2e8f0', borderRadius: '24px',
-      padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '20px',
-      boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-    }}>
-      <style>{`
-        @keyframes baHintPulse {
-          0%, 100% { opacity: 0.9; transform: translateX(-50%) scale(1); }
-          50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
-        }
-      `}</style>
-
-      <div>
-        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0, marginBottom: '4px' }}>
-          🔄 Transformation: Before &amp; After
+    <div className="bg-white border border-slate-200 rounded-[24px] p-6 md:p-8 flex flex-col gap-6 shadow-sm text-left">
+      <div className="text-left">
+        <h3 className="text-lg font-bold text-slate-900 m-0 mb-1 flex items-center gap-2">
+          <span>🔄</span>
+          <span>Transformation: Before &amp; After</span>
         </h3>
-        <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0, lineHeight: 1.6 }}>
-          Drag the handle left or right to reveal the full transformation — from neglected grey infrastructure to a living ecological waterway corridor.
+        <p className="text-[13.5px] text-slate-500 m-0 leading-relaxed">
+          Drag the handle left or right to reveal the full transformation — from a neglected, silted drainage canal to a vibrant public ecological waterway corridor.
         </p>
       </div>
 
       {/* Tab switcher */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #f1f5f9' }}>
+      <div className="flex gap-2 border-b-2 border-slate-100 pb-0.5 overflow-x-auto">
         {SLIDER_PAIRS.map(pair => (
-          <button key={pair.id} onClick={() => setActiveSlider(pair.id)} style={{
-            background: 'none', border: 'none',
-            borderBottom: activeSlider === pair.id ? '2px solid #4f46e5' : '2px solid transparent',
-            marginBottom: '-2px', padding: '8px 16px', fontSize: '13px', fontWeight: 700,
-            color: activeSlider === pair.id ? '#4f46e5' : '#94a3b8',
-            cursor: 'pointer', transition: 'color 0.15s, border-color 0.15s', whiteSpace: 'nowrap',
-          }}>
-            {pair.label}
+          <button
+            key={pair.id}
+            onClick={() => setActiveSlider(pair.id)}
+            className={`text-[13.5px] font-bold px-4 py-2.5 cursor-pointer transition-colors duration-200 bg-transparent border-b-2 -mb-[2px] whitespace-nowrap flex items-center gap-2 ${activeSlider === pair.id ? 'text-indigo-600 border-indigo-600 bg-indigo-50/40 rounded-t-lg' : 'text-slate-500 hover:text-slate-900 border-transparent'}`}
+          >
+            <span>{pair.icon}</span>
+            <span>{pair.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Slider with horizontal breathing room */}
-      <div style={{ paddingLeft: '32px', paddingRight: '32px' }}>
-        <BeforeAfterSlider
-          key={active.id}
-          beforeSrc={active.beforeSrc}
-          afterSrc={active.afterSrc}
-          beforeAlt={active.beforeAlt}
-          afterAlt={active.afterAlt}
-          beforeCaption={active.beforeCaption}
-          afterCaption={active.afterCaption}
-        />
-      </div>
+      {/* Slider View */}
+      <BeforeAfterSlider key={active.id} pair={active} />
     </div>
   );
 };
@@ -359,8 +392,6 @@ const Interventions = () => {
   const [selectedAssetTab, setSelectedAssetTab] = useState('publicRealm');
 
   const activePhase = K100_TIMELINE_DATA.find(item => item.yearKey === selectedPhase) || K100_TIMELINE_DATA[0];
-
-
 
   const getDotClass = (item, isSelected) => {
     let colorTheme = item.colorTheme;
@@ -466,7 +497,7 @@ const Interventions = () => {
         </div>
       </div>
 
-      {/* 4. Before & After Ecological Transformation — Drag Slider */}
+      {/* 4. Before & After Ecological Transformation — Advanced Drag Slider */}
       <BeforeAfterSection />
 
       {/* 5. Dual-Layer Asset Explorer */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const CASE_STUDIES = [
   {
@@ -48,9 +48,16 @@ const CASE_STUDIES = [
       { text: "Singapore's National University (2020): 'From Trash to Treasure: Kallang River Restoration'" },
     ],
     sourceLink: 'https://una.city/nbs/singapore/bishan-ang-mo-kio-park-kallang-river-restoration',
-    images: [
-      { src: '/images/SingaporeImage.png', caption: 'Bishan-Ang Mo Kio Park — naturalized river with restored floodplain, Singapore' },
-    ],
+    beforeAfter: {
+      beforeSrc: '/images/Singapore_before.png',
+      afterSrc: '/images/Singapore_after.png',
+      beforeAlt: 'Singapore Kallang River concrete canal before restoration',
+      afterAlt: 'Singapore Bishan-Ang Mo Kio Park naturalized river after restoration',
+      beforeLabel: 'Concrete Canal (Before)',
+      afterLabel: 'Naturalized River (After)',
+      beforeCaption: 'The 2.7 km concrete drainage channel — fenced off, separating neighborhoods, and prone to flash flooding.',
+      afterCaption: 'The 3.2 km naturalized meandering river — integrated floodplains, lush parklands, and 3M+ annual visitors.'
+    }
   },
   {
     id: 'copenhagen',
@@ -101,10 +108,16 @@ const CASE_STUDIES = [
       { text: 'EU Climate Adaptation Platform: Case study documentation on Tåsinge Plads' },
     ],
     sourceLink: 'https://dac.dk/en/magazine/places/tasinge-plads-a-pioneering-project-for-the-climate-14',
-    images: [
-      { src: '/images/CopenhagenImage1.webp', caption: 'Tåsinge Plads — sunken plaza storing 1.8 million litres of stormwater' },
-      { src: '/images/CopenhagenImage2.webp', caption: 'Copenhagen Climate Quarter — bioswales and blue-green street redesign' },
-    ],
+    beforeAfter: {
+      beforeSrc: '/images/CopenhagenImage1.webp',
+      afterSrc: '/images/CopenhagenImage2.webp',
+      beforeAlt: 'Copenhagen Tåsinge Plads sunken plaza stormwater retention',
+      afterAlt: 'Copenhagen Climate Quarter Østerbro blue-green street redesign',
+      beforeLabel: 'Tåsinge Plads (Plaza)',
+      afterLabel: 'Climate Quarter (Neighbourhood)',
+      beforeCaption: 'Tåsinge Plads sunken plaza — captures and stores 1.8M litres of extreme cloudburst rainwater beneath urban play features.',
+      afterCaption: 'Climate Quarter Østerbro — Copenhagen’s first climate-resilient neighbourhood with bioswales & green streets.'
+    }
   },
   {
     id: 'rotterdam',
@@ -158,12 +171,237 @@ const CASE_STUDIES = [
       { text: "PRX World (2016): 'Why Holland is Making Room for Water' — multimedia documentation" },
     ],
     sourceLink: 'https://www.dutchwatersector.com/news/biggest-icon-project-of-room-for-the-river-programme-officially-commissioned-at-nijmegen-the',
-    images: [
-      { src: '/images/RotterdamImages1.jpg', caption: 'Nijmegen — dike relocated 350m inland, new secondary channel excavated' },
-      { src: '/images/RotterdamImages2.jpg', caption: 'Room for the River — new urban island and river park created at Lent' },
-    ],
+    beforeAfter: {
+      beforeSrc: '/images/RotterdamImages1.jpg',
+      afterSrc: '/images/RotterdamImages2.jpg',
+      beforeAlt: 'Rotterdam Nijmegen dike relocation and secondary channel excavation',
+      afterAlt: 'Rotterdam Room for the River transformed island park at Lent',
+      beforeLabel: 'Excavation & Dike Relocation (Before)',
+      afterLabel: 'Room for the River (After)',
+      beforeCaption: 'Dike relocated 350m inland and massive 4 km secondary channel excavation to relieve the bottleneck.',
+      afterCaption: 'Transformed waterfront, recreational river park at Lent, and doubled river discharge capacity (16,000 m³/s).'
+    }
   },
 ];
+
+const CaseStudyBeforeAfterSlider = ({ beforeAfter, cityColor }) => {
+  const [position, setPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef(null);
+
+  // Reset to 50% whenever active case study changes
+  useEffect(() => {
+    setPosition(50);
+  }, [beforeAfter?.beforeSrc, beforeAfter?.afterSrc]);
+
+  const updatePosition = useCallback((clientX) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const pct = Math.min(100, Math.max(0, (x / rect.width) * 100));
+    setPosition(pct);
+  }, []);
+
+  const handlePointerDown = (e) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    updatePosition(e.clientX);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDragging) return;
+    updatePosition(e.clientX);
+  };
+
+  const handlePointerUp = (e) => {
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+    setIsDragging(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      setPosition(prev => Math.max(0, prev - 5));
+    } else if (e.key === 'ArrowRight') {
+      setPosition(prev => Math.min(100, prev + 5));
+    } else if (e.key === 'Home') {
+      setPosition(0);
+    } else if (e.key === 'End') {
+      setPosition(100);
+    }
+  };
+
+  const showBeforeBadge = position > 8;
+  const showAfterBadge = position < 92;
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-7 flex flex-col gap-4 text-left shadow-sm">
+      {/* Section Title & Controls Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+        <div>
+          <h3 className="text-base md:text-[17px] font-bold text-slate-900 m-0 flex items-center gap-2">
+            <span>🔄</span>
+            <span>Visual Transformation: Before &amp; After</span>
+          </h3>
+          <p className="text-xs text-slate-500 m-0 mt-0.5">
+            Drag the vertical divider left or right to compare the before and after states
+          </p>
+        </div>
+
+        {/* Quick Position Presets */}
+        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setPosition(100)}
+            className={`px-2.5 py-1 text-xs font-semibold rounded transition-all duration-150 cursor-pointer ${position >= 98 ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Before
+          </button>
+          <button
+            type="button"
+            onClick={() => setPosition(50)}
+            className={`px-2.5 py-1 text-xs font-semibold rounded transition-all duration-150 cursor-pointer ${Math.abs(position - 50) < 3 ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            50 / 50
+          </button>
+          <button
+            type="button"
+            onClick={() => setPosition(0)}
+            className={`px-2.5 py-1 text-xs font-semibold rounded transition-all duration-150 cursor-pointer ${position <= 2 ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            After
+          </button>
+        </div>
+      </div>
+
+      {/* Main Image Slider Container */}
+      <div
+        ref={containerRef}
+        tabIndex={0}
+        role="slider"
+        aria-label="Before and after comparison slider"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(position)}
+        onKeyDown={handleKeyDown}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-xl sm:rounded-2xl overflow-hidden cursor-ew-resize select-none bg-slate-900 border border-slate-200 shadow-md touch-none focus:outline-hidden focus:ring-2 focus:ring-sky-500/50"
+      >
+        {/* AFTER Image (Full Background) */}
+        <img
+          src={beforeAfter.afterSrc}
+          alt={beforeAfter.afterAlt}
+          draggable={false}
+          className="absolute inset-0 w-full h-full object-cover block pointer-events-none"
+        />
+
+        {/* BEFORE Image (Clipped overlay) */}
+        <div
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
+        >
+          <img
+            src={beforeAfter.beforeSrc}
+            alt={beforeAfter.beforeAlt}
+            draggable={false}
+            className="w-full h-full object-cover block"
+          />
+        </div>
+
+        {/* Floating BEFORE Badge */}
+        <div
+          className="absolute top-3.5 left-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-red-600/90 text-white backdrop-blur-md shadow-md border border-white/20 pointer-events-none transition-opacity duration-200 z-10"
+          style={{ opacity: showBeforeBadge ? 1 : 0 }}
+        >
+          <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          <span>BEFORE</span>
+        </div>
+
+        {/* Floating AFTER Badge */}
+        <div
+          className="absolute top-3.5 right-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-600/90 text-white backdrop-blur-md shadow-md border border-white/20 pointer-events-none transition-opacity duration-200 z-10"
+          style={{ opacity: showAfterBadge ? 1 : 0 }}
+        >
+          <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          <span>AFTER</span>
+        </div>
+
+        {/* Vertical Divider Stick */}
+        <div
+          className="absolute top-0 bottom-0 pointer-events-none z-20"
+          style={{
+            left: `${position}%`,
+            transform: 'translateX(-50%)',
+            width: '3px',
+            background: 'white',
+            boxShadow: '0 0 14px rgba(0,0,0,0.6)',
+          }}
+        />
+
+        {/* Central Drag Handle Button */}
+        <div
+          className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white shadow-xl flex items-center justify-center border-2 border-white transition-transform duration-100 ${isDragging ? 'scale-110 shadow-2xl ring-4' : 'hover:scale-105'}`}
+          style={{
+            left: `${position}%`,
+            cursor: isDragging ? 'grabbing' : 'ew-resize',
+            ringColor: cityColor || '#0ea5e9',
+          }}
+        >
+          <div className="flex items-center gap-1 text-slate-700 font-bold text-xs">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+            <div className="w-[1.5px] h-3.5 bg-slate-300 rounded-full" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Drag Interaction Prompt */}
+        {!isDragging && position === 50 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium px-3.5 py-1 rounded-full pointer-events-none shadow-sm flex items-center gap-1.5 animate-pulse z-10">
+            <span>⟵ Drag stick to compare ⟶</span>
+          </div>
+        )}
+      </div>
+
+      {/* Before / After Captions Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+        <div
+          className={`p-3.5 rounded-xl border transition-all duration-200 ${position > 40 ? 'bg-amber-50/70 border-amber-200/80 shadow-xs' : 'bg-slate-50 border-slate-200 opacity-60'}`}
+        >
+          <div className="text-[11.5px] font-extrabold uppercase tracking-wider text-amber-800 flex items-center gap-1 mb-1">
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>{beforeAfter.beforeLabel || 'Before State'}</span>
+          </div>
+          <p className="text-xs sm:text-[13px] text-slate-700 m-0 leading-relaxed">
+            {beforeAfter.beforeCaption}
+          </p>
+        </div>
+
+        <div
+          className={`p-3.5 rounded-xl border transition-all duration-200 ${position < 60 ? 'bg-emerald-50/70 border-emerald-200/80 shadow-xs' : 'bg-slate-50 border-slate-200 opacity-60'}`}
+        >
+          <div className="text-[11.5px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1 mb-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>{beforeAfter.afterLabel || 'Transformed State'}</span>
+          </div>
+          <p className="text-xs sm:text-[13px] text-slate-700 m-0 leading-relaxed">
+            {beforeAfter.afterCaption}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
   const [activeId, setActiveId] = useState('singapore');
@@ -267,20 +505,12 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
             </div>
           </div>
 
-          {/* Image Gallery */}
-          {active.images && active.images.length > 0 && (
-            <div className={`grid gap-4 rounded-2xl overflow-hidden ${active.images.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-              {active.images.map((img, i) => (
-                <figure key={i} className="m-0 flex flex-col gap-2 rounded-xl overflow-hidden border border-slate-200 group text-left">
-                  <img
-                    src={img.src}
-                    alt={img.caption}
-                    className="w-full h-auto block transition-transform duration-400 group-hover:scale-[1.02]"
-                  />
-                  <figcaption className="text-[12.5px] text-slate-500 px-3.5 py-2.5 bg-slate-50 leading-relaxed italic">{img.caption}</figcaption>
-                </figure>
-              ))}
-            </div>
+          {/* Before / After Interactive Comparison Slider */}
+          {active.beforeAfter && (
+            <CaseStudyBeforeAfterSlider
+              beforeAfter={active.beforeAfter}
+              cityColor={active.color}
+            />
           )}
 
           {/* Key Project Data */}
