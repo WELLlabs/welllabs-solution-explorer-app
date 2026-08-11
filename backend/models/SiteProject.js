@@ -20,6 +20,9 @@ const SiteProjectSchema = new Schema(
     name: String,
     latitude: Number,
     longitude: Number,
+    watershed: String,           // e.g. "Nallurhalli Micro Watershed"
+    site_level_impact: String,
+    subcatchment_level_impact: String,
 
     // GeoJSON point — populated when lat/lng are valid
     location: {
@@ -27,11 +30,11 @@ const SiteProjectSchema = new Schema(
       coordinates: [Number], // [lng, lat]
     },
 
-    watershed: String,           // e.g. "Nallurhalli Micro Watershed"
-    site_level_impact: String,
-    subcatchment_level_impact: String,
-
     linked_intervention_ids: [{ type: String, index: true }],
+
+    // Images and media for project view and map popups
+    image_url: { type: String, default: '' },
+    images: [{ type: String }],
 
     // flagged if site type couldn't be mapped confidently
     needs_review: { type: Boolean, default: false },
