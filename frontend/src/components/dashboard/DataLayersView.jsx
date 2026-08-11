@@ -12,6 +12,7 @@ import localProjects from '../../data/projects.json';
 import localWells from '../../data/wells.json';
 import v1WellsCsv from '../../data/v1_wells_with_wards.csv?raw';
 import v1ProjectsCsv from '../../data/v1_projects_with_wards.csv?raw';
+import { getProjectImage } from '../../data/projectImages';
 
 const NEW_PROJECTS_DATA = [
   {
@@ -1642,10 +1643,23 @@ const DataLayersView = () => {
           fillOpacity: 0.92
         });
 
+        const siteImg = getProjectImage(site);
+        const imageHeader = siteImg ? `
+          <div style="width:100%;height:105px;margin-bottom:8px;border-radius:8px;overflow:hidden;background:#f1f5f9;position:relative;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <img 
+              src="${siteImg}" 
+              alt="${site.name}" 
+              style="width:100%;height:100%;object-fit:cover;display:block;" 
+              onerror="this.parentElement.style.display='none';" 
+            />
+          </div>
+        ` : '';
+
         const viewMoreBtn = `<button onclick="window.openSiteDetailInPlace && window.openSiteDetailInPlace('${site.site_id}')" style="display:block;width:100%;margin-top:8px;border:none;background-color:${color};color:white!important;text-align:center;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:750;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.1);">View Details →</button>`;
 
         marker.bindPopup(`
-          <div style="display:flex;flex-direction:column;text-align:left;padding:4px;font-family:system-ui,-apple-system,sans-serif;min-width:180px">
+          <div style="display:flex;flex-direction:column;text-align:left;padding:4px;font-family:system-ui,-apple-system,sans-serif;min-width:200px;max-width:240px">
+            ${imageHeader}
             <span style="font-size:8.5px;font-weight:800;letter-spacing:0.5px;padding:3px 6px;border-radius:4px;align-self:flex-start;margin-bottom:6px;text-transform:uppercase;background-color:${color}20;color:${color}">${typeIcon} ${(site.type || 'SITE').toUpperCase()}</span>
             <h4 style="font-size:13.5px;font-weight:750;color:#0f172a;margin:0 0 4px 0">${site.name}</h4>
             ${site.watershed ? `<p style="font-size:11px;color:#64748b;margin:0 0 4px 0">🌊 ${site.watershed}</p>` : ''}
@@ -1661,6 +1675,8 @@ const DataLayersView = () => {
             lat,
             lng,
             wardName:    '',
+            image_url:   siteImg,
+            images:      site.images || (siteImg ? [siteImg] : []),
             tags:        site.type === 'lake' ? 'lake' : site.type === 'park' ? 'rainwater' : 'flood',
             categoryInfo: {
               id:    site.type,

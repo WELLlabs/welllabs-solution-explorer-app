@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { getProjectImage } from '../../data/projectImages';
 
 /* ============ helpers ============ */
 const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
@@ -194,6 +195,8 @@ function normaliseProject(site) {
     alts:       ['fol', 'biome'],
     funders:    [],
     assets,
+    image_url:  getProjectImage(site),
+    images:     site.images || [],
     // pass through raw fields for the overview tab
     _raw: site,
   };
@@ -661,6 +664,16 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
       case 'overview':
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
+            {p.image_url && (
+              <div className="w-full h-48 sm:h-64 rounded-2xl overflow-hidden mb-6 bg-slate-100 border border-slate-200 shadow-sm relative">
+                <img
+                  src={p.image_url}
+                  alt={p.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { if (e.currentTarget?.parentElement) e.currentTarget.parentElement.style.display = 'none'; }}
+                />
+              </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
                 <b className="text-lg font-bold text-slate-800">{rs(p.total)}</b>

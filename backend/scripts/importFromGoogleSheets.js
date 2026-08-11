@@ -206,6 +206,7 @@ const HEADER_PATTERNS = {
   tentative_timeline:    /timeline|duration|period/i,
   site_level_impact:     /site.?level|site.?impact/i,
   subcatchment_impact:   /subcatch|sub.?catchment/i,
+  image_url:             /image|photo|picture|img|thumbnail/i,
 };
 
 function detectHeaderRow(rows) {
@@ -386,6 +387,7 @@ function transform(rows) {
           issue: `Unrecognized site type "${siteType}" for site "${siteName}"`,
         });
       }
+      const imgRaw = get(row, colIdx, 'image_url') || '';
       const siteDoc = {
         site_id:   siteId,
         type:      mappedType || 'park',
@@ -393,6 +395,8 @@ function transform(rows) {
         watershed: currentWatershed,
         latitude:  lat,
         longitude: lng,
+        image_url: imgRaw || '',
+        images:    imgRaw ? [imgRaw] : [],
         site_level_impact:         impact   || null,
         subcatchment_level_impact: subImpact || null,
         needs_review:  !mappedType,
