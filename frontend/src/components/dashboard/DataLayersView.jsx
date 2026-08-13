@@ -817,6 +817,7 @@ const DataLayersView = () => {
   const gbaCorporationsLayerRef = useRef(null);
   const valleysLayerRef = useRef(null);
   const greenspacesLayerRef = useRef(null);
+  const floodHazardLayerRef = useRef(null);
 
   const [loadingAssemblyConst2, setLoadingAssemblyConst2] = useState(false);
   const [loadingBengaluruAssembly, setLoadingBengaluruAssembly] = useState(false);
@@ -825,6 +826,7 @@ const DataLayersView = () => {
   const [loadingGbaCorporations, setLoadingGbaCorporations] = useState(false);
   const [loadingValleys, setLoadingValleys] = useState(false);
   const [loadingGreenspaces, setLoadingGreenspaces] = useState(false);
+  const [loadingFloodHazard, setLoadingFloodHazard] = useState(false);
 
   // Selected item (project or well) for full details panel
   const [selectedItem, setSelectedItem] = useState(null);
@@ -933,6 +935,7 @@ const DataLayersView = () => {
       gbaCorporationsLayerRef.current = null;
       valleysLayerRef.current = null;
       greenspacesLayerRef.current = null;
+      floodHazardLayerRef.current = null;
     };
   }, []);
 
@@ -941,22 +944,68 @@ const DataLayersView = () => {
     const map = mapRef.current;
     if (!map) return;
 
+    const getFloodHazardStyle = (floodMean) => {
+      if (floodMean === null || floodMean === undefined || isNaN(floodMean)) {
+        return { color: '#94a3b8', fillColor: '#cbd5e1', fillOpacity: 0.35, level: 'Unrated', range: 'N/A', badgeColor: '#475569', badgeBg: '#f1f5f9' };
+      }
+      // 1. Red: 0.543 - 0.667 (Very High)
+      if (floodMean >= 0.543) {
+        return { color: '#b91c1c', fillColor: '#ef4444', fillOpacity: 0.65, level: 'Very High Hazard', range: '0.543 – 0.667', badgeColor: '#991b1b', badgeBg: '#fee2e2' };
+      }
+      // 2. Orange: 0.497 - 0.543 (High)
+      if (floodMean >= 0.497) {
+        return { color: '#c2410c', fillColor: '#f97316', fillOpacity: 0.58, level: 'High Hazard', range: '0.497 – 0.543', badgeColor: '#c2410c', badgeBg: '#ffedd5' };
+      }
+      // 3. Light Yellow: 0.456 - 0.497 (Moderate)
+      if (floodMean >= 0.456) {
+        return { color: '#ca8a04', fillColor: '#fde047', fillOpacity: 0.55, level: 'Moderate Hazard', range: '0.456 – 0.497', badgeColor: '#854d0e', badgeBg: '#fef9c3' };
+      }
+      // 4. Light Green: 0.416 - 0.456 (Low)
+      if (floodMean >= 0.416) {
+        return { color: '#4d7c0f', fillColor: '#84cc16', fillOpacity: 0.50, level: 'Low Hazard', range: '0.416 – 0.456', badgeColor: '#3f6212', badgeBg: '#ecfccb' };
+      }
+      // 5. Green: 0.000 - 0.416 (Very Low)
+      return { color: '#14532d', fillColor: '#16a34a', fillOpacity: 0.45, level: 'Very Low Hazard', range: '0.000 – 0.416', badgeColor: '#14532d', badgeBg: '#dcfce7' };
+    };
+
     const addGeoJsonLayer = (data, layerRef, color, layerType = 'assembly', weight = 2, fillOpacity = 0.05) => {
       if (layerRef.current) return;
 
       const layer = L.geoJSON(data, {
-        style: {
-          color: color,
-          weight: weight,
-          opacity: 0.65,
-          fillColor: color,
-          fillOpacity: fillOpacity
+        style: (feature) => {
+          if (layerType === 'flood_hazard') {
+            const hazard = getFloodHazardStyle(feature?.properties?._Floodmean);
+            return {
+              color: hazard.color,
+              weight: weight || 1.5,
+              opacity: 0.85,
+              fillColor: hazard.fillColor,
+              fillOpacity: hazard.fillOpacity
+            };
+          }
+          return {
+            color: color,
+            weight: weight,
+            opacity: 0.65,
+            fillColor: color,
+            fillOpacity: fillOpacity
+          };
         },
         onEachFeature: (feature, leafletLayer) => {
           const props = feature.properties || {};
           let popupContent = '';
 
-          if (layerType === 'gba_wards') {
+          if (layerType === 'flood_hazard') {
+            const floodMean = props._Floodmean;
+            const hazard = getFloodHazardStyle(floodMean);
+            popupContent = `
+              <div style="display: flex; flex-direction: column; text-align: left; padding: 4px; font-family: system-ui, -apple-system, sans-serif; min-width: 175px;">
+                <span style="font-size: 8.5px; font-weight: 850; letter-spacing: 0.5px; padding: 3px 6px; border-radius: 4px; align-self: flex-start; margin-bottom: 6px; text-transform: uppercase; background-color: ${hazard.badgeBg}; color: ${hazard.badgeColor};">⚠️ ${hazard.level.toUpperCase()}</span>
+                <h4 style="margin: 0 0 4px 0; font-size: 13.5px; font-weight: 750; color: #0f172a;">Flood Hazard Grid #${props.id || 'N/A'}</h4>
+                <p style="margin: 3px 0 0 0; font-size: 11.5px; color: #334155;">🌊 Flood Index: <strong>${typeof floodMean === 'number' ? floodMean.toFixed(3) : '—'}</strong></p>
+              </div>
+            `;
+          } else if (layerType === 'gba_wards') {
             const wardName = props.wardName || 'Unknown Ward';
             const wardNameKn = props.wardNameKn || '';
             const wardId = props.wardId || 'N/A';
@@ -1088,10 +1137,18 @@ const DataLayersView = () => {
           });
 
           leafletLayer.on('mouseout', () => {
-            leafletLayer.setStyle({
-              fillOpacity: fillOpacity,
-              weight: weight
-            });
+            if (layerType === 'flood_hazard') {
+              const hazard = getFloodHazardStyle(feature?.properties?._Floodmean);
+              leafletLayer.setStyle({
+                fillOpacity: hazard.fillOpacity,
+                weight: weight || 1.5
+              });
+            } else {
+              leafletLayer.setStyle({
+                fillOpacity: fillOpacity,
+                weight: weight
+              });
+            }
           });
         }
       }).addTo(map);
@@ -1135,7 +1192,7 @@ const DataLayersView = () => {
     }
 
     // Layer 2: bengaluruAssembly (Bengaluru Assemblies Map)
-    if (showBengaluruAssembly || showNewFloodRisk) {
+    if (showBengaluruAssembly) {
       if (!bengaluruAssemblyLayerRef.current) {
         setLoadingBengaluruAssembly(true);
         import('../../data/assembly_const2/bengaluru_assembly_const.json')
@@ -1259,18 +1316,40 @@ const DataLayersView = () => {
         greenspacesLayerRef.current = null;
       }
     }
+
+    // Layer 8: Flood Hazard Map (JasinS)
+    if (showNewFloodRisk) {
+      if (!floodHazardLayerRef.current) {
+        setLoadingFloodHazard(true);
+        import('../../data/flood_hazard_jasin.json')
+          .then((mod) => {
+            addGeoJsonLayer(mod.default, floodHazardLayerRef, '#ef4444', 'flood_hazard', 1.5, 0.48);
+            setLoadingFloodHazard(false);
+          })
+          .catch((err) => {
+            console.error('Failed to load Flood Hazard Map layer:', err);
+            setLoadingFloodHazard(false);
+          });
+      }
+    } else {
+      if (floodHazardLayerRef.current) {
+        map.removeLayer(floodHazardLayerRef.current);
+        floodHazardLayerRef.current = null;
+      }
+    }
   }, [showAssemblyConst2, showBengaluruAssembly, showKarnatakaAssembly, showGbaWards, showGbaCorporations, showValleys, showGreenspaces, showNewFloodRisk]);
 
   // Clear selected item if corresponding layer is unchecked
   useEffect(() => {
     if (!selectedItem) return;
-    const isProj = selectedItem.projName !== undefined;
-    if (isProj && !showProjects) {
+    if (selectedItem.isSiteProject && !showNewProjects) {
       setSelectedItem(null);
-    } else if (!isProj && !showWells) {
+    } else if (selectedItem.projName !== undefined && !selectedItem.isSiteProject && !showProjects) {
+      setSelectedItem(null);
+    } else if (selectedItem.wellName !== undefined && !showWells) {
       setSelectedItem(null);
     }
-  }, [showWells, showProjects]);
+  }, [showWells, showProjects, showNewProjects]);
 
   // Aggregate loaded wells and projects to build a Wards summary water profile
   const getWardsSummary = () => {
@@ -1670,19 +1749,23 @@ const DataLayersView = () => {
 
         marker.on('click', () => {
           setSelectedItem({
-            projName:    site.name,
-            status:      site.type,
+            isSiteProject: true,
+            site_id: site.site_id,
+            name: site.name,
+            type: site.type,
             lat,
             lng,
-            wardName:    '',
-            image_url:   siteImg,
-            images:      site.images || (siteImg ? [siteImg] : []),
-            tags:        site.type === 'lake' ? 'lake' : site.type === 'park' ? 'rainwater' : 'flood',
+            watershed: site.watershed || '',
+            site_level_impact: site.site_level_impact || '',
+            subcatchment_level_impact: site.subcatchment_level_impact || '',
+            interventions: site.interventions || [],
+            linked_intervention_ids: site.linked_intervention_ids || [],
+            image_url: siteImg,
             categoryInfo: {
-              id:    site.type,
-              name:  site.name,
+              id: site.type,
+              name: site.name,
               color: color,
-              icon:  typeIcon
+              icon: typeIcon
             },
             _raw: site
           });
@@ -1721,52 +1804,8 @@ const DataLayersView = () => {
       });
     }
 
-    // Render Flood Hotspots
-    if (showNewFloodRisk) {
-      FLOOD_SPOTS_DATA.forEach((spot) => {
-        const { lat, lng } = spot;
-        if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
-
-        const warningIcon = L.divIcon({
-          className: 'custom-leaflet-flood-container',
-          html: `
-            <div class="flood-spot-marker animate-pulse-fast" style="background-color: #ef4444; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; display: grid; place-items: center; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); cursor: pointer;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              </svg>
-            </div>
-          `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
-
-        const fsMarker = L.marker([lat, lng], { icon: warningIcon });
-        const wsInfo = WATERSHEDS_POLYGONS[spot.watershedId];
-
-        fsMarker.bindPopup(`
-          <div style="display: flex; flex-direction: column; text-align: left; padding: 4px; font-family: system-ui, -apple-system, sans-serif; width: 210px;">
-            <span style="font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 6px; border-radius: 4px; align-self: flex-start; margin-bottom: 6px; text-transform: uppercase; background-color: #ffeeeb; color: #ef4444; font-weight: 850;">⚠️ FLOOD HOTSPOT</span>
-            <h4 style="margin: 4px 0 2px 0; font-size: 13px; font-weight: 700; color: #1e293b;">${spot.name}</h4>
-            <p style="font-size: 11px; margin: 0 0 6px 0; color: #64748b;">🌊 Watershed: <strong>${wsInfo ? wsInfo.name : 'Unknown'}</strong></p>
-            <p style="font-size: 11.5px; color: #475569; margin: 0; line-height: 1.35;">${spot.details}</p>
-            <button class="popup-filter-ws-btn" style="display: block; width: 100%; margin-top: 8px; border: none; background-color: #ef4444; color: white !important; text-align: center; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Trace Watershed</button>
-          </div>
-        `, { closeButton: false });
-
-        fsMarker.on('popupopen', () => {
-          const btn = document.querySelector('.popup-filter-ws-btn');
-          if (btn) {
-            btn.onclick = () => {
-              handleSelectFloodSpot(spot);
-              fsMarker.closePopup();
-            };
-          }
-        });
-
-        fsMarker.addTo(markersGroup);
-        boundsPoints.push([lat, lng]);
-      });
-    }
+    // Render Projects Layer
+    // (Flood Hazard is rendered via GeoJSON layer with custom polygon styles and borders)
 
     // Zoom automatically to active bounds containing visible points
     if (boundsPoints.length > 0) {
@@ -2078,15 +2117,42 @@ const DataLayersView = () => {
                 <span>Projects</span>
               </label>
 
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showNewFloodRisk}
-                  onChange={(e) => setShowNewFloodRisk(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 accent-[#ef4444] mt-0.5"
-                />
-                <span>Flood Risk {loadingBengaluruAssembly && showNewFloodRisk && <span className="small-inline-spinner"></span>}</span>
-              </label>
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+                  <input
+                    type="checkbox"
+                    checked={showNewFloodRisk}
+                    onChange={(e) => setShowNewFloodRisk(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 accent-[#ef4444] mt-0.5"
+                  />
+                  <span>Flood Hazard Map {loadingFloodHazard && <span className="small-inline-spinner"></span>}</span>
+                </label>
+                {showNewFloodRisk && (
+                  <div className="ml-7 flex flex-col gap-1.5 text-[11px] text-slate-700 font-medium bg-slate-50 border border-slate-200 rounded-xl p-2.5 shadow-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Flood Hazard Index Legend</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#ef4444] inline-block border border-black/15"></span> Red</span>
+                      <strong className="font-mono text-[10.5px] text-slate-600">0.543 – 0.667</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#f97316] inline-block border border-black/15"></span> Orange</span>
+                      <strong className="font-mono text-[10.5px] text-slate-600">0.497 – 0.543</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#fde047] inline-block border border-black/15"></span> Light Yellow</span>
+                      <strong className="font-mono text-[10.5px] text-slate-600">0.456 – 0.497</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#84cc16] inline-block border border-black/15"></span> Light Green</span>
+                      <strong className="font-mono text-[10.5px] text-slate-600">0.416 – 0.456</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#16a34a] inline-block border border-black/15"></span> Green</span>
+                      <strong className="font-mono text-[10.5px] text-slate-600">0.000 – 0.416</strong>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {activeWatershedId && (
@@ -2210,7 +2276,103 @@ const DataLayersView = () => {
           <div className="min-h-[280px] xl:flex-1 xl:h-0 overflow-y-auto bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm custom-scrollbar">
             {selectedItem ? (
               <div className="flex flex-col gap-5">
-                {selectedItem.projName !== undefined ? (
+                {selectedItem.isSiteProject ? (
+                  <>
+                    <div className="flex justify-between items-start border-b border-slate-100 pb-3.5 flex-wrap gap-3 text-left">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <span 
+                          className="text-[9.5px] font-extrabold tracking-wider px-2.5 py-1 rounded-md uppercase"
+                          style={{ backgroundColor: (selectedItem.categoryInfo?.color || '#3b82f6') + '18', color: selectedItem.categoryInfo?.color || '#3b82f6' }}
+                        >
+                          {selectedItem.categoryInfo?.icon} {String(selectedItem.type || 'SITE').toUpperCase()}
+                        </span>
+                        <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-[200px] text-left">{selectedItem.name}</h3>
+                      </div>
+                      <button
+                        onClick={() => window.openSiteDetailInPlace && window.openSiteDetailInPlace(selectedItem.site_id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer border-0"
+                      >
+                        <span>Open Project Workspace</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M5 12h14" />
+                          <path d="M12 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-5 text-left">
+                      {selectedItem.image_url && (
+                        <div className="w-full h-44 sm:h-52 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-xs relative">
+                          <img
+                            src={selectedItem.image_url}
+                            alt={selectedItem.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { if (e.currentTarget?.parentElement) e.currentTarget.parentElement.style.display = 'none'; }}
+                          />
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-3.5 flex flex-col gap-1 text-left">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">🌱 Site Level Impact</span>
+                          <p className="text-xs font-semibold text-slate-700 m-0 leading-relaxed">
+                            {selectedItem.site_level_impact || 'Infiltration & storage modeling.'}
+                          </p>
+                        </div>
+                        <div className="bg-sky-50/70 border border-sky-100 rounded-xl p-3.5 flex flex-col gap-1 text-left">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-700">🌊 Subcatchment Level Impact</span>
+                          <p className="text-xs font-semibold text-slate-700 m-0 leading-relaxed">
+                            {selectedItem.subcatchment_level_impact || 'Subcatchment runoff & infiltration telemetry.'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-100 pt-3">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Watershed</span>
+                          <strong className="text-xs text-slate-700 font-semibold">{selectedItem.watershed || '—'}</strong>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Coordinates</span>
+                          <code className="font-mono text-[11px] text-slate-700 bg-white border border-slate-300 px-2 py-0.5 rounded w-fit inline-block">
+                            {selectedItem.lat?.toFixed(6)}° N, {selectedItem.lng?.toFixed(6)}° E
+                          </code>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Interventions</span>
+                          <strong className="text-xs text-blue-600 font-bold">
+                            {(selectedItem.interventions?.length || selectedItem.linked_intervention_ids?.length || 0)} planned
+                          </strong>
+                        </div>
+                      </div>
+
+                      {((selectedItem.interventions && selectedItem.interventions.length > 0) || (selectedItem.linked_intervention_ids && selectedItem.linked_intervention_ids.length > 0)) && (
+                        <div className="border-t border-dashed border-slate-200 pt-3 flex flex-col gap-2">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Planned Nature-Based Interventions</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedItem.interventions?.length > 0 ? (
+                              selectedItem.interventions.map((iv, idx) => (
+                                <span key={idx} className="text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">
+                                  🔧 {iv.type?.replace(/_/g, ' ')} {iv.quantity ? `×${iv.quantity}` : ''}
+                                </span>
+                              ))
+                            ) : (
+                              selectedItem.linked_intervention_ids.map((id, idx) => {
+                                const parts = id.split('__');
+                                const typeName = parts[1] ? parts[1].replace(/_/g, ' ') : id;
+                                return (
+                                  <span key={idx} className="text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">
+                                    🔧 {typeName}
+                                  </span>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : selectedItem.projName !== undefined ? (
                   <>
                     <div className="flex justify-between items-center border-b border-slate-100 pb-3 flex-wrap gap-2 text-left">
                       {selectedItem.categoryInfo ? (
@@ -2414,7 +2576,7 @@ const DataLayersView = () => {
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-                <p className="text-[13.5px] m-0 max-w-[380px] font-semibold">Tick the &quot;Wells&quot; or &quot;Existing Interventions&quot; layers and choose a location to view telemetry measurements here.</p>
+                <p className="text-[13.5px] m-0 max-w-[380px] font-semibold">Tick the &quot;Wells&quot;, &quot;Projects&quot;, or &quot;Existing Interventions&quot; layers and choose a location to view telemetry measurements here.</p>
               </div>
             )}
           </div>
