@@ -116,7 +116,8 @@ const Dashboard = () => {
           <PendingApproval />
         )}
 
-        {/* WORKSPACE NAVIGATION TABS */}
+        {/* WORKSPACE NAVIGATION TABS (Home, Case Study, Dashboard tabs hidden as requested) */}
+        {/*
         {user?.role !== 'Pending' && activeTab !== 'interventions' && activeTab !== 'newprojects' && (
           <div className="dashboard-navigation-tabs max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6">
             <button 
@@ -154,7 +155,6 @@ const Dashboard = () => {
               Dashboard
             </button>
 
-            {/* Admin Exclusive User Management */}
             {user?.role === 'Admin' && (
               <button 
                 className={`tab-btn ${activeTab === 'usermanagement' ? 'active' : ''}`}
@@ -172,6 +172,7 @@ const Dashboard = () => {
             )}
           </div>
         )}
+        */}
 
         {/* 1. HOME VIEW */}
         {user?.role !== 'Pending' && activeTab === 'home' && (
