@@ -776,6 +776,209 @@ const DataLayersView = () => {
   // New placeholder layers states
   const [showNewProjects, setShowNewProjects] = useState(false);
   const [showNewFloodRisk, setShowNewFloodRisk] = useState(false);
+  const [showFloodingHotspots, setShowFloodingHotspots] = useState(false);
+
+  // Accordion questions state for left sidebar
+  const [openSections, setOpenSections] = useState({
+    happening: true,
+    risks: true,
+    projects: true,
+  });
+
+  const toggleSection = (sectionKey) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey],
+    }));
+  };
+
+  // Layer Boundary Search (Bengaluru Assembly, GBA Wards, GBA Corporations) states & methods
+  const [searchLayerItems, setSearchLayerItems] = useState([]);
+  const [selectedSearchCategory, setSelectedSearchCategory] = useState('all'); // 'all' | 'assembly' | 'ward' | 'corporation'
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [selectedBoundaryItem, setSelectedBoundaryItem] = useState(null);
+  const selectedBoundaryLayerRef = useRef(null);
+  const searchDropdownContainerRef = useRef(null);
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
+  const [searchError, setSearchError] = useState(null);
+
+  // Load GeoJSON data for the 3 searchable layers on mount
+  useEffect(() => {
+    Promise.all([
+      import('../../data/assembly_const2/bengaluru_assembly_const.json'),
+      import('../../data/gba_wards.json'),
+      import('../../data/gba_corporations.json')
+    ]).then(([assemblyMod, wardMod, corpMod]) => {
+      const items = [];
+
+      // 1. Bengaluru Assemblies
+      if (assemblyMod.default?.features) {
+        assemblyMod.default.features.forEach((f, idx) => {
+          const props = f.properties || {};
+          const name = props.AC_NAME || props.ac_name || props.Name || `Assembly ${idx + 1}`;
+          const code = props.AC_CODE || props.ac_code || '';
+          items.push({
+            id: `assembly_${idx}_${name}`,
+            name: String(name).trim(),
+            category: 'assembly',
+            categoryLabel: 'Bengaluru Assembly',
+            categoryColor: '#2563eb',
+            categoryBg: '#eff6ff',
+            categoryBorder: '#bfdbfe',
+            categoryIcon: '🏛️',
+            subtitle: code ? `AC Code: ${code}` : 'Assembly Constituency',
+            feature: f
+          });
+        });
+      }
+
+      // 2. GBA Wards
+      if (wardMod.default?.features) {
+        wardMod.default.features.forEach((f, idx) => {
+          const props = f.properties || {};
+          const name = props.wardName || props.Name || `Ward ${idx + 1}`;
+          const corp = props.corporation || '';
+          const ac = props.ac || '';
+          const wardId = props.wardId || '';
+          items.push({
+            id: `ward_${idx}_${name}`,
+            name: String(name).trim(),
+            category: 'ward',
+            categoryLabel: 'GBA Ward',
+            categoryColor: '#e11d48',
+            categoryBg: '#fff1f2',
+            categoryBorder: '#fecdd3',
+            categoryIcon: '📍',
+            subtitle: [corp ? `Corp: ${corp}` : '', ac ? `AC: ${ac}` : '', wardId ? `ID: ${wardId}` : ''].filter(Boolean).join(' • ') || 'GBA Ward Boundary',
+            feature: f
+          });
+        });
+      }
+
+      // 3. GBA Corporations
+      if (corpMod.default?.features) {
+        corpMod.default.features.forEach((f, idx) => {
+          const props = f.properties || {};
+          const name = props.name || `Corporation ${idx + 1}`;
+          const id = props.id || '';
+          items.push({
+            id: `corp_${idx}_${name}`,
+            name: String(name).includes('Corporation') ? String(name).trim() : `${String(name).trim()} Corporation`,
+            category: 'corporation',
+            categoryLabel: 'GBA Corporation',
+            categoryColor: '#db2777',
+            categoryBg: '#fdf2f8',
+            categoryBorder: '#fbcfe8',
+            categoryIcon: '🏢',
+            subtitle: id ? `Zone ID: ${id}` : 'GBA City Corporation Zone',
+            feature: f
+          });
+        });
+      }
+
+      setSearchLayerItems(items);
+    }).catch(err => console.error('Error loading searchable boundary layers:', err));
+  }, []);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchDropdownContainerRef.current && !searchDropdownContainerRef.current.contains(e.target)) {
+        setIsSearchDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectBoundaryItem = (item) => {
+    if (!mapRef.current || !item) return;
+    setSearchError(null);
+
+    // Remove previous single boundary highlight
+    if (selectedBoundaryLayerRef.current) {
+      mapRef.current.removeLayer(selectedBoundaryLayerRef.current);
+      selectedBoundaryLayerRef.current = null;
+    }
+
+    setSelectedBoundaryItem(item);
+    setLocationSearchQuery(item.name);
+    setIsSearchDropdownOpen(false);
+
+    const color = item.category === 'assembly' ? '#2563eb' : item.category === 'ward' ? '#e11d48' : '#db2777';
+    const fillColor = item.category === 'assembly' ? '#3b82f6' : item.category === 'ward' ? '#f43f5e' : '#ec4899';
+
+    const boundaryLayer = L.geoJSON(item.feature, {
+      style: {
+        color: color,
+        weight: 3.5,
+        opacity: 0.95,
+        fillColor: fillColor,
+        fillOpacity: 0.22
+      }
+    }).addTo(mapRef.current);
+
+    boundaryLayer.bindPopup(`
+      <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px; text-align: left; min-width: 170px;">
+        <span style="font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; background-color: ${fillColor}20; color: ${color}; display: inline-block; margin-bottom: 4px;">
+          ${item.categoryIcon} ${item.categoryLabel}
+        </span>
+        <h4 style="margin: 2px 0 3px 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">${item.name}</h4>
+        <p style="margin: 0; font-size: 11px; color: #64748b;">${item.subtitle}</p>
+      </div>
+    `).openPopup();
+
+    selectedBoundaryLayerRef.current = boundaryLayer;
+
+    try {
+      const bounds = boundaryLayer.getBounds();
+      if (bounds.isValid()) {
+        mapRef.current.flyToBounds(bounds, {
+          padding: [50, 50],
+          animate: true,
+          duration: 1.2
+        });
+      }
+    } catch (e) {
+      console.warn('Could not fit bounds to boundary:', e);
+    }
+  };
+
+  const handleClearSelectedBoundary = () => {
+    if (selectedBoundaryLayerRef.current && mapRef.current) {
+      mapRef.current.removeLayer(selectedBoundaryLayerRef.current);
+      selectedBoundaryLayerRef.current = null;
+    }
+    setSelectedBoundaryItem(null);
+    setLocationSearchQuery('');
+  };
+
+  const filteredSearchItems = searchLayerItems.filter(item => {
+    if (selectedSearchCategory !== 'all' && item.category !== selectedSearchCategory) {
+      return false;
+    }
+    if (!locationSearchQuery.trim()) {
+      return true;
+    }
+    const q = locationSearchQuery.toLowerCase().trim();
+    return (
+      item.name.toLowerCase().includes(q) ||
+      item.subtitle.toLowerCase().includes(q) ||
+      item.categoryLabel.toLowerCase().includes(q)
+    );
+  });
+
+  const handleLocationSearch = (e) => {
+    if (e) e.preventDefault();
+    const query = locationSearchQuery.trim();
+    if (!query) return;
+
+    if (filteredSearchItems.length > 0) {
+      handleSelectBoundaryItem(filteredSearchItems[0]);
+    } else {
+      setSearchError(`No boundary matching "${query}" found in Assemblies, Wards, or Corporations.`);
+    }
+  };
 
   // Watershed Explorer & Flood spots states & refs
   const [activeWatershedId, setActiveWatershedId] = useState(null);
@@ -907,7 +1110,7 @@ const DataLayersView = () => {
       zoomControl: false
     });
 
-    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -972,13 +1175,14 @@ const DataLayersView = () => {
       if (layerRef.current) return;
 
       const layer = L.geoJSON(data, {
+        smoothFactor: 0,
         style: (feature) => {
           if (layerType === 'flood_hazard') {
             const hazard = getFloodHazardStyle(feature?.properties?._Floodmean);
             return {
               color: hazard.color,
-              weight: weight || 1.5,
-              opacity: 0.85,
+              weight: 1.0,
+              opacity: 0.9,
               fillColor: hazard.fillColor,
               fillOpacity: hazard.fillOpacity
             };
@@ -998,13 +1202,71 @@ const DataLayersView = () => {
           if (layerType === 'flood_hazard') {
             const floodMean = props._Floodmean;
             const hazard = getFloodHazardStyle(floodMean);
+            
+            const corpsList = (props.corporations && props.corporations.length > 0)
+              ? props.corporations.join(', ')
+              : (props.corporations_str || props.corporation || 'BBMP');
+            
+            const wardsList = (props.wards && props.wards.length > 0)
+              ? props.wards.join(', ')
+              : (props.wards_str || props.wardName || 'N/A');
+
             popupContent = `
-              <div style="display: flex; flex-direction: column; text-align: left; padding: 4px; font-family: system-ui, -apple-system, sans-serif; min-width: 175px;">
-                <span style="font-size: 8.5px; font-weight: 850; letter-spacing: 0.5px; padding: 3px 6px; border-radius: 4px; align-self: flex-start; margin-bottom: 6px; text-transform: uppercase; background-color: ${hazard.badgeBg}; color: ${hazard.badgeColor};">⚠️ ${hazard.level.toUpperCase()}</span>
-                <h4 style="margin: 0 0 4px 0; font-size: 13.5px; font-weight: 750; color: #0f172a;">Flood Hazard Grid #${props.id || 'N/A'}</h4>
-                <p style="margin: 3px 0 0 0; font-size: 11.5px; color: #334155;">🌊 Flood Index: <strong>${typeof floodMean === 'number' ? floodMean.toFixed(3) : '—'}</strong></p>
+              <div class="font-sans min-w-[220px] max-w-[280px] bg-white text-slate-800 text-left">
+                <div style="background-color: ${hazard.fillColor};" class="px-3.5 py-2.5 pr-8 border-b border-black/10">
+                  <h4 class="m-0 text-sm font-black text-black tracking-tight leading-tight">Flood Hazard Index</h4>
+                </div>
+                <div class="p-3 flex flex-col gap-2 text-xs leading-normal">
+                  <div class="flex flex-col gap-0.5">
+                    <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Corporation Name:</span>
+                    <span class="font-bold text-slate-900 text-[11.5px]">${corpsList}</span>
+                  </div>
+                  <div class="flex flex-col gap-0.5">
+                    <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Ward Name:</span>
+                    <span class="font-semibold text-slate-800 text-[11.5px]">${wardsList}</span>
+                  </div>
+                  <div class="flex items-center justify-between pt-1.5 border-t border-slate-100">
+                    <span class="font-semibold text-slate-600">Flood Index:</span>
+                    <strong class="font-bold text-slate-900 text-xs">${typeof floodMean === 'number' ? floodMean.toFixed(3) : '—'}</strong>
+                  </div>
+                  <div class="flex items-center justify-between pt-1 border-t border-slate-100">
+                    <span class="font-semibold text-slate-600">Hazard Class:</span>
+                    <span style="background-color: ${hazard.fillColor}25; color: ${hazard.color}; border: 1px solid ${hazard.color}50;" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md">
+                      ${hazard.level}
+                    </span>
+                  </div>
+                </div>
               </div>
             `;
+
+            leafletLayer.bindPopup(popupContent, {
+              className: 'flood-hazard-popup-container',
+              closeButton: true
+            });
+
+            leafletLayer.on('popupopen', (e) => {
+              const popupEl = e.popup.getElement();
+              if (popupEl) {
+                const wrapper = popupEl.querySelector('.leaflet-popup-content-wrapper');
+                const content = popupEl.querySelector('.leaflet-popup-content');
+                const tip = popupEl.querySelector('.leaflet-popup-tip');
+                const closeBtn = popupEl.querySelector('.leaflet-popup-close-button');
+
+                if (wrapper) {
+                  wrapper.className += ' !p-0 !rounded-xl !overflow-hidden !shadow-2xl !bg-white';
+                  wrapper.style.border = '1px solid rgba(0,0,0,0.1)';
+                }
+                if (content) {
+                  content.className += ' !m-0 !leading-relaxed';
+                }
+                if (tip) {
+                  tip.className += ' !bg-white';
+                }
+                if (closeBtn) {
+                  closeBtn.className += ' !text-black !top-2 !right-2.5 !font-black !text-base !p-0 !w-5 !h-5 !flex !items-center !justify-center hover:!opacity-70';
+                }
+              }
+            });
           } else if (layerType === 'gba_wards') {
             const wardName = props.wardName || 'Unknown Ward';
             const wardNameKn = props.wardNameKn || '';
@@ -1020,6 +1282,7 @@ const DataLayersView = () => {
                 <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">🔑 Ward ID: <strong>${wardId}</strong></p>
               </div>
             `;
+            leafletLayer.bindPopup(popupContent);
           } else if (layerType === 'gba_corporations') {
             const name = props.name || 'Unknown Corporation';
             const id = props.id || 'N/A';
@@ -1030,6 +1293,7 @@ const DataLayersView = () => {
                 <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">🔑 Zone ID: <strong>${id}</strong></p>
               </div>
             `;
+            leafletLayer.bindPopup(popupContent);
           } else if (layerType === 'valleys') {
             const name = props.name || 'Unknown Valley';
             const area = props.area ? (props.area / 1000000).toFixed(2) : 'N/A';
@@ -1040,6 +1304,7 @@ const DataLayersView = () => {
                 <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">📐 Catchment Area: <strong>${area} km²</strong></p>
               </div>
             `;
+            leafletLayer.bindPopup(popupContent);
           } else if (layerType === 'greenspaces') {
             const name = props.name || 'Unnamed Greenspace';
             const nameKn = props.nameKn || '';
@@ -1049,6 +1314,7 @@ const DataLayersView = () => {
                 <h4 style="margin: 0 0 4px 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">${name} ${nameKn ? `(${nameKn})` : ''}</h4>
               </div>
             `;
+            leafletLayer.bindPopup(popupContent);
           } else {
             const acName = props.AC_NAME || props.ac_name || props.Name || 'Unknown Assembly';
             const acNameKn = props.AC_NAME_KN || '';
@@ -1062,9 +1328,8 @@ const DataLayersView = () => {
                 <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">📍 District Code: <strong>${district}</strong></p>
               </div>
             `;
+            leafletLayer.bindPopup(popupContent);
           }
-
-          leafletLayer.bindPopup(popupContent);
 
           leafletLayer.on('click', () => {
             const props = feature.properties || {};
@@ -1130,10 +1395,17 @@ const DataLayersView = () => {
           });
 
           leafletLayer.on('mouseover', () => {
-            leafletLayer.setStyle({
-              fillOpacity: fillOpacity + 0.08,
-              weight: weight + 1
-            });
+            if (layerType === 'flood_hazard') {
+              leafletLayer.setStyle({
+                fillOpacity: 0.85,
+                weight: 1.0
+              });
+            } else {
+              leafletLayer.setStyle({
+                fillOpacity: fillOpacity + 0.08,
+                weight: weight + 1
+              });
+            }
           });
 
           leafletLayer.on('mouseout', () => {
@@ -1141,7 +1413,7 @@ const DataLayersView = () => {
               const hazard = getFloodHazardStyle(feature?.properties?._Floodmean);
               leafletLayer.setStyle({
                 fillOpacity: hazard.fillOpacity,
-                weight: weight || 1.5
+                weight: 1.0
               });
             } else {
               leafletLayer.setStyle({
@@ -1936,6 +2208,7 @@ const DataLayersView = () => {
         }
       ` }} />
 
+      {/* 
       <div>
         <p className="font-bold text-xl">Interactive Spatial Explorer</p>
       </div>
@@ -1943,235 +2216,341 @@ const DataLayersView = () => {
       <div className="h-[650px] bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm overflow-y-auto">
         <Analytics />
       </div>
+      */}
 
-      <div className="grid grid-cols-1 xl:grid-cols-[300px_1fr] gap-6 xl:h-[950px] items-stretch">
-        {/* Left Sidebar Control Panel */}
-        <div className="bg-white border border-slate-200 rounded-[20px] p-6 flex flex-col gap-6 shadow-sm h-[600px] xl:h-full overflow-hidden">
-          {/* Map Layer Checkboxes */}
-          <div className="flex flex-col gap-4">
-            <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Map Layers ({wells.length + projects.length} items total)</h5>
-            <div className="flex flex-col gap-3">
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showWells}
-                  onChange={(e) => setShowWells(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 accent-purple-600 mt-0.5"
-                />
-                <span>Wells ({showWells ? `${filteredItems.filter(i => i.projName === undefined).length} active` : `${wells.length} total`})</span>
-              </label>
+      <div className="grid grid-cols-1 xl:grid-cols-[350px_1fr] gap-6 items-start">
+        {/* Left Sidebar Control Panel - Free Dynamic Height */}
+        <div className="bg-white border border-slate-200 rounded-[20px] p-5 flex flex-col gap-4 shadow-sm h-auto">
+          {/* Header */}
+          <div className="border-b border-slate-100 pb-2.5">
+            <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">Map Exploration Layers</h5>
+            <span className="text-[11px] text-slate-400 font-medium">{wells.length + projects.length} GIS items available</span>
+          </div>
 
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showProjects}
-                  onChange={(e) => setShowProjects(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 mt-0.5"
-                />
-                <span>Existing Interventions ({showProjects ? `${filteredItems.filter(i => i.projName !== undefined).length} active` : `${projects.length} total`})</span>
-              </label>
-
-              {showProjects && (
-                <div className="flex flex-col gap-2 pl-7 mt-1 mb-1 animate-[slideDown_0.25s_cubic-bezier(0.16,1,0.3,1)_forwards]">
-                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none relative text-left transition-colors duration-200">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.lake}
-                      onChange={(e) => setSelectedCategories({ ...selectedCategories, lake: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-sky-500 accent-[#0284c7]"
-                    />
-                    <span className="whitespace-nowrap">🌊 Lakes ({categoryCounts.lake})</span>
-                  </label>
-                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none relative text-left transition-colors duration-200">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.flood}
-                      onChange={(e) => setSelectedCategories({ ...selectedCategories, flood: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-orange-500 accent-[#ea580c]"
-                    />
-                    <span className="whitespace-nowrap">🛡️ Flood ({categoryCounts.flood})</span>
-                  </label>
-                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none relative text-left transition-colors duration-200">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.groundwater}
-                      onChange={(e) => setSelectedCategories({ ...selectedCategories, groundwater: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-purple-500 accent-[#8b5cf6]"
-                    />
-                    <span className="whitespace-nowrap">💧 Groundwater ({categoryCounts.groundwater})</span>
-                  </label>
-                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none relative text-left transition-colors duration-200">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.rainwater}
-                      onChange={(e) => setSelectedCategories({ ...selectedCategories, rainwater: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-emerald-500 accent-[#10b981]"
-                    />
-                    <span className="whitespace-nowrap">🌧️ Rainwater ({categoryCounts.rainwater})</span>
-                  </label>
-                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none relative text-left transition-colors duration-200">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.iuwm}
-                      onChange={(e) => setSelectedCategories({ ...selectedCategories, iuwm: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-pink-500 accent-[#ec4899]"
-                    />
-                    <span className="whitespace-nowrap">🔄 IUWM ({categoryCounts.iuwm})</span>
-                  </label>
-                  {categoryCounts.other > 0 && (
-                    <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none relative text-left transition-colors duration-200">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.other}
-                        onChange={(e) => setSelectedCategories({ ...selectedCategories, other: e.target.checked })}
-                        className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-slate-500 accent-[#64748b]"
-                      />
-                      <span className="whitespace-nowrap">⚙️ Other ({categoryCounts.other})</span>
-                    </label>
-                  )}
-                </div>
-              )}
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showWards}
-                  onChange={(e) => setShowWards(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 accent-[#d97706] mt-0.5"
-                />
-                <span>Wards Summary ({Object.keys(wells.concat(projects).reduce((acc, item) => {
-                  if (item.wardName && !item.wardName.toLowerCase().includes('unknown') && item.wardName.trim() !== '') {
-                    acc[item.wardName] = true;
-                  }
-                  return acc;
-                }, {})).length} Wards)</span>
-              </label>
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showBengaluruAssembly}
-                  onChange={(e) => setShowBengaluruAssembly(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-[#3b82f6] mt-0.5"
-                />
-                <span>Bengaluru Assemblies {loadingBengaluruAssembly && <span className="small-inline-spinner"></span>}</span>
-              </label>
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showKarnatakaAssembly}
-                  onChange={(e) => setShowKarnatakaAssembly(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-[#10b981] mt-0.5"
-                />
-                <span>Karnataka Assemblies {loadingKarnatakaAssembly && <span className="small-inline-spinner"></span>}</span>
-              </label>
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showGbaWards}
-                  onChange={(e) => setShowGbaWards(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 accent-[#f43f5e] mt-0.5"
-                />
-                <span>GBA Wards {loadingGbaWards && <span className="small-inline-spinner"></span>}</span>
-              </label>
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showGbaCorporations}
-                  onChange={(e) => setShowGbaCorporations(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 accent-[#ec4899] mt-0.5"
-                />
-                <span>GBA Corporations {loadingGbaCorporations && <span className="small-inline-spinner"></span>}</span>
-              </label>
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showValleys}
-                  onChange={(e) => setShowValleys(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 accent-[#06b6d4] mt-0.5"
-                />
-                <span>Valleys {loadingValleys && <span className="small-inline-spinner"></span>}</span>
-              </label>
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showGreenspaces}
-                  onChange={(e) => setShowGreenspaces(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500 accent-[#22c55e] mt-0.5"
-                />
-                <span>Greenspaces {loadingGreenspaces && <span className="small-inline-spinner"></span>}</span>
-              </label>
-
-              <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                <input
-                  type="checkbox"
-                  checked={showNewProjects}
-                  onChange={(e) => setShowNewProjects(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-[#3b82f6] mt-0.5"
-                />
-                <span>Projects</span>
-              </label>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="flex items-start gap-3 text-[13.5px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+          {/* Section 1: What's Happening in the City? */}
+          <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleSection('happening')}
+              className="w-full flex items-center justify-between p-3.5 bg-slate-50/90 hover:bg-slate-100 text-left transition-colors cursor-pointer"
+            >
+              <span className="text-[13px] font-bold text-slate-800 flex items-center gap-2">
+                <span>What&apos;s Happening in the City?</span>
+              </span>
+              <svg
+                className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${openSections.happening ? 'rotate-180' : ''}`}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {openSections.happening && (
+              <div className="p-3.5 flex flex-col gap-3 border-t border-slate-100 animate-[slideDown_0.2s_ease-out]">
+                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-700 cursor-pointer select-none relative text-left">
                   <input
                     type="checkbox"
-                    checked={showNewFloodRisk}
-                    onChange={(e) => setShowNewFloodRisk(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 accent-[#ef4444] mt-0.5"
+                    checked={showProjects}
+                    onChange={(e) => setShowProjects(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 mt-0.5"
                   />
-                  <span>Flood Hazard Map {loadingFloodHazard && <span className="small-inline-spinner"></span>}</span>
+                  <span>Existing Interventions ({showProjects ? `${filteredItems.filter(i => i.projName !== undefined).length} active` : `${projects.length} total`})</span>
                 </label>
-                {showNewFloodRisk && (
-                  <div className="ml-7 flex flex-col gap-1.5 text-[11px] text-slate-700 font-medium bg-slate-50 border border-slate-200 rounded-xl p-2.5 shadow-xs">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Flood Hazard Index Legend</span>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#ef4444] inline-block border border-black/15"></span> Red</span>
-                      <strong className="font-mono text-[10.5px] text-slate-600">0.543 – 0.667</strong>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#f97316] inline-block border border-black/15"></span> Orange</span>
-                      <strong className="font-mono text-[10.5px] text-slate-600">0.497 – 0.543</strong>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#fde047] inline-block border border-black/15"></span> Light Yellow</span>
-                      <strong className="font-mono text-[10.5px] text-slate-600">0.456 – 0.497</strong>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#84cc16] inline-block border border-black/15"></span> Light Green</span>
-                      <strong className="font-mono text-[10.5px] text-slate-600">0.416 – 0.456</strong>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#16a34a] inline-block border border-black/15"></span> Green</span>
-                      <strong className="font-mono text-[10.5px] text-slate-600">0.000 – 0.416</strong>
-                    </div>
+
+                {showProjects && (
+                  <div className="flex flex-col gap-2 pl-6 mt-0.5 animate-[slideDown_0.2s_ease-out]">
+                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.lake}
+                        onChange={(e) => setSelectedCategories({ ...selectedCategories, lake: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-sky-500 accent-[#0284c7]"
+                      />
+                      <span className="whitespace-nowrap">🌊 Lakes ({categoryCounts.lake})</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.flood}
+                        onChange={(e) => setSelectedCategories({ ...selectedCategories, flood: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-orange-500 accent-[#ea580c]"
+                      />
+                      <span className="whitespace-nowrap">🛡️ Flood ({categoryCounts.flood})</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.groundwater}
+                        onChange={(e) => setSelectedCategories({ ...selectedCategories, groundwater: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-purple-500 accent-[#8b5cf6]"
+                      />
+                      <span className="whitespace-nowrap">💧 Groundwater ({categoryCounts.groundwater})</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.rainwater}
+                        onChange={(e) => setSelectedCategories({ ...selectedCategories, rainwater: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-emerald-500 accent-[#10b981]"
+                      />
+                      <span className="whitespace-nowrap">🌧️ Rainwater ({categoryCounts.rainwater})</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.iuwm}
+                        onChange={(e) => setSelectedCategories({ ...selectedCategories, iuwm: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-pink-500 accent-[#ec4899]"
+                      />
+                      <span className="whitespace-nowrap">🔄 IUWM ({categoryCounts.iuwm})</span>
+                    </label>
+                    {categoryCounts.other > 0 && (
+                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.other}
+                          onChange={(e) => setSelectedCategories({ ...selectedCategories, other: e.target.checked })}
+                          className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-slate-500 accent-[#64748b]"
+                        />
+                        <span className="whitespace-nowrap">⚙️ Other ({categoryCounts.other})</span>
+                      </label>
+                    )}
                   </div>
                 )}
-              </div>
-            </div>
-
-            {activeWatershedId && (
-              <div className="flex justify-between items-center bg-blue-50 border border-blue-200 rounded-lg p-2.5 mt-3">
-                <div className="text-[11.5px] text-blue-900 text-left">
-                  Watershed Active: <strong className="block text-xs">{WATERSHEDS_POLYGONS[activeWatershedId].name}</strong>
-                </div>
-                <button onClick={() => { setActiveWatershedId(null); setActiveFloodSpotId(null); }} className="border-none bg-none text-blue-600 hover:text-blue-700 font-bold text-[11px] cursor-pointer p-1">Clear</button>
               </div>
             )}
           </div>
 
-          {/* Search and List Panel */}
-          <div className="flex-grow flex flex-col gap-4 overflow-hidden">
-            <div className="relative w-full" style={{ marginBottom: (showWells || showProjects) ? '4px' : '0px' }}>
+          {/* Section 2: Water Risks of the City? */}
+          <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleSection('risks')}
+              className="w-full flex items-center justify-between p-3.5 bg-slate-50/90 hover:bg-slate-100 text-left transition-colors cursor-pointer"
+            >
+              <span className="text-[13px] font-bold text-slate-800 flex items-center gap-2">
+                <span>Water Risks of the City?</span>
+              </span>
+              <svg
+                className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${openSections.risks ? 'rotate-180' : ''}`}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {openSections.risks && (
+              <div className="p-3.5 flex flex-col gap-3.5 border-t border-slate-100 animate-[slideDown_0.2s_ease-out]">
+                {/* Flood Risk Map Layer */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-700 cursor-pointer select-none relative text-left">
+                    <input
+                      type="checkbox"
+                      checked={showNewFloodRisk}
+                      onChange={(e) => setShowNewFloodRisk(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 accent-[#ef4444] mt-0.5"
+                    />
+                    <span>Flood Risk Map {loadingFloodHazard && <span className="small-inline-spinner"></span>}</span>
+                  </label>
+                  {showNewFloodRisk && (
+                    <div className="ml-6 flex flex-col gap-1.5 text-[11px] text-slate-700 font-medium bg-slate-50 border border-slate-200 rounded-xl p-2.5 shadow-xs">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Flood Hazard Index Legend</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#ef4444] inline-block border border-black/15"></span> Very High</span>
+                        <strong className="font-mono text-[10.5px] text-slate-600">0.543 – 0.667</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#f97316] inline-block border border-black/15"></span> High</span>
+                        <strong className="font-mono text-[10.5px] text-slate-600">0.497 – 0.543</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#fde047] inline-block border border-black/15"></span> Moderate</span>
+                        <strong className="font-mono text-[10.5px] text-slate-600">0.456 – 0.497</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#84cc16] inline-block border border-black/15"></span> Low</span>
+                        <strong className="font-mono text-[10.5px] text-slate-600">0.416 – 0.456</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-xs bg-[#16a34a] inline-block border border-black/15"></span> Very Low</span>
+                        <strong className="font-mono text-[10.5px] text-slate-600">0.000 – 0.416</strong>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Flooding Hotspot (new) Layer */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-700 cursor-pointer select-none relative text-left">
+                    <input
+                      type="checkbox"
+                      checked={showFloodingHotspots}
+                      onChange={(e) => setShowFloodingHotspots(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 accent-[#d97706] mt-0.5"
+                    />
+                    <span className="flex items-center gap-1.5">
+                      <span>Flooding Hotspot</span>
+                      <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded leading-none">new</span>
+                    </span>
+                  </label>
+                  {showFloodingHotspots && (
+                    <div className="ml-6 text-[11px] text-slate-500 italic bg-amber-50/60 border border-amber-200/80 rounded-xl p-2.5">
+                      No active hotspot incidents currently reported. Layer active and listening.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 3: Explore Potential Projects? */}
+          <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleSection('projects')}
+              className="w-full flex items-center justify-between p-3.5 bg-slate-50/90 hover:bg-slate-100 text-left transition-colors cursor-pointer"
+            >
+              <span className="text-[13px] font-bold text-slate-800 flex items-center gap-2">
+                <span>Explore Potential Projects?</span>
+              </span>
+              <svg
+                className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${openSections.projects ? 'rotate-180' : ''}`}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {openSections.projects && (
+              <div className="p-3.5 flex flex-col gap-3 border-t border-slate-100 animate-[slideDown_0.2s_ease-out]">
+                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-700 cursor-pointer select-none relative text-left">
+                  <input
+                    type="checkbox"
+                    checked={showNewProjects}
+                    onChange={(e) => setShowNewProjects(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-[#3b82f6] mt-0.5"
+                  />
+                  <span>Projects</span>
+                </label>
+                {showNewProjects && (
+                  <div className="ml-6 flex flex-col gap-1.5 text-[11px] text-slate-700 font-medium bg-slate-50 border border-slate-200 rounded-xl p-2.5 shadow-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Project Types Legend</span>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-[#3b82f6] inline-block border border-white shadow-xs"></span>
+                      <span>Lake Interventions</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-[#22c55e] inline-block border border-white shadow-xs"></span>
+                      <span>Parks & Green Spaces</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-[#f59e0b] inline-block border border-white shadow-xs"></span>
+                      <span>Institutional Campuses</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-[#94a3b8] inline-block border border-white shadow-xs"></span>
+                      <span>Stormdrains & Drainage</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Remaining Base and Boundary Layers Openly Below */}
+          <div className="pt-2 border-t border-slate-200 flex flex-col gap-3">
+            <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider m-0">Additional Base & Boundary Layers</h5>
+            
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showWells}
+                onChange={(e) => setShowWells(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 accent-purple-600 mt-0.5"
+              />
+              <span>Wells ({showWells ? `${filteredItems.filter(i => i.projName === undefined).length} active` : `${wells.length} total`})</span>
+            </label>
+
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showWards}
+                onChange={(e) => setShowWards(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 accent-[#d97706] mt-0.5"
+              />
+              <span>Wards Summary ({Object.keys(wells.concat(projects).reduce((acc, item) => {
+                if (item.wardName && !item.wardName.toLowerCase().includes('unknown') && item.wardName.trim() !== '') {
+                  acc[item.wardName] = true;
+                }
+                return acc;
+              }, {})).length} Wards)</span>
+            </label>
+
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showBengaluruAssembly}
+                onChange={(e) => setShowBengaluruAssembly(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-[#3b82f6] mt-0.5"
+              />
+              <span>Bengaluru Assemblies {loadingBengaluruAssembly && <span className="small-inline-spinner"></span>}</span>
+            </label>
+
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showKarnatakaAssembly}
+                onChange={(e) => setShowKarnatakaAssembly(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-[#10b981] mt-0.5"
+              />
+              <span>Karnataka Assemblies {loadingKarnatakaAssembly && <span className="small-inline-spinner"></span>}</span>
+            </label>
+
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showGbaWards}
+                onChange={(e) => setShowGbaWards(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 accent-[#f43f5e] mt-0.5"
+              />
+              <span>GBA Wards {loadingGbaWards && <span className="small-inline-spinner"></span>}</span>
+            </label>
+
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showGbaCorporations}
+                onChange={(e) => setShowGbaCorporations(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 accent-[#ec4899] mt-0.5"
+              />
+              <span>GBA Corporations {loadingGbaCorporations && <span className="small-inline-spinner"></span>}</span>
+            </label>
+
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showValleys}
+                onChange={(e) => setShowValleys(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 accent-[#06b6d4] mt-0.5"
+              />
+              <span>Valleys {loadingValleys && <span className="small-inline-spinner"></span>}</span>
+            </label>
+
+            <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
+              <input
+                type="checkbox"
+                checked={showGreenspaces}
+                onChange={(e) => setShowGreenspaces(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500 accent-[#22c55e] mt-0.5"
+              />
+              <span>Greenspaces {loadingGreenspaces && <span className="small-inline-spinner"></span>}</span>
+            </label>
+          </div>
+
+          {/* Search Assets inside Selected Layers */}
+          <div className="flex flex-col gap-2.5 pt-3 border-t border-slate-200">
+            <div className="relative w-full">
               <svg
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-[2]"
-                width="16"
-                height="16"
+                width="15"
+                height="15"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="#64748b"
@@ -2182,35 +2561,35 @@ const DataLayersView = () => {
               </svg>
               <input
                 type="text"
-                placeholder="Search wells or projects..."
+                placeholder="Filter active layer assets..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 disabled={!showWells && !showProjects}
-                className="w-full pl-9 pr-9 py-2.5 text-sm border border-slate-300 rounded-xl outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/12 text-slate-900 bg-white transition-all shadow-sm"
+                className="w-full pl-9 pr-9 py-2 text-xs border border-slate-300 rounded-xl outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/12 text-slate-900 bg-white transition-all shadow-xs"
               />
               {searchText && (
-                <button onClick={() => setSearchText('')} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-lg text-slate-400 hover:text-slate-600 cursor-pointer">×</button>
+                <button onClick={() => setSearchText('')} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-sm text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
               )}
             </div>
 
             {(showWells || showProjects) && (
-              <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', paddingLeft: '4px' }}>
-                Showing {filteredItems.length} of {wells.length + projects.length} items (scroll down to view all)
+              <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', paddingLeft: '2px' }}>
+                Showing {filteredItems.length} of {wells.length + projects.length} items
               </div>
             )}
 
-            <div className="flex-1 overflow-y-auto flex flex-col gap-2 custom-scrollbar pr-1">
+            <div className="max-h-52 overflow-y-auto flex flex-col gap-2 custom-scrollbar pr-1">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-10 gap-3 text-slate-500 text-xs">
-                  <div className="w-6 h-6 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin"></div>
+                <div className="flex flex-col items-center justify-center py-6 gap-2 text-slate-500 text-xs">
+                  <div className="w-5 h-5 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin"></div>
                   <span>Loading GIS assets...</span>
                 </div>
               ) : (!showWells && !showProjects) ? (
-                <div className="text-center py-10 px-2.5 text-slate-400 text-xs font-semibold">
-                  Check the <strong>Wells</strong> or <strong>Existing Interventions</strong> layer above to display spatial data.
+                <div className="text-center py-4 px-2 text-slate-400 text-xs font-medium">
+                  Toggle on layers above to explore spatial points and assets.
                 </div>
               ) : filteredItems.length === 0 ? (
-                <div className="text-center py-10 px-2.5 text-slate-400 text-xs font-semibold">No matching assets found.</div>
+                <div className="text-center py-4 px-2 text-slate-400 text-xs font-medium">No matching assets found.</div>
               ) : (
                 filteredItems.map((item, index) => {
                   const isProj = item.projName !== undefined;
@@ -2221,31 +2600,13 @@ const DataLayersView = () => {
                   return (
                     <div
                       key={item._id || item._mb_row_id || index}
-                      className={`flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100/80 border rounded-xl cursor-pointer transition-all duration-200 text-left ${isItemSelected(item) ? 'bg-indigo-500/5 border-indigo-500' : 'border-slate-100 hover:border-slate-300'}`}
+                      className={`flex items-center gap-2.5 p-2.5 bg-slate-50 hover:bg-slate-100/80 border rounded-xl cursor-pointer transition-all duration-200 text-left ${isItemSelected(item) ? 'bg-indigo-500/5 border-indigo-500' : 'border-slate-100 hover:border-slate-300'}`}
                       onClick={() => handleSelectItem(item)}
                     >
                       <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }}></div>
                       <div className="flex flex-col gap-0.5 overflow-hidden w-full">
                         <strong className="text-xs font-bold text-slate-800 truncate block">{name}</strong>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <span className="text-[11px] text-slate-500 truncate block">{desc || 'Open Well'} — {item.wardName || 'Unknown Ward'}</span>
-                          {isProj && item.categoryInfo && (
-                            <span style={{
-                              display: 'inline-block',
-                              fontSize: '9.5px',
-                              fontWeight: '750',
-                              color: color,
-                              backgroundColor: color + '12',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              alignSelf: 'flex-start',
-                              marginTop: '2px',
-                              letterSpacing: '0.2px'
-                            }}>
-                              {item.categoryInfo.icon} {item.categoryInfo.name}
-                            </span>
-                          )}
-                        </div>
+                        <span className="text-[10.5px] text-slate-500 truncate block">{desc || 'Open Well'} — {item.wardName || 'Unknown Ward'}</span>
                       </div>
                     </div>
                   );
@@ -2256,18 +2617,191 @@ const DataLayersView = () => {
         </div>
 
         {/* Center / Right Section: Map & Details Pane */}
-        <div className="flex flex-col gap-6 h-auto xl:h-full">
-          {/* Main Leaflet Map */}
-          <div className="h-[400px] sm:h-[500px] xl:h-[550px] shrink-0 bg-white border border-slate-200 rounded-[20px] flex flex-col overflow-hidden shadow-sm">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider m-0">🗺️ Bengaluru Map View — Groundwater & Watershed Explorer</h4>
-              <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                {(showWells || showProjects)
-                  ? `Showing ${filteredItems.length} of ${wells.length + projects.length} items`
-                  : `0 of ${wells.length + projects.length} items visible`}
-              </span>
+        <div className="flex flex-col gap-6 h-auto">
+          {/* Main Leaflet Map Card with Ward / Locality Search Bar */}
+          <div className="h-[480px] sm:h-[540px] xl:h-[600px] shrink-0 bg-white border border-slate-200 rounded-[20px] flex flex-col overflow-hidden shadow-sm">
+            <div className="px-5 py-3 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white gap-3 relative z-[1000]">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider m-0">🗺️ Bengaluru Map View</h4>
+                {selectedBoundaryItem && (
+                  <div
+                    className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs animate-[fadeIn_0.2s_ease-out]"
+                    style={{
+                      backgroundColor: selectedBoundaryItem.categoryBg,
+                      color: selectedBoundaryItem.categoryColor,
+                      border: `1px solid ${selectedBoundaryItem.categoryBorder}`
+                    }}
+                  >
+                    <span>{selectedBoundaryItem.categoryIcon} {selectedBoundaryItem.name}</span>
+                    <button
+                      type="button"
+                      onClick={handleClearSelectedBoundary}
+                      title="Clear border highlight"
+                      className="hover:opacity-75 font-black ml-0.5 cursor-pointer border-none bg-transparent"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Enhanced Layer Search & Dropdown Box */}
+              <div ref={searchDropdownContainerRef} className="relative max-w-lg w-full sm:w-auto">
+                <form onSubmit={handleLocationSearch} className="flex items-center bg-slate-50 hover:bg-white focus-within:bg-white border border-slate-300 focus-within:border-indigo-500 rounded-xl transition-all shadow-xs overflow-hidden">
+                  <div className="pl-3 pr-1 text-slate-400">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder={
+                      selectedSearchCategory === 'assembly' ? 'Search Bengaluru Assemblies...' :
+                      selectedSearchCategory === 'ward' ? 'Search GBA Wards...' :
+                      selectedSearchCategory === 'corporation' ? 'Search GBA Corporations...' :
+                      'Search Assemblies, Wards, Corporations...'
+                    }
+                    value={locationSearchQuery}
+                    onChange={(e) => {
+                      setLocationSearchQuery(e.target.value);
+                      setIsSearchDropdownOpen(true);
+                    }}
+                    onFocus={() => setIsSearchDropdownOpen(true)}
+                    className="w-full sm:w-72 py-1.5 px-2 text-xs outline-none bg-transparent text-slate-900 placeholder:text-slate-400 font-medium"
+                  />
+
+                  {locationSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setLocationSearchQuery('')}
+                      className="px-1.5 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  )}
+
+                  {/* Dropdown Toggle Chevron */}
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchDropdownOpen(prev => !prev)}
+                    className="px-2.5 py-2 border-l border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center"
+                    title="Select Layer or Boundary"
+                  >
+                    <svg
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${isSearchDropdownOpen ? 'rotate-180 text-indigo-600' : ''}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </form>
+
+                {/* Dropdown Menu */}
+                {isSearchDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 w-full sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-[1050] overflow-hidden animate-[fadeIn_0.15s_ease-out]">
+                    {/* Category Filter Tabs */}
+                    <div className="p-2 bg-slate-50 border-b border-slate-100 flex items-center gap-1 overflow-x-auto text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSearchCategory('all')}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer shrink-0 ${selectedSearchCategory === 'all' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'}`}
+                      >
+                        All ({searchLayerItems.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSearchCategory('assembly')}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 ${selectedSearchCategory === 'assembly' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'}`}
+                      >
+                        <span>🏛️ Assembly</span>
+                        <span className="opacity-80">({searchLayerItems.filter(i => i.category === 'assembly').length})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSearchCategory('ward')}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 ${selectedSearchCategory === 'ward' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:bg-rose-50 hover:text-rose-700'}`}
+                      >
+                        <span>📍 Wards</span>
+                        <span className="opacity-80">({searchLayerItems.filter(i => i.category === 'ward').length})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSearchCategory('corporation')}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 ${selectedSearchCategory === 'corporation' ? 'bg-pink-600 text-white shadow-xs' : 'text-slate-600 hover:bg-pink-50 hover:text-pink-700'}`}
+                      >
+                        <span>🏢 Corporations</span>
+                        <span className="opacity-80">({searchLayerItems.filter(i => i.category === 'corporation').length})</span>
+                      </button>
+                    </div>
+
+                    {/* Results / Browse List */}
+                    <div className="max-h-64 overflow-y-auto custom-scrollbar p-1.5 flex flex-col gap-1 text-left">
+                      {filteredSearchItems.length === 0 ? (
+                        <div className="py-6 text-center text-xs text-slate-400 font-medium">
+                          No matching boundaries found.
+                        </div>
+                      ) : (
+                        filteredSearchItems.map((item) => (
+                          <div
+                            key={item.id}
+                            onClick={() => handleSelectBoundaryItem(item)}
+                            className="p-2.5 rounded-xl hover:bg-slate-50 active:bg-slate-100 cursor-pointer transition-colors border border-transparent hover:border-slate-200/80 flex items-center justify-between gap-3 text-left group"
+                          >
+                            <div className="flex flex-col gap-0.5 overflow-hidden">
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded leading-none shrink-0"
+                                  style={{
+                                    backgroundColor: item.categoryBg,
+                                    color: item.categoryColor,
+                                    border: `1px solid ${item.categoryBorder}`
+                                  }}
+                                >
+                                  {item.categoryIcon} {item.categoryLabel}
+                                </span>
+                                <strong className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+                                  {item.name}
+                                </strong>
+                              </div>
+                              <span className="text-[10.5px] text-slate-500 truncate pl-0.5">
+                                {item.subtitle}
+                              </span>
+                            </div>
+
+                            <span className="text-xs font-bold text-slate-400 group-hover:text-indigo-600 shrink-0 transition-transform group-hover:translate-x-0.5">
+                              →
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Footer Info */}
+                    <div className="px-3 py-2 bg-slate-50/80 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-500 font-medium">
+                      <span>Showing {filteredSearchItems.length} boundary items</span>
+                      <button
+                        type="button"
+                        onClick={() => setIsSearchDropdownOpen(false)}
+                        className="text-slate-500 hover:text-slate-800 font-bold cursor-pointer"
+                      >
+                        Close ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="leaflet-map-wrapper-inner" style={{ position: 'relative', width: '100%', height: 'calc(100% - 48px)' }}>
+
+            {searchError && (
+              <div className="px-5 py-1.5 bg-amber-50 text-amber-800 text-[11px] font-medium border-b border-amber-200 flex justify-between items-center">
+                <span>{searchError}</span>
+                <button onClick={() => setSearchError(null)} className="text-amber-600 hover:text-amber-900 font-bold cursor-pointer">✕</button>
+              </div>
+            )}
+
+            <div className="leaflet-map-wrapper-inner" style={{ position: 'relative', width: '100%', height: 'calc(100% - 54px)' }}>
               <div ref={mapContainerRef} className="leaflet-map-canvas" style={{ width: '100%', height: '100%' }}></div>
             </div>
           </div>
