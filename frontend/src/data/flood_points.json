@@ -1,0 +1,4629 @@
+{
+  "type": "FeatureCollection",
+  "totalFeatures": 201,
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6280556,
+          13.0436111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_1",
+        "slNo": "1",
+        "location": "Nanada gokula",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.0436111,
+        "lng": 77.6280556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6347222,
+          13.0188889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_2",
+        "slNo": "2",
+        "location": "HRBR Lyt.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.0188889,
+        "lng": 77.6347222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6380556,
+          13.0391667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_3",
+        "slNo": "3",
+        "location": "HBR Lyt.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "878",
+        "lat": 13.0391667,
+        "lng": 77.6380556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6122222,
+          13.0411111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_4",
+        "slNo": "4",
+        "location": "Veerannapalya",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Carle building obstruction.",
+        "reducedLevel": "890",
+        "lat": 13.0411111,
+        "lng": 77.6122222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6041667,
+          12.9863889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_5",
+        "slNo": "5",
+        "location": "Broadway road junction",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "",
+        "reducedLevel": "899",
+        "lat": 12.9863889,
+        "lng": 77.6041667
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6102778,
+          12.9863889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_6",
+        "slNo": "1",
+        "location": "Armstrong road junction in Shivajinagr",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Low lying area ( Desilting work is in progress)",
+        "reducedLevel": "895",
+        "lat": 12.9863889,
+        "lng": 77.6102778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6272222,
+          12.9783333
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_7",
+        "slNo": "2",
+        "location": "MV garden & Murphy market",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Low lying area ( Desilting work is in\nprogress)",
+        "reducedLevel": "885",
+        "lat": 12.9783333,
+        "lng": 77.6272222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6333333,
+          12.9716667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_8",
+        "slNo": "3",
+        "location": "Jougupalya in Ulsoor",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Low lying area ( Desilting work is in\nprogress)",
+        "reducedLevel": "883",
+        "lat": 12.9716667,
+        "lng": 77.6333333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6336111,
+          12.9708333
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_9",
+        "slNo": "4",
+        "location": "Cambridge layout (Near Jogupalya)",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Low lying area ( Desilting work is in progress)",
+        "reducedLevel": "883",
+        "lat": 12.9708333,
+        "lng": 77.6336111
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6430556,
+          12.9611111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_10",
+        "slNo": "5",
+        "location": "Nandhini hotel backside on 100 feet road indiranagar",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Low lying area ( Desilting work is in progress)",
+        "reducedLevel": "881",
+        "lat": 12.9611111,
+        "lng": 77.6430556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6369444,
+          13.0088889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_11",
+        "slNo": "6",
+        "location": "Kalyananagar",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200",
+        "remarks": "Low lying area ( Desilting work is in\nprogress)",
+        "reducedLevel": "",
+        "lat": 13.0088889,
+        "lng": 77.6369444
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6577778,
+          12.8608333
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_12",
+        "slNo": "7",
+        "location": "BDA Layout in ward ni 113 Konena Agrahara",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Low lying area ( Desilting work is in\nprogress)",
+        "reducedLevel": "886",
+        "lat": 12.8608333,
+        "lng": 77.6577778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6588889,
+          12.9947222
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_13",
+        "slNo": "8",
+        "location": "Railway parallel road Sadanadanagar",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Additional vent to be provided for railway bridge.",
+        "reducedLevel": "896",
+        "lat": 12.9947222,
+        "lng": 77.6588889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5825,
+          13.0247222
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_14",
+        "slNo": "9",
+        "location": "Jala Dharshani Layout in ward no.18 of Hebbal constituency.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "180",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "901",
+        "lat": 13.0247222,
+        "lng": 77.5825
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5722222,
+          13.0255556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_15",
+        "slNo": "10",
+        "location": "Vasanthappa block in ward no.20 of Hebbal\nconstituency.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "180",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "904",
+        "lat": 13.0255556,
+        "lng": 77.5722222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5902778,
+          13.0333333
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_16",
+        "slNo": "11",
+        "location": "A Block in ward no.20 of  Hebbal constituency.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "180",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "905",
+        "lat": 13.0333333,
+        "lng": 77.5902778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5972222,
+          13.0355556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_17",
+        "slNo": "12",
+        "location": "Sun Rise colony in ward no.22 of Hebbal\nconstituency.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "180",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "901",
+        "lat": 13.0355556,
+        "lng": 77.5972222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5708333,
+          13.0466667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_18",
+        "slNo": "13",
+        "location": "Upstreams of Devi  nagar (junction of Ring road and railway track) in ward no.18 of Hebbal\nconstituency.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "180",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "904",
+        "lat": 13.0466667,
+        "lng": 77.5708333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5913889,
+          13.0425
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_19",
+        "slNo": "14",
+        "location": "Near Shani mahathma temple beside Hebbal Fly\nover  in ward no.21 of Hebbal constituency.",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "180",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "900",
+        "lat": 13.0425,
+        "lng": 77.5913889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6002778,
+          13.0333333
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_20",
+        "slNo": "15",
+        "location": "Low Laying areas of Chamundi nagar in ward\nno.33 of Hebbal constituency",
+        "zone": "EAST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "180",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "902",
+        "lat": 13.0333333,
+        "lng": 77.6002778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5460639,
+          12.9841167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_21",
+        "slNo": "1",
+        "location": "Rajajinagar  Industrial  Area ,1st Cross Rd Ward\nNo 108",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Tackled to avoid flooding",
+        "reducedLevel": "890",
+        "lat": 12.9841167,
+        "lng": 77.5460639
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.566525,
+          12.9653167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_22",
+        "slNo": "2",
+        "location": "Cheluvadipalya Near by  GoodShed Road Ward No 138",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RCC Retaining wall to be Constructed and desilting work is in Progress by AMC",
+        "reducedLevel": "894",
+        "lat": 12.9653167,
+        "lng": 77.566525
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5275333,
+          13.0101694
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_23",
+        "slNo": "3",
+        "location": "Near by 2nd Cross Ring Road Ward No 77",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant & Tender Under Process",
+        "reducedLevel": "885",
+        "lat": 13.0101694,
+        "lng": 77.5275333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5673472,
+          12.9765972
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_24",
+        "slNo": "4",
+        "location": "Binnymill Road Ward No 120  near belimath",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant & Tender Under Process",
+        "reducedLevel": "898",
+        "lat": 12.9765972,
+        "lng": 77.5673472
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5628833,
+          12.9726194
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_25",
+        "slNo": "5",
+        "location": "K P Agrahara 7th Cross  Road Ward No 121",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "887",
+        "lat": 12.9726194,
+        "lng": 77.5628833
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5705639,
+          12.9913278
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_26",
+        "slNo": "1",
+        "location": "Near Mantri Mall bridge in ward no-94",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "889",
+        "lat": 12.9913278,
+        "lng": 77.5705639
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5604167,
+          12.9752167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_27",
+        "slNo": "2",
+        "location": "Gopalpura area drain v-108 in ward no 121",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "885",
+        "lat": 12.9752167,
+        "lng": 77.5604167
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5290472,
+          13.0035667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_28",
+        "slNo": "3",
+        "location": "Sandeep bar in ward no-75",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Already tackled no flood occurred Desilting work is in progress by AMC",
+        "reducedLevel": "857",
+        "lat": 13.0035667,
+        "lng": 77.5290472
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5294917,
+          13.0041167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_29",
+        "slNo": "4",
+        "location": "Kemegowda bridge in ward no 74/75",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Already tackled no flood occurred Desilting work is in progress by AMC",
+        "reducedLevel": "859",
+        "lat": 13.0041167,
+        "lng": 77.5294917
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5293167,
+          13.004175
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_30",
+        "slNo": "5",
+        "location": "17th and 19th main in kamalanagar in ward-75",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "858",
+        "lat": 13.004175,
+        "lng": 77.5293167
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5290944,
+          13.0044056
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_31",
+        "slNo": "6",
+        "location": "40-vent bridge in ward no-75",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "858",
+        "lat": 13.0044056,
+        "lng": 77.5290944
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5355278,
+          13.0095111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_32",
+        "slNo": "7",
+        "location": "near ward office 43 ( circular road) drain v-205",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "875",
+        "lat": 13.0095111,
+        "lng": 77.5355278
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5280639,
+          13.0109528
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_33",
+        "slNo": "8",
+        "location": "down stream of laggere bridge (sakamma badavane)in ward no 43",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Already tackled no flood occurred Desilting work is in progress by AMC",
+        "reducedLevel": "877",
+        "lat": 13.0109528,
+        "lng": 77.5280639
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5300417,
+          13.0058639
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_34",
+        "slNo": "9",
+        "location": "junction of v-200 & v-202 in ward no. -43/75.",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Already tackled no flood occurred Desilting work is in progress by AMC",
+        "reducedLevel": "862",
+        "lat": 13.0058639,
+        "lng": 77.5300417
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5780417,
+          12.9974139
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_35",
+        "slNo": "10",
+        "location": "Guttahalli Circle, Malleshwaram.",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "905",
+        "lat": 12.9974139,
+        "lng": 77.5780417
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.565525,
+          12.98345
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_36",
+        "slNo": "11",
+        "location": "Gandi Statue, Vokkalipuram.",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Tackled to avoid flooding",
+        "reducedLevel": "886",
+        "lat": 12.98345,
+        "lng": 77.565525
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5604167,
+          12.9752167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_37",
+        "slNo": "12",
+        "location": "Gopalpuram inward No-98.",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Tender Called",
+        "reducedLevel": "885",
+        "lat": 12.9752167,
+        "lng": 77.5604167
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5733833,
+          12.9960139
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_38",
+        "slNo": "13",
+        "location": "Link Road, Malleshwaram.",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Tender Called",
+        "reducedLevel": "895",
+        "lat": 12.9960139,
+        "lng": 77.5733833
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5355278,
+          13.0095111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_39",
+        "slNo": "14",
+        "location": "Back of presidency school in ward no. -44",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant & Tender Under Process",
+        "reducedLevel": "875",
+        "lat": 13.0095111,
+        "lng": 77.5355278
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5355278,
+          13.0095111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_40",
+        "slNo": "15",
+        "location": "3rd circular road nandhini layout ward no-44",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "875",
+        "lat": 13.0095111,
+        "lng": 77.5355278
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5567056,
+          13.0367361
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_41",
+        "slNo": "16",
+        "location": "Near bescom office mattikere in ward no. -36",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Already tackled no flood occurred Desilting work is in progress by AMC",
+        "reducedLevel": "907",
+        "lat": 13.0367361,
+        "lng": 77.5567056
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.534025,
+          13.0250306
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_42",
+        "slNo": "17",
+        "location": "near yashavanthpur TTMC in ward no. -45",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "909",
+        "lat": 13.0250306,
+        "lng": 77.534025
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5189389,
+          12.984675
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_43",
+        "slNo": "18",
+        "location": "Near summanahalli bridge(up stream) in ward no-\n102",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Already tackled no flood occurred",
+        "reducedLevel": "849",
+        "lat": 12.984675,
+        "lng": 77.5189389
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5278778,
+          13.001
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_44",
+        "slNo": "19",
+        "location": "1st main road bridge down stream in ward no-74",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Already tackled no flood occurred",
+        "reducedLevel": "850",
+        "lat": 13.001,
+        "lng": 77.5278778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5325528,
+          13.0017556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_45",
+        "slNo": "20",
+        "location": "Jai maruthi nagar and nandhini layout bridge ( up and doen stream) in ward no 43/66",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant & Tender Under Process",
+        "reducedLevel": "877",
+        "lat": 13.0017556,
+        "lng": 77.5325528
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5085389,
+          12.9590583
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_46",
+        "slNo": "21",
+        "location": "NGEF Layout in ward no.128",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "828",
+        "lat": 12.9590583,
+        "lng": 77.5085389
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5186556,
+          12.9711694
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_47",
+        "slNo": "22",
+        "location": "Kalyan Nagar , Moodalapalya, Ward 127",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "833",
+        "lat": 12.9711694,
+        "lng": 77.5186556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5621028,
+          12.9764556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_48",
+        "slNo": "23",
+        "location": "Netaji Nagara in ward no.120 KP Agrahara",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant & Tender Under Process",
+        "reducedLevel": "888",
+        "lat": 12.9764556,
+        "lng": 77.5621028
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5697722,
+          12.98
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_49",
+        "slNo": "24",
+        "location": "Nagamma nagara Near binny mill road",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Included under CMNNY Grant & Tender Under Process",
+        "reducedLevel": "901",
+        "lat": 12.98,
+        "lng": 77.5697722
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.54405,
+          12.9908722
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_50",
+        "slNo": "25",
+        "location": "Netaji ground & Saneguruvanalli, Ward 100",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "902",
+        "lat": 12.9908722,
+        "lng": 77.54405
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5592972,
+          12.9875639
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_51",
+        "slNo": "26",
+        "location": "Srirammandir ward.108, Gubbanna Industrial\nEstate",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Tackled to avoid flooding",
+        "reducedLevel": "897",
+        "lat": 12.9875639,
+        "lng": 77.5592972
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5571667,
+          12.9934833
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_52",
+        "slNo": "27",
+        "location": "Prakashnagar Near mudalayar Choultry",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant & Tender Under Process",
+        "reducedLevel": "902",
+        "lat": 12.9934833,
+        "lng": 77.5571667
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5255861,
+          12.9446528
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_53",
+        "slNo": "28",
+        "location": "Nayandahalli ward.131 and near Railway track",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Work Tackled to avoid flooding",
+        "reducedLevel": "895",
+        "lat": 12.9446528,
+        "lng": 77.5255861
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.566525,
+          12.9653167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_54",
+        "slNo": "29",
+        "location": "Siddartha Nagar, Cheluvadipalya Ward 138",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RCC Retaining wall to be Constructed and desilting work is in Progress by\nAMC",
+        "reducedLevel": "895",
+        "lat": 12.9653167,
+        "lng": 77.566525
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5636111,
+          13.0033056
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_55",
+        "slNo": "30",
+        "location": "Munikrishnappa layout area of kaveripura in ward\nNo.103",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work Included under CMNNY Grant\n& Tender Under Process",
+        "reducedLevel": "919",
+        "lat": 13.0033056,
+        "lng": 77.5636111
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5526194,
+          12.9658833
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_56",
+        "slNo": "31",
+        "location": "Rayapuram near Govt Maternity Hospital, Ward 137",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Desilting to be done periodically by AMC",
+        "reducedLevel": "878",
+        "lat": 12.9658833,
+        "lng": 77.5526194
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5620833,
+          12.9570389
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_57",
+        "slNo": "32",
+        "location": "Chamarajapet Ward 140",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Culvert Work Under Progress",
+        "reducedLevel": "894",
+        "lat": 12.9570389,
+        "lng": 77.5620833
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5686806,
+          12.9572417
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_58",
+        "slNo": "33",
+        "location": "Nari Halla, Ward 141",
+        "zone": "WEST ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Already tackled no flood occurred",
+        "reducedLevel": "896",
+        "lat": 12.9572417,
+        "lng": 77.5686806
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5412528,
+          12.9530351
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_59",
+        "slNo": "1",
+        "location": "Sri Galianjaneya  swamy temple, Mysore road",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "70",
+        "remarks": "Periodical desilting to be done",
+        "reducedLevel": "",
+        "lat": 12.9530351,
+        "lng": 77.5412528
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5541086,
+          12.9722476
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_60",
+        "slNo": "2",
+        "location": "Kempapura Agrahara Secondary Drain, Magadi\nroad",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "40",
+        "remarks": "RCC Retaining wall to be constructed",
+        "reducedLevel": "",
+        "lat": 12.9722476,
+        "lng": 77.5541086
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5289368,
+          12.9454803
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_61",
+        "slNo": "3",
+        "location": "Nayandahalli Junction, Mysore road",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "80",
+        "remarks": "Periodical desilting to be done",
+        "reducedLevel": "",
+        "lat": 12.9454803,
+        "lng": 77.5289368
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5385974,
+          12.9505685
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_62",
+        "slNo": "1",
+        "location": "Kavika Bridge to Nice road bridge",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "60",
+        "remarks": "RCC Retaining wall to be constructed",
+        "reducedLevel": "",
+        "lat": 12.9505685,
+        "lng": 77.5385974
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.549697,
+          12.9684047
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_63",
+        "slNo": "2",
+        "location": "Vrishabhavthi main valley near Cholurapalya in\nward 123",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "40",
+        "remarks": "RCC Retaining wall to be constructed",
+        "reducedLevel": "",
+        "lat": 12.9684047,
+        "lng": 77.549697
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5466514,
+          12.9737296
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_64",
+        "slNo": "3",
+        "location": "Manuvana, Pipeline road",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "30",
+        "remarks": "Bend pipe to be provided",
+        "reducedLevel": "",
+        "lat": 12.9737296,
+        "lng": 77.5466514
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5350696,
+          12.9453019
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_65",
+        "slNo": "4",
+        "location": "Ranganatha Colony in W 158",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "70",
+        "remarks": "RCC Retaining wall to be constructed",
+        "reducedLevel": "",
+        "lat": 12.9453019,
+        "lng": 77.5350696
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5425798,
+          12.9563166
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_66",
+        "slNo": "5",
+        "location": "Hosaguddadahalli, Bapujinagara",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Bend pipe to be provided",
+        "reducedLevel": "",
+        "lat": 12.9563166,
+        "lng": 77.5425798
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5353228,
+          12.9320232
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_67",
+        "slNo": "6",
+        "location": "Hosakere halli, near D'souza Nagara",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "40",
+        "remarks": "RCC Retaining wall to be constructed",
+        "reducedLevel": "",
+        "lat": 12.9320232,
+        "lng": 77.5353228
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5391333,
+          12.9246956
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_68",
+        "slNo": "7",
+        "location": "Near Dattarthraya Temple, Hosakerehalli",
+        "zone": "SOUTH ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "RCC Retaining wall to be constructed",
+        "reducedLevel": "",
+        "lat": 12.9246956,
+        "lng": 77.5391333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6010278,
+          12.93025
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_69",
+        "slNo": "1",
+        "location": "Bannerghatta Road near spar super market, no shoulder drain to rsd",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Shoulders drains to be provided.",
+        "reducedLevel": "",
+        "lat": 12.93025,
+        "lng": 77.6010278
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5999444,
+          12.9216944
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_70",
+        "slNo": "2",
+        "location": "Bannerghatta Road near oakyard Apartment,\nbecause choked Rsd",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.9216944,
+        "lng": 77.5999444
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5998889,
+          12.9164722
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_71",
+        "slNo": "3",
+        "location": "Hosur road Jayadeva flyover to Udupi Garden\nSignal due to choked Rsd.",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.9164722,
+        "lng": 77.5998889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6218889,
+          12.9186389
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_72",
+        "slNo": "4",
+        "location": "SILK BOARD  due to  choked Rsd and shoulder\ndrain",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.9186389,
+        "lng": 77.6218889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6264167,
+          12.9368889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_73",
+        "slNo": "5",
+        "location": "Sony Signal to Maharaja signal in Koramangala due Rsd work and Choked Rsd and shoulder drains.",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Rsd to be desilted  and shoulder drains to be cleared.",
+        "reducedLevel": "",
+        "lat": 12.9368889,
+        "lng": 77.6264167
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6096667,
+          12.9706111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_74",
+        "slNo": "6",
+        "location": "Magrath road and brigade road junction",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD to be linked at SWD near HM Towers",
+        "reducedLevel": "",
+        "lat": 12.9706111,
+        "lng": 77.6096667
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6059444,
+          12.9519444
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_75",
+        "slNo": "7",
+        "location": "Anepalya Gajendranagar SWD surroundings",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200",
+        "remarks": "RSD bed level in same level as SWD",
+        "reducedLevel": "",
+        "lat": 12.9519444,
+        "lng": 77.6059444
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5839722,
+          12.9624167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_76",
+        "slNo": "8",
+        "location": "Kumbargundi lead off drains",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD bed level in same level as SWD",
+        "reducedLevel": "",
+        "lat": 12.9624167,
+        "lng": 77.5839722
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5896389,
+          12.9463056
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_77",
+        "slNo": "9",
+        "location": "Siddpaura gate",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "RSD bed level in same level as SWD",
+        "reducedLevel": "",
+        "lat": 12.9463056,
+        "lng": 77.5896389
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5968333,
+          12.9529722
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_78",
+        "slNo": "10",
+        "location": "Wilson garden PWD quarters",
+        "zone": "K-valley",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD bed level in same level as SWD",
+        "reducedLevel": "",
+        "lat": 12.9529722,
+        "lng": 77.5968333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6146389,
+          12.9637222
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_79",
+        "slNo": "1",
+        "location": "Palm grove road",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "20",
+        "remarks": "UG Cables running across the bed of\nSWD,hence a lot of obstruction",
+        "reducedLevel": "",
+        "lat": 12.9637222,
+        "lng": 77.6146389
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.599,
+          12.9511667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_80",
+        "slNo": "2",
+        "location": "JK Pura",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "15",
+        "remarks": "RSD bed level in same level as SWD",
+        "reducedLevel": "",
+        "lat": 12.9511667,
+        "lng": 77.599
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5970278,
+          12.9561389
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_81",
+        "slNo": "3",
+        "location": "Micheal church",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "10",
+        "remarks": "RSD not working.",
+        "reducedLevel": "",
+        "lat": 12.9561389,
+        "lng": 77.5970278
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5939167,
+          12.9319167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_82",
+        "slNo": "4",
+        "location": "Gulbarga Calony RBI extension.",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "25",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.9319167,
+        "lng": 77.5939167
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6056111,
+          12.951
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_83",
+        "slNo": "5",
+        "location": "Anepalya junction",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "75",
+        "remarks": "RSD bed level in same level as SWD bed\nlevel",
+        "reducedLevel": "",
+        "lat": 12.951,
+        "lng": 77.6056111
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5828056,
+          12.9621111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_84",
+        "slNo": "6",
+        "location": "Kumbaragundi",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "25",
+        "remarks": "RSD bed level in same level as SWD",
+        "reducedLevel": "",
+        "lat": 12.9621111,
+        "lng": 77.5828056
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5889722,
+          12.9329444
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_85",
+        "slNo": "7",
+        "location": "Byrasandara Fire station",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "15",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.9329444,
+        "lng": 77.5889722
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5798056,
+          12.963
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_86",
+        "slNo": "8",
+        "location": "Osaman Khan  Road Near KR Market",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "25",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.963,
+        "lng": 77.5798056
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.61675,
+          12.91575
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_87",
+        "slNo": "9",
+        "location": "BTM layout",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.91575,
+        "lng": 77.61675
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5814722,
+          12.9435833
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_88",
+        "slNo": "10",
+        "location": "RV Teachers College",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "10",
+        "remarks": "RSD bed level lower than  SWD bed level",
+        "reducedLevel": "",
+        "lat": 12.9435833,
+        "lng": 77.5814722
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6090278,
+          12.9249444
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_89",
+        "slNo": "11",
+        "location": "Tavarkere Main road.",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "20",
+        "remarks": "Rsd to be desilted  and shoulder drains to\nbe cleared.",
+        "reducedLevel": "",
+        "lat": 12.9249444,
+        "lng": 77.6090278
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6227222,
+          12.9171944
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_90",
+        "slNo": "12",
+        "location": "Silk Board junction",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Rsd to be desilted  and shoulder drains to\nbe cleared.",
+        "reducedLevel": "",
+        "lat": 12.9171944,
+        "lng": 77.6227222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5749167,
+          12.9140556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_91",
+        "slNo": "13",
+        "location": "Navoduya Layout",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Rsd to be desilted  and shoulder drains to\nbe cleared.",
+        "reducedLevel": "",
+        "lat": 12.9140556,
+        "lng": 77.5749167
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6191944,
+          12.9478611
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_92",
+        "slNo": "14",
+        "location": "RAJENDRA NAGARA  slum opp kpwd quarters",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "RSD bed level in same level as SWD",
+        "reducedLevel": "",
+        "lat": 12.9478611,
+        "lng": 77.6191944
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6258889,
+          12.9503889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_93",
+        "slNo": "15",
+        "location": "Ejipura opp army land",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "25",
+        "remarks": "Rsd to be desilted  and shoulder drains to\nbe cleared.",
+        "reducedLevel": "",
+        "lat": 12.9503889,
+        "lng": 77.6258889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.62875,
+          12.9386389
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_94",
+        "slNo": "16",
+        "location": "Ejpura ashwini layout",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Rsd to be desilted  and shoulder drains to\nbe cleared.",
+        "reducedLevel": "",
+        "lat": 12.9386389,
+        "lng": 77.62875
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6301389,
+          12.9347222
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_95",
+        "slNo": "17",
+        "location": "ST BED KORAMANGALA",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Rsd to be desilted  and shoulder drains to\nbe cleared.",
+        "reducedLevel": "",
+        "lat": 12.9347222,
+        "lng": 77.6301389
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6303889,
+          12.9338056
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_96",
+        "slNo": "18",
+        "location": "Koramangala 4 th block",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Rsd to be desilted  and shoulder drains to\nbe cleared.",
+        "reducedLevel": "",
+        "lat": 12.9338056,
+        "lng": 77.6303889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6004444,
+          12.923
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_97",
+        "slNo": "19",
+        "location": "Gurappanapalya banneragatta main road",
+        "zone": "K-valley",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "RSD to be desilted",
+        "reducedLevel": "",
+        "lat": 12.923,
+        "lng": 77.6004444
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6002778,
+          13.0436111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_98",
+        "slNo": "1",
+        "location": "Kariyannapalya Bridge over flowed ORR",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "700",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "888",
+        "lat": 13.0436111,
+        "lng": 77.6002778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6147222,
+          13.0577778
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_99",
+        "slNo": "2",
+        "location": "Near Rachanahalli lake inlet over flow due to let\nout of BWSSB",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "1000",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "886",
+        "lat": 13.0577778,
+        "lng": 77.6147222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5936111,
+          13.0925
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_100",
+        "slNo": "3",
+        "location": "Lbs nagar Yelahanka",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "300",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "904",
+        "lat": 13.0925,
+        "lng": 77.5936111
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6155556,
+          13.0425
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_101",
+        "slNo": "4",
+        "location": "Veerannapaly drain near Manpho convention\ncenter.",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "850",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "890",
+        "lat": 13.0425,
+        "lng": 77.6155556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5988889,
+          13.0430556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_102",
+        "slNo": "1",
+        "location": "Kariyannapalya outer ring road,w.no.7 near varun\nmotors see H100.",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "250",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "888",
+        "lat": 13.0430556,
+        "lng": 77.5988889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6236111,
+          13.0472222
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_103",
+        "slNo": "2",
+        "location": "H 183 manyata tech park, m.s.ranaiah north city to element mall.in ward no.6",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "650",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "888",
+        "lat": 13.0472222,
+        "lng": 77.6236111
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5716667,
+          13.055
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_104",
+        "slNo": "3",
+        "location": "TATA nagar 8th cross, inward no.8",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "897",
+        "lat": 13.055,
+        "lng": 77.5716667
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5627778,
+          13.0691667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_105",
+        "slNo": "4",
+        "location": "Thindlu  to doddabommasandra tank. In ward no.9",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "903",
+        "lat": 13.0691667,
+        "lng": 77.5627778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5933333,
+          13.0472222
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_106",
+        "slNo": "5",
+        "location": "H200 from esteem mall beside dhobi that to yogesh nagar bridge in ward no.7",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "250",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "892",
+        "lat": 13.0472222,
+        "lng": 77.5933333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5933333,
+          13.1102778
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_107",
+        "slNo": "6",
+        "location": "Kondappa layout in Ward no.2",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "898",
+        "lat": 13.1102778,
+        "lng": 77.5933333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6011111,
+          13.1030556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_108",
+        "slNo": "7",
+        "location": "Kogilu cross behind Udupi Grand hotel in Ward no.1",
+        "zone": "YELAHANKA ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "450",
+        "remarks": "Revenue width of the nala was very less, proposed to widen the nala under TDR scheme",
+        "reducedLevel": "893",
+        "lat": 13.1030556,
+        "lng": 77.6011111
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.727188,
+          12.93142
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_109",
+        "slNo": "1",
+        "location": "Sarjapuraroad",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.93142,
+        "lng": 77.727188
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.732498,
+          12.92109
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_110",
+        "slNo": "2",
+        "location": "Gunjur",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.92109,
+        "lng": 77.732498
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.735939,
+          12.95694
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_111",
+        "slNo": "3",
+        "location": "Varthur",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.95694,
+        "lng": 77.735939
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.705013,
+          12.936355
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_112",
+        "slNo": "4",
+        "location": "Panathur",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.936355,
+        "lng": 77.705013
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.723178,
+          12.938932
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_113",
+        "slNo": "5",
+        "location": "Balagere",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.938932,
+        "lng": 77.723178
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.718137,
+          12.992015
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_114",
+        "slNo": "6",
+        "location": "Hoodi",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.992015,
+        "lng": 77.718137
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.733753,
+          12.978889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_116",
+        "slNo": "2",
+        "location": "Pattandur agrahara",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.978889,
+        "lng": 77.733753
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.692178,
+          12.969066
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_117",
+        "slNo": "3",
+        "location": "Ddoddenakundi near gururaja layout",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.969066,
+        "lng": 77.692178
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.692871,
+          12.99492
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_118",
+        "slNo": "4",
+        "location": "Maheshwari nagar",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.99492,
+        "lng": 77.692871
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.678116,
+          12.926464
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_119",
+        "slNo": "5",
+        "location": "Bellandur",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.926464,
+        "lng": 77.678116
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.700679,
+          12.949943
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_120",
+        "slNo": "6",
+        "location": "S G R dental college",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.949943,
+        "lng": 77.700679
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.556049,
+          13.014108
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_121",
+        "slNo": "7",
+        "location": "varthur columbia asia hospital",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.014108,
+        "lng": 77.556049
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.746844,
+          12.938078
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_122",
+        "slNo": "8",
+        "location": "varthur police station",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.938078,
+        "lng": 77.746844
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.556933,
+          13.112929
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_123",
+        "slNo": "9",
+        "location": "Ramagondanahalli",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.112929,
+        "lng": 77.556933
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.487694,
+          12.949595
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_124",
+        "slNo": "10",
+        "location": "Vinayaka layout orr",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.949595,
+        "lng": 77.487694
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.512709,
+          12.911066
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_125",
+        "slNo": "11",
+        "location": "Beml layout",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.911066,
+        "lng": 77.512709
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.690549,
+          12.955021
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_126",
+        "slNo": "12",
+        "location": "Deepa nursing home",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.955021,
+        "lng": 77.690549
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.736686,
+          12.9693
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_127",
+        "slNo": "13",
+        "location": "Nellurahalli",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.9693,
+        "lng": 77.736686
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.720545,
+          12.955652
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_128",
+        "slNo": "14",
+        "location": "Thubarahalli",
+        "zone": "MAHADEVAPURA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "50",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.955652,
+        "lng": 77.720545
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6683333,
+          12.9902778
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_129",
+        "slNo": "1",
+        "location": "Pai Layout",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Railway under bridge additional vent\nshould be made",
+        "reducedLevel": "887",
+        "lat": 12.9902778,
+        "lng": 77.6683333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6813889,
+          13.0108333
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_130",
+        "slNo": "2",
+        "location": "Ambedkar Nagar near Ramamurthy Nagar.",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200",
+        "remarks": "Because of closed box drain.",
+        "reducedLevel": "888",
+        "lat": 13.0108333,
+        "lng": 77.6813889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6722222,
+          13.0066667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_131",
+        "slNo": "3",
+        "location": "RR layout & Ambedkar Nagar",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Low laying area",
+        "reducedLevel": "898",
+        "lat": 13.0066667,
+        "lng": 77.6722222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6447222,
+          13.0427778
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_132",
+        "slNo": "4",
+        "location": "Vaddera Palya (Railway track)",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "300",
+        "remarks": "Railway under bridge additional vent\nshould be made",
+        "reducedLevel": "877",
+        "lat": 13.0427778,
+        "lng": 77.6447222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6827778,
+          12.9663889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_133",
+        "slNo": "5",
+        "location": "Talakaveri layout",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Opening at HAL Compound should\nmade bigger ( Work is in progress)",
+        "reducedLevel": "877",
+        "lat": 12.9663889,
+        "lng": 77.6827778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6802778,
+          13.0105556
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_134",
+        "slNo": "1",
+        "location": "ITI Layout",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Narrow drain.(Series of buildings built\nalong the drain.",
+        "reducedLevel": "890",
+        "lat": 13.0105556,
+        "lng": 77.6802778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6791667,
+          13.0113889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_135",
+        "slNo": "2",
+        "location": "Koudenahalli (Ramamurthy Nagar main road)",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200",
+        "remarks": "Narrow drain.(Series of buildings built along the drain.",
+        "reducedLevel": "889",
+        "lat": 13.0113889,
+        "lng": 77.6791667
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6655556,
+          13.0186111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_136",
+        "slNo": "3",
+        "location": "Hoysala nagar in Hormavu",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "250",
+        "remarks": "No lead of drain due to buildings",
+        "reducedLevel": "",
+        "lat": 13.0186111,
+        "lng": 77.6655556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6963889,
+          13.0066667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_137",
+        "slNo": "4",
+        "location": "Devasandra(Nethravathi Badavane)",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200",
+        "remarks": "Low laying area.(Slum)",
+        "reducedLevel": "",
+        "lat": 13.0066667,
+        "lng": 77.6963889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6902778,
+          12.9888889
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_138",
+        "slNo": "5",
+        "location": "Shivaganga layout",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "250",
+        "remarks": "Narrow drain.(Series of buildings built\nalong the drain.",
+        "reducedLevel": "883",
+        "lat": 12.9888889,
+        "lng": 77.6902778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6788889,
+          13.0127778
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_139",
+        "slNo": "6",
+        "location": "NRI layout",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200",
+        "remarks": "Due to smallerdiverted box drain.",
+        "reducedLevel": "896",
+        "lat": 13.0127778,
+        "lng": 77.6788889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6811111,
+          13.0366667
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_140",
+        "slNo": "7",
+        "location": "Richi's Garden",
+        "zone": "KR PURAM",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Encroachment.",
+        "reducedLevel": "889",
+        "lat": 13.0366667,
+        "lng": 77.6811111
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.641585,
+          12.909359
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_141",
+        "slNo": "1",
+        "location": "HSR 3rd sector lead off drains and no shoulder\ndrains",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "150",
+        "remarks": "RSD have to be desilted",
+        "reducedLevel": "",
+        "lat": 12.909359,
+        "lng": 77.641585
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.632402,
+          12.911655
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_142",
+        "slNo": "2",
+        "location": "Sector 6 lead off drains surrounding 5th and 9th\nmain",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200",
+        "remarks": "RSD have to be desilted",
+        "reducedLevel": "",
+        "lat": 12.911655,
+        "lng": 77.632402
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.603036,
+          12.904903
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_143",
+        "slNo": "3",
+        "location": "NS palya RSD not desilted from 3 years",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD/Ward drains have to be desilted",
+        "reducedLevel": "",
+        "lat": 12.904903,
+        "lng": 77.603036
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.644933,
+          12.909073
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_144",
+        "slNo": "4",
+        "location": "HSR sector 2 Garden layout RSD blocked",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.909073,
+        "lng": 77.644933
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.633121,
+          12.900922
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_145",
+        "slNo": "5",
+        "location": "Garebhavipalya NH  service road junction",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "SWD construction in progress",
+        "reducedLevel": "",
+        "lat": 12.900922,
+        "lng": 77.633121
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.603987,
+          12.880518
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_146",
+        "slNo": "6",
+        "location": "BDA layout Hulimavu",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.880518,
+        "lng": 77.603987
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.604415,
+          12.880586
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_147",
+        "slNo": "7",
+        "location": "Kempamma layout RSD Arekere",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.880586,
+        "lng": 77.604415
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.604051,
+          12.879969
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_148",
+        "slNo": "8",
+        "location": "Someshwara layout Arekere",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.879969,
+        "lng": 77.604051
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.611262,
+          12.901886
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_149",
+        "slNo": "9",
+        "location": "Anugraha layout RSD phase 1",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "250",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.901886,
+        "lng": 77.611262
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.692907,
+          12.897817
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_150",
+        "slNo": "10",
+        "location": "Doddakanneli",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.897817,
+        "lng": 77.692907
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.642075,
+          12.885937
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_151",
+        "slNo": "11",
+        "location": "Hosur road near Royal Enfield show room, white s\nhall",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "50",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.885937,
+        "lng": 77.642075
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.637418,
+          12.878907
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_152",
+        "slNo": "12",
+        "location": "singasandra Country club road ward 191",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "100",
+        "remarks": "RSD have to be linked to SWD",
+        "reducedLevel": "",
+        "lat": 12.878907,
+        "lng": 77.637418
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.632402,
+          12.911655
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_153",
+        "slNo": "1",
+        "location": "HSR layout 9th and 5th main",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200",
+        "remarks": "-",
+        "reducedLevel": "",
+        "lat": 12.911655,
+        "lng": 77.632402
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.631443,
+          12.90136
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_154",
+        "slNo": "2",
+        "location": "Oxford college NH Junction",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300",
+        "remarks": "-",
+        "reducedLevel": "",
+        "lat": 12.90136,
+        "lng": 77.631443
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.626758,
+          12.904782
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_155",
+        "slNo": "3",
+        "location": "Hongasandara Ambedkar Nagar",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300",
+        "remarks": "Low Lying areas Drainage system not\nefficient",
+        "reducedLevel": "",
+        "lat": 12.904782,
+        "lng": 77.626758
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.598853,
+          12.903331
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_157",
+        "slNo": "5",
+        "location": "Dollars Colony JP Nagar",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "100",
+        "remarks": "Work has been stayed in Hon.High Court by Vaishnavi Terrace Apartment Association",
+        "reducedLevel": "",
+        "lat": 12.903331,
+        "lng": 77.598853
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.602807,
+          12.904455
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_158",
+        "slNo": "6",
+        "location": "Dollars Colony NS palya(BTM 2nd stage)",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200",
+        "remarks": "Purva Heights Apartmeny Owners Association hs obtained a stay from lower court and stopped the work near their premisis",
+        "reducedLevel": "",
+        "lat": 12.904455,
+        "lng": 77.602807
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.608253,
+          12.881756
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_159",
+        "slNo": "7",
+        "location": "Hulimavu Sri Lanka colony",
+        "zone": "BOMMANAHALLI ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "150",
+        "remarks": "Drainage network (RSD & Lead off\ndrains not existent)",
+        "reducedLevel": "",
+        "lat": 12.881756,
+        "lng": 77.608253
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5208833,
+          12.9164333
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_160",
+        "slNo": "1",
+        "location": "Ward non160 RR nagar beml 5th stage near kapi katte hotel",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "250 M",
+        "remarks": "Existing pipe culvert not sufficient, Remodelling work approved, tender has\nto be floated.",
+        "reducedLevel": "",
+        "lat": 12.9164333,
+        "lng": 77.5208833
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5201417,
+          13.0330972
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_161",
+        "slNo": "2",
+        "location": "Ward no.38 peenya industrial  area 3rd phase 1 st main road",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "Remodelling of SWD have proposed, but file not approved",
+        "reducedLevel": "",
+        "lat": 13.0330972,
+        "lng": 77.5201417
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5129917,
+          12.9315917
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_162",
+        "slNo": "3",
+        "location": "Ward no.160 near DIAT college",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.9315917,
+        "lng": 77.5129917
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.504071,
+          12.923679
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_163",
+        "slNo": "1",
+        "location": "Pattanagere main road beside r v college",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "250 M",
+        "remarks": "Already tackled no  flood occurred",
+        "reducedLevel": "",
+        "lat": 12.923679,
+        "lng": 77.504071
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.488025,
+          13.039565
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_164",
+        "slNo": "2",
+        "location": "Andanappa layout doddabidarakallu",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200M",
+        "remarks": "Already tackled no  flood occurred",
+        "reducedLevel": "",
+        "lat": 13.039565,
+        "lng": 77.488025
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.490534,
+          13.033788
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_165",
+        "slNo": "3",
+        "location": "Bhavani nagara doddabidarakallu",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "250M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 13.033788,
+        "lng": 77.490534
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.489889,
+          12.990491
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_166",
+        "slNo": "4",
+        "location": "Herohalli lake inlet handrahalli main road",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200M",
+        "remarks": "Already tackled no  flood occurred",
+        "reducedLevel": "",
+        "lat": 12.990491,
+        "lng": 77.489889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.491921,
+          12.962212
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_167",
+        "slNo": "5",
+        "location": "Mallathahalli lake inlet muddaiahna palya road",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "H",
+        "vulnerabilityLevel": "High",
+        "vulnerabilityMeasure": "200M",
+        "remarks": "Already tackled no  flood occurred",
+        "reducedLevel": "",
+        "lat": 12.962212,
+        "lng": 77.491921
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.541875,
+          12.9247111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_171",
+        "slNo": "4",
+        "location": "Gurudutta Layout to Sapthagiri Layout in ward\n160",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.9247111,
+        "lng": 77.541875
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5225556,
+          12.9164056
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_172",
+        "slNo": "5",
+        "location": "Shankarappa Layout to BEML gate R.R.Nagara",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200 M",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.9164056,
+        "lng": 77.5225556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5203306,
+          12.9285694
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_173",
+        "slNo": "6",
+        "location": "Jawaregowdana Doddi, Bangarappa Nagara",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.9285694,
+        "lng": 77.5203306
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5174889,
+          12.96595
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_174",
+        "slNo": "7",
+        "location": "Malagala main road to Vrishabhavathi Valley",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.96595,
+        "lng": 77.5174889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5185222,
+          12.9228167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_175",
+        "slNo": "8",
+        "location": "Basaveshwara Circle BEML 3rd stage in ward no.160",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.9228167,
+        "lng": 77.5185222
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5390972,
+          12.9247111
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_176",
+        "slNo": "9",
+        "location": "Gurudutta   Layout  to Sapthagiri Layout in ward 160",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.9247111,
+        "lng": 77.5390972
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5215556,
+          12.9248167
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_177",
+        "slNo": "10",
+        "location": "Halagevadeyarahalli lake to Kenchenahalli  lake  in\nward  no 160",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "Already tackled no  flood occurred",
+        "reducedLevel": "",
+        "lat": 12.9248167,
+        "lng": 77.5215556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5173889,
+          13.003639
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_178",
+        "slNo": "11",
+        "location": "Lavakushanagara to Vrishabhavathi Valley",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "",
+        "reducedLevel": "",
+        "lat": 13.003639,
+        "lng": 77.5173889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5118611,
+          12.9329972
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_179",
+        "slNo": "12",
+        "location": "Ideal Homes beside Akkamahadevi choultry",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "",
+        "reducedLevel": "",
+        "lat": 12.9329972,
+        "lng": 77.5118611
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5173944,
+          12.9657028
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_180",
+        "slNo": "13",
+        "location": "Bande Maramma Temple behind Nagarabhavi 10th cross Bus Stop",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "",
+        "reducedLevel": "",
+        "lat": 12.9657028,
+        "lng": 77.5173944
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.487364,
+          13.036639
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_181",
+        "slNo": "14",
+        "location": "Near Tippena Halli Govt. School",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 13.036639,
+        "lng": 77.487364
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.477201,
+          13.00969
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_182",
+        "slNo": "15",
+        "location": "Chakranagara Doddabidirukallu",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "250 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 13.00969,
+        "lng": 77.477201
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.499901,
+          13.017125
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_183",
+        "slNo": "16",
+        "location": "Thigalara Palya Doddabidirukallu",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "250 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 13.017125,
+        "lng": 77.499901
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.484496,
+          13.021657
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_184",
+        "slNo": "17",
+        "location": "Horanadu Annapurneshwari Layout Doddabidirukallu",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 13.021657,
+        "lng": 77.484496
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.478921,
+          12.963815
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_185",
+        "slNo": "18",
+        "location": "Ambedkar Nagara Ullala",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 12.963815,
+        "lng": 77.478921
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.4954,
+          12.926779
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_186",
+        "slNo": "19",
+        "location": "Dubasipalya Tank",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "action to be taken by lakes division",
+        "reducedLevel": "",
+        "lat": 12.926779,
+        "lng": 77.4954
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.477999,
+          12.918535
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_187",
+        "slNo": "20",
+        "location": "Bande Matta Kengeri",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 12.918535,
+        "lng": 77.477999
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.478994,
+          12.905953
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_188",
+        "slNo": "21",
+        "location": "Mysore Road Kengeri Satellite Town Main Road",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 12.905953,
+        "lng": 77.478994
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.490779,
+          12.913417
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_189",
+        "slNo": "22",
+        "location": "Vijayashri Layout",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200 M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 12.913417,
+        "lng": 77.490779
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.466559,
+          12.901002
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_190",
+        "slNo": "23",
+        "location": "Vishva Vakkaligara Maha Samsthana Mysore road",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500 M",
+        "remarks": "action will be taken by NHAI & BMRCL",
+        "reducedLevel": "",
+        "lat": 12.901002,
+        "lng": 77.466559
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.483394,
+          12.989302
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_191",
+        "slNo": "24",
+        "location": "Kempegowda nagar Ward",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200M",
+        "remarks": "",
+        "reducedLevel": "",
+        "lat": 12.989302,
+        "lng": 77.483394
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.538538,
+          12.876393
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_192",
+        "slNo": "25",
+        "location": "Balaji Layout Ward 198 Kanakapura Road",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 12.876393,
+        "lng": 77.538538
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.527756,
+          12.860256
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_193",
+        "slNo": "26",
+        "location": "Mantri Lake view Appartment Next to Talagattapura\nLake",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 12.860256,
+        "lng": 77.527756
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.54944,
+          12.878313
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_194",
+        "slNo": "27",
+        "location": "Raghuvanahalli at Hemmigepura ward",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "250M",
+        "remarks": "Encroachment issue, work to be proposed.\nMaintained under AMC",
+        "reducedLevel": "",
+        "lat": 12.878313,
+        "lng": 77.54944
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.502519,
+          12.920448
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_195",
+        "slNo": "28",
+        "location": "Global Village Joining V Vally at Glabal Village\nProperty ward no.198.",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "200M",
+        "remarks": "Taken under CMNNY",
+        "reducedLevel": "",
+        "lat": 12.920448,
+        "lng": 77.502519
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.528255,
+          12.872472
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_196",
+        "slNo": "29",
+        "location": "Kendriya nagara ward 198",
+        "zone": "SWD RR NAGARA",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "300M",
+        "remarks": "Encroachment issue, work to be proposed.\nMaintained under AMC",
+        "reducedLevel": "",
+        "lat": 12.872472,
+        "lng": 77.528255
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.53471,
+          13.06407
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_199",
+        "slNo": "3",
+        "location": "Kammagondanahalli near MNTI Polytecnic",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "",
+        "reducedLevel": "",
+        "lat": 13.06407,
+        "lng": 77.53471
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.57271,
+          13.034332
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_201",
+        "slNo": "5",
+        "location": "Siddeswara Layout",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.034332,
+        "lng": 77.57271
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.50116,
+          13.06087
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_202",
+        "slNo": "6",
+        "location": "MEI layout",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.06087,
+        "lng": 77.50116
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.50074,
+          13.04681
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_203",
+        "slNo": "7",
+        "location": "Gundappa Layout & Belmar Layout",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.04681,
+        "lng": 77.50074
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.51178,
+          13.01264
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_204",
+        "slNo": "8",
+        "location": "Government School & Durgalamma Temple",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "",
+        "reducedLevel": "",
+        "lat": 13.01264,
+        "lng": 77.51178
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.51178,
+          13.06634
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_205",
+        "slNo": "9",
+        "location": "Settyhalli & Chikkasandra Village in Settyhalli Ward no. 12",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.06634,
+        "lng": 77.51178
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.51178,
+          13.06068
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_206",
+        "slNo": "10",
+        "location": "Aaimatha layout, Mallasandra, Bengaluru",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.06068,
+        "lng": 77.51178
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.51674,
+          12.99822
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_207",
+        "slNo": "11",
+        "location": "Pillappanakatte valley (KTG Roads to DWCC)",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 12.99822,
+        "lng": 77.51674
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.60487,
+          13.05796
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_208",
+        "slNo": "12",
+        "location": "Shivapura tank in ward No 41.",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "Adjacent SWD have been De-silted",
+        "reducedLevel": "",
+        "lat": 13.05796,
+        "lng": 77.60487
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.47808,
+          13.04137
+        ]
+      },
+      "properties": {
+        "id": "flood_pt_209",
+        "slNo": "13",
+        "location": "Shambhavinagar in ward No 70",
+        "zone": "DASARAHALLI  ZONE",
+        "vulnerabilityCode": "M",
+        "vulnerabilityLevel": "Moderate",
+        "vulnerabilityMeasure": "500",
+        "remarks": "",
+        "reducedLevel": "",
+        "lat": 13.04137,
+        "lng": 77.47808
+      }
+    }
+  ]
+}
