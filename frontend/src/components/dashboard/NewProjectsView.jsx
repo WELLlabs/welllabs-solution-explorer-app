@@ -3,10 +3,10 @@ import { useLocation } from 'react-router-dom';
 import { getProjectImage } from '../../data/projectImages';
 
 /* ============ helpers ============ */
-const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
-const lk = v => '₹' + (v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)) + ' L';
-const rs = v => v >= 100 ? cr(v) : lk(v);
-const parseCostNum = val => {
+export const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
+export const lk = v => '₹' + (v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)) + ' L';
+export const rs = v => v >= 100 ? cr(v) : lk(v);
+export const parseCostNum = val => {
   if (typeof val === 'number') return val;
   if (!val) return 0;
   const str = String(val).trim();
@@ -17,16 +17,16 @@ const parseCostNum = val => {
   if (/cr/i.test(str)) num = num * 100;
   return num;
 };
-const m3 = n => n >= 1e6 ? (n / 1e6).toFixed(2) + 'M m³' : n >= 1e3 ? Math.round(n / 1e3) + 'k m³' : Math.round(n) + ' m³';
-const runoff = (P, CN) => {
+export const m3 = n => n >= 1e6 ? (n / 1e6).toFixed(2) + 'M m³' : n >= 1e3 ? Math.round(n / 1e3) + 'k m³' : Math.round(n) + ' m³';
+export const runoff = (P, CN) => {
   const S = 25400 / CN - 254;
   const Ia = 0.2 * S;
   return P <= Ia ? 0 : Math.pow(P - Ia, 2) / (P - Ia + S);
 };
-const initials = s => s.split(' ').filter(w => /[A-Za-z]/.test(w[0])).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+export const initials = s => s.split(' ').filter(w => /[A-Za-z]/.test(w[0])).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
 /* ============ implementing agencies ============ */
-const AG = {
+export const AG = {
   welllabs: {
     name: 'WELL Labs',
     type: 'Research institute',
@@ -84,7 +84,7 @@ const AG = {
 };
 
 /** Map our Intervention.type enum → the blue/green/grey colour category */
-const INT_COLOUR = {
+export const INT_COLOUR = {
   raingarden:         'green',
   bioswale:           'green',
   constructed_wetlands: 'green',
@@ -101,7 +101,7 @@ const INT_COLOUR = {
 };
 
 /** Friendly display name for each intervention type */
-const INT_LABEL = {
+export const INT_LABEL = {
   raingarden:          'Rain Garden',
   bioswale:            'Bioswale',
   infiltration_trench: 'Infiltration Trench',
@@ -118,7 +118,7 @@ const INT_LABEL = {
 };
 
 /** Friendly display name for SiteProject.type */
-const SITE_TYPE_LABEL = {
+export const SITE_TYPE_LABEL = {
   lake:       '🔵 Blue Site · Lake',
   park:       '🟢 Green Site · Park',
   stormdrain: '⚫ Grey Site · Storm Drain',
@@ -129,7 +129,7 @@ const SITE_TYPE_LABEL = {
  * Normalise a SiteProject document (with embedded interventions[]) into
  * the shape the existing component expects.
  */
-function normaliseProject(site) {
+export function normaliseProject(site) {
   const interventions = site.interventions || [];
 
   // Build the `assets` array from interventions
@@ -203,7 +203,7 @@ function normaliseProject(site) {
 }
 
 /** Compute derived totals on a project object (works for both old & new shape) */
-function preprocessProject(p) {
+export function preprocessProject(p) {
   const rawCosts = p.assets.map(a => parseCostNum(a.rawCost || a.cost));
   const nonZeroCosts = rawCosts.filter(c => c > 0);
   const allEqual = nonZeroCosts.length > 0 && nonZeroCosts.every(c => Math.abs(c - nonZeroCosts[0]) < 0.001);

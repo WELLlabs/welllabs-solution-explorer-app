@@ -1,47 +1,32 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import './Header.css';
 
 const Header = ({ user, onLogout }) => {
-  const [logoSrcIndex, setLogoSrcIndex] = useState(0);
-  const possibleLogoPaths = [
-    '/images/welllabs.png',
-  ];
-
-  const handleLogoError = (e) => {
-    if (logoSrcIndex < possibleLogoPaths.length - 1) {
-      setLogoSrcIndex((prev) => prev + 1);
-    } else {
-      e.target.style.display = 'none';
-    }
-  };
-
   return (
     <header className="dashboard-header">
       <div className="header-content">
         <div className="logo-section">
-          {/* Recovered Previous Logo Icon */}
-          <div className="logo-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <div className="header-logos-container">
+            <img
+              src="/images/logo/govt-karnataka-logo.png"
+              alt="Government of Karnataka Logo"
+              className="header-brand-logo"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+            <div className="logo-separator" />
+            <img
+              src="/images/logo/GBA-logo.png"
+              alt="GBA Logo"
+              className="header-brand-logo"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
           </div>
 
-          <div className='flex'>
-            <div>
+          <div className="logo-text-container">
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="logo-text">Climate Solutions</h1>
             </div>
             <p className="logo-subtitle">WELL Labs & Citizen Hydrology Hub</p>
-            </div>
-            <img
-              src={possibleLogoPaths[logoSrcIndex]}
-              alt="WELL Labs"
-              className="h-14 sm:h-14 w-auto object-contain inline-block ml-1"
-              onError={handleLogoError}
-            />
           </div>
         </div>
         
