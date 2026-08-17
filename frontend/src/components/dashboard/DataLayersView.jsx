@@ -374,39 +374,47 @@ const isPointInGeometry = (lat, lng, geometry) => {
   return false;
 };
 
-// Category resolution based on project tags
+// Category resolution based on project tags (Intervention Type full forms)
 const getProjectCategoryInfo = (tags) => {
   const tagsStr = String(tags || "").toLowerCase();
   if (tagsStr.includes("rainwater")) {
     return {
       id: "rainwater",
-      name: "Rainwater Harvesting",
+      name: "Rainwater Harvesting Systems",
       color: "#10b981",
       icon: "🌧️",
+      bg: "#ecfdf5",
+      border: "#a7f3d0",
     };
   }
   if (tagsStr.includes("groundwater")) {
     return {
       id: "groundwater",
-      name: "Groundwater Management",
+      name: "Groundwater Management & Recharge",
       color: "#8b5cf6",
       icon: "💧",
+      bg: "#f5f3ff",
+      border: "#ddd6fe",
     };
   }
   if (tagsStr.includes("flood")) {
     return {
       id: "flood",
-      name: "Flood Management",
+      name: "Flood Mitigation & Drainage",
       color: "#ea580c",
       icon: "🛡️",
+      bg: "#fff7ed",
+      border: "#fed7aa",
     };
   }
   if (tagsStr.includes("lake")) {
     return {
       id: "lake",
-      name: "Lake Rejuvenation",
+      name: "Lake Rejuvenation & Restoration",
       color: "#0284c7",
       icon: "🌊",
+      bg: "#f0f9ff",
+      border: "#bae6fd",
     };
   }
   if (tagsStr.includes("iuwm")) {
@@ -415,13 +423,126 @@ const getProjectCategoryInfo = (tags) => {
       name: "Integrated Urban Water Management (IUWM)",
       color: "#ec4899",
       icon: "🔄",
+      bg: "#fdf2f8",
+      border: "#fbcfe8",
     };
   }
   return {
     id: "other",
-    name: "Other Solutions",
+    name: "Other Water Infrastructure",
     color: "#64748b",
     icon: "⚙️",
+    bg: "#f8fafc",
+    border: "#e2e8f0",
+  };
+};
+
+// Site Type resolution (Parks, Lakes, Drains, Roads / Campuses)
+const getProjectSiteType = (tags, projName = "", details = "", type = "") => {
+  const text = `${projName} ${tags} ${details} ${type}`.toLowerCase();
+  if (
+    text.includes("lake") ||
+    text.includes("kere") ||
+    text.includes("tank") ||
+    text.includes("water body") ||
+    text.includes("pond")
+  ) {
+    return {
+      id: "lake",
+      name: "Lakes & Water Bodies",
+      icon: "🌊",
+      color: "#0284c7",
+      bg: "#e0f2fe",
+      border: "#bae6fd",
+    };
+  }
+  if (
+    text.includes("park") ||
+    text.includes("garden") ||
+    text.includes("green") ||
+    text.includes("forest") ||
+    text.includes("tree") ||
+    text.includes("playground")
+  ) {
+    return {
+      id: "park",
+      name: "Parks & Green Spaces",
+      icon: "🟢",
+      color: "#16a34a",
+      bg: "#dcfce7",
+      border: "#bbf7d0",
+    };
+  }
+  if (
+    text.includes("drain") ||
+    text.includes("kaluve") ||
+    text.includes("swd") ||
+    text.includes("channel") ||
+    text.includes("culvert") ||
+    text.includes("storm")
+  ) {
+    return {
+      id: "drain",
+      name: "Storm Drains & Channels",
+      icon: "⚫",
+      color: "#475569",
+      bg: "#f1f5f9",
+      border: "#cbd5e1",
+    };
+  }
+  return {
+    id: "road",
+    name: "Roads, Layouts & Campuses",
+    icon: "🛣️",
+    color: "#d97706",
+    bg: "#fef3c7",
+    border: "#fde68a",
+  };
+};
+
+// BGG Framework resolution directly mapped from Site Typology:
+// - Blue: Lakes & Water Bodies
+// - Green: Parks & Green Spaces
+// - Grey: Roads, Layouts & Campuses (+ Storm Drains)
+const getProjectBGGType = (siteTypeOrTags, projName = "", details = "", type = "") => {
+  let siteId = "";
+  if (typeof siteTypeOrTags === "object" && siteTypeOrTags?.id) {
+    siteId = siteTypeOrTags.id;
+  } else {
+    siteId = getProjectSiteType(siteTypeOrTags, projName, details, type).id;
+  }
+
+  if (siteId === "lake") {
+    return {
+      id: "blue",
+      name: "Blue Infrastructure",
+      subtitle: "Lakes & Water Bodies",
+      icon: "🔵",
+      color: "#0284c7",
+      bg: "#e0f2fe",
+      border: "#bae6fd",
+    };
+  }
+  if (siteId === "park") {
+    return {
+      id: "green",
+      name: "Green Infrastructure",
+      subtitle: "Parks & Green Spaces",
+      icon: "🟢",
+      color: "#16a34a",
+      bg: "#dcfce7",
+      border: "#bbf7d0",
+    };
+  }
+  // road & drain map to Grey (Roads, Layouts, Campuses & Storm Drains)
+  return {
+    id: "grey",
+    name: "Grey Infrastructure",
+    subtitle: "Roads, Layouts & Campuses",
+    icon: "⚫",
+    color: "#475569",
+    bg: "#f1f5f9",
+    border: "#cbd5e1",
   };
 };
 
@@ -434,11 +555,17 @@ const normalizeProject = (p) => {
     p.longitude !== undefined ? p.longitude : p.Longitude,
   );
   const tagsVal = String(p.tags || p["Tags"] || "");
+  const projNameVal = String(p.projName || p["Proj Name"] || p.proj_name || "");
+  const detailsVal = String(p.details || p["Details"] || "");
+  const typeVal = String(p.type || "");
+
   const categoryInfo = getProjectCategoryInfo(tagsVal);
+  const siteTypeInfo = getProjectSiteType(tagsVal, projNameVal, detailsVal, typeVal);
+  const bggTypeInfo = getProjectBGGType(siteTypeInfo);
 
   return {
     projNo: String(p.projNo || p["Proj No"] || p.proj_no || ""),
-    projName: String(p.projName || p["Proj Name"] || p.proj_name || ""),
+    projName: projNameVal,
     latitude: lat,
     longitude: lng,
     lat: lat,
@@ -450,6 +577,8 @@ const normalizeProject = (p) => {
     stakeholders: String(p.stakeholders || p["Stakeholders"] || ""),
     tags: tagsVal,
     categoryInfo: categoryInfo,
+    siteTypeInfo: siteTypeInfo,
+    bggTypeInfo: bggTypeInfo,
     areaCatchment: String(
       p.areaCatchment || p["Area Catchment"] || p.area_catchment || "",
     ),
@@ -1427,14 +1556,34 @@ const DataLayersView = () => {
     }
   };
 
-  // Categories state for filtering existing interventions
-  const [selectedCategories, setSelectedCategories] = useState({
+  // ── Existing Interventions Multi-Dimensional Filter States ─────────
+  // Mode: 'intervention' (Interventions Type) | 'site' (Site Type) | 'bgg' (BGG Type)
+  const [interventionFilterMode, setInterventionFilterMode] =
+    useState("intervention");
+
+  // Option 1: Interventions Type (Full forms)
+  const [selectedInterventionTypes, setSelectedInterventionTypes] = useState({
     lake: true,
     flood: true,
     groundwater: true,
     rainwater: true,
     iuwm: true,
     other: true,
+  });
+
+  // Option 2: Site Type (Parks, Lakes, Drains, Roads / Campuses)
+  const [selectedSiteTypes, setSelectedSiteTypes] = useState({
+    lake: true,
+    park: true,
+    drain: true,
+    road: true,
+  });
+
+  // Option 3: BGG Framework (Blue, Green, Grey)
+  const [selectedBGGTypes, setSelectedBGGTypes] = useState({
+    blue: true,
+    green: true,
+    grey: true,
   });
 
   const assemblyConst2LayerRef = useRef(null);
@@ -2611,8 +2760,17 @@ const DataLayersView = () => {
           p.wardName.toLowerCase().includes(search) ||
           p.tags.toLowerCase().includes(search);
 
-        const categoryId = p.categoryInfo?.id || "other";
-        const matchesCategory = selectedCategories[categoryId] === true;
+        let matchesFilter = true;
+        if (interventionFilterMode === "intervention") {
+          const categoryId = p.categoryInfo?.id || "other";
+          matchesFilter = selectedInterventionTypes[categoryId] === true;
+        } else if (interventionFilterMode === "site") {
+          const siteId = p.siteTypeInfo?.id || "road";
+          matchesFilter = selectedSiteTypes[siteId] === true;
+        } else if (interventionFilterMode === "bgg") {
+          const bggId = p.bggTypeInfo?.id || "grey";
+          matchesFilter = selectedBGGTypes[bggId] === true;
+        }
 
         if (activeWatershedId) {
           const hasMatchingId = p.watershedId === activeWatershedId;
@@ -2620,12 +2778,12 @@ const DataLayersView = () => {
           const isInsidePolygon = pointInPolygon(p.lat, p.lng, wsCoords);
           return (
             matchesSearch &&
-            matchesCategory &&
+            matchesFilter &&
             (hasMatchingId || isInsidePolygon)
           );
         }
 
-        return matchesSearch && matchesCategory;
+        return matchesSearch && matchesFilter;
       });
       items = [...items, ...filteredProjects];
     }
@@ -2750,21 +2908,31 @@ const DataLayersView = () => {
       }
 
       marker.bindPopup(`
-        <div style="display: flex; flex-direction: column; text-align: left; padding: 4px; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="display: flex; flex-direction: column; text-align: left; padding: 4px; font-family: system-ui, -apple-system, sans-serif; min-width: 200px;">
           <span style="font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 6px; border-radius: 4px; align-self: flex-start; margin-bottom: 6px; text-transform: uppercase; background-color: ${color}20; color: ${color};">${badgeLabel}: ${String(type || "UNSPECIFIED").toUpperCase()}</span>
           <h4 style="font-size: 13.5px; font-weight: 750; color: #0f172a; margin: 0 0 4px 0;">${name}</h4>
-          <p style="font-size: 11px; color: #64748b; margin: 0;">📍 ${item.wardName || "Unknown Ward"}</p>
-          ${isProj ? `<p style="margin: 4px 0 8px 0; font-size: 11px; color: #475569;">🏷️ Category: <strong style="color: ${color};">${item.categoryInfo?.name}</strong></p>` : ""}
+          <p style="font-size: 11px; color: #64748b; margin: 0 0 6px 0;">📍 ${item.wardName || "Unknown Ward"}</p>
           ${
             isProj
               ? `
-            <button onclick="window.openInterventionDetailInPlace && window.openInterventionDetailInPlace()" style="display: block; width: 100%; margin-top: 10px; border: none; background-color: ${color}; color: white !important; text-align: center; padding: 8px; border-radius: 6px; font-size: 11.5px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 4px ${color}20;">
+            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 10.5px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px;">
+              <span style="color: #475569;">🏷️ <strong>Intervention:</strong> <strong style="color: ${color};">${item.categoryInfo?.name || "Standard Solution"}</strong></span>
+              <span style="color: #475569;">📍 <strong>Site Type:</strong> <strong style="color: #0f172a;">${item.siteTypeInfo?.name || "General Site"}</strong></span>
+              <span style="color: #475569;">🎨 <strong>BGG:</strong> <strong style="color: ${item.bggTypeInfo?.color || "#0284c7"};">${item.bggTypeInfo?.name || "Blue Infrastructure"}</strong></span>
+            </div>
+          `
+              : ""
+          }
+          ${
+            isProj
+              ? `
+            <button onclick="window.openInterventionDetailInPlace && window.openInterventionDetailInPlace()" style="display: block; width: 100%; border: none; background-color: ${color}; color: white !important; text-align: center; padding: 7px; border-radius: 6px; font-size: 11.5px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 4px ${color}20;">
               View Details →
             </button>
           `
               : ""
           }
-          <span style="font-size: 9.5px; color: #94a3b8; display: block; margin-top: 8px; font-weight: 600;">Click point for full details</span>
+          <span style="font-size: 9.5px; color: #94a3b8; display: block; margin-top: 6px; font-weight: 600;">Click point for full telemetry</span>
         </div>
       `);
 
@@ -2949,7 +3117,10 @@ const DataLayersView = () => {
     projects,
     searchText,
     loading,
-    selectedCategories,
+    interventionFilterMode,
+    selectedInterventionTypes,
+    selectedSiteTypes,
+    selectedBGGTypes,
     sitesData,
   ]);
 
@@ -2999,8 +3170,9 @@ const DataLayersView = () => {
     return itemId && selectedId && itemId === selectedId;
   };
 
-  const getCategoryCounts = () => {
-    const counts = {
+  // Multi-dimensional dynamic count helper
+  const getInterventionFilterCounts = () => {
+    const interventionCounts = {
       lake: 0,
       flood: 0,
       groundwater: 0,
@@ -3008,15 +3180,45 @@ const DataLayersView = () => {
       iuwm: 0,
       other: 0,
     };
+    const siteCounts = {
+      lake: 0,
+      park: 0,
+      drain: 0,
+      road: 0,
+    };
+    const bggCounts = {
+      blue: 0,
+      green: 0,
+      grey: 0,
+    };
+
     projects.forEach((p) => {
+      // 1. Intervention Type
       const catId = p.categoryInfo?.id || "other";
-      if (counts[catId] !== undefined) {
-        counts[catId]++;
+      if (interventionCounts[catId] !== undefined) {
+        interventionCounts[catId]++;
+      }
+
+      // 2. Site Type
+      const siteId = p.siteTypeInfo?.id || "road";
+      if (siteCounts[siteId] !== undefined) {
+        siteCounts[siteId]++;
+      }
+
+      // 3. BGG Type
+      const bggId = p.bggTypeInfo?.id || "grey";
+      if (bggCounts[bggId] !== undefined) {
+        bggCounts[bggId]++;
       }
     });
-    return counts;
+
+    return {
+      intervention: interventionCounts,
+      site: siteCounts,
+      bgg: bggCounts,
+    };
   };
-  const categoryCounts = getCategoryCounts();
+  const filterCounts = getInterventionFilterCounts();
 
   return (
     <div className="max-w-[1650px] 2xl:max-w-[1850px] w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 text-left relative">
@@ -3169,105 +3371,373 @@ const DataLayersView = () => {
                     </span>
                   </label>
 
+                  {/* Sub-Filters for Existing Interventions with 3 Classification Modes */}
                   {showProjects && (
-                    <div className="flex flex-col gap-2 pl-6 mt-0.5 animate-[slideDown_0.2s_ease-out]">
-                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.lake}
-                          onChange={(e) =>
-                            setSelectedCategories({
-                              ...selectedCategories,
-                              lake: e.target.checked,
-                            })
-                          }
-                          className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-sky-500 accent-[#0284c7]"
-                        />
-                        <span className="whitespace-nowrap">
-                          🌊 Lakes ({categoryCounts.lake})
+                    <div className="flex flex-col gap-2.5 pl-3.5 mt-1 animate-[slideDown_0.2s_ease-out] border-l-2 border-blue-200/80 ml-2">
+                      {/* Filter Mode Selector Pills */}
+                      <div className="flex items-center gap-1 p-1 bg-slate-100/90 rounded-lg text-[10px] font-bold">
+                        <button
+                          type="button"
+                          onClick={() => setInterventionFilterMode("intervention")}
+                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${
+                            interventionFilterMode === "intervention"
+                              ? "bg-white text-blue-700 shadow-2xs font-extrabold"
+                              : "bg-transparent text-slate-500 hover:text-slate-800"
+                          }`}
+                        >
+                          🏷️ Type
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInterventionFilterMode("site")}
+                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${
+                            interventionFilterMode === "site"
+                              ? "bg-white text-emerald-700 shadow-2xs font-extrabold"
+                              : "bg-transparent text-slate-500 hover:text-slate-800"
+                          }`}
+                        >
+                          📍 Site
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInterventionFilterMode("bgg")}
+                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${
+                            interventionFilterMode === "bgg"
+                              ? "bg-white text-indigo-700 shadow-2xs font-extrabold"
+                              : "bg-transparent text-slate-500 hover:text-slate-800"
+                          }`}
+                        >
+                          🎨 BGG
+                        </button>
+                      </div>
+
+                      {/* Quick Select All / Clear Row */}
+                      <div className="flex items-center justify-between text-[10px] px-1 text-slate-500">
+                        <span className="font-semibold uppercase tracking-wider text-[9px] text-slate-400">
+                          {interventionFilterMode === "intervention"
+                            ? "Intervention Type (Full)"
+                            : interventionFilterMode === "site"
+                              ? "Site Type"
+                              : "Blue-Green-Grey Type"}
                         </span>
-                      </label>
-                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.flood}
-                          onChange={(e) =>
-                            setSelectedCategories({
-                              ...selectedCategories,
-                              flood: e.target.checked,
-                            })
-                          }
-                          className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-orange-500 accent-[#ea580c]"
-                        />
-                        <span className="whitespace-nowrap">
-                          🛡️ Flood ({categoryCounts.flood})
-                        </span>
-                      </label>
-                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.groundwater}
-                          onChange={(e) =>
-                            setSelectedCategories({
-                              ...selectedCategories,
-                              groundwater: e.target.checked,
-                            })
-                          }
-                          className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-purple-500 accent-[#8b5cf6]"
-                        />
-                        <span className="whitespace-nowrap">
-                          💧 Groundwater ({categoryCounts.groundwater})
-                        </span>
-                      </label>
-                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.rainwater}
-                          onChange={(e) =>
-                            setSelectedCategories({
-                              ...selectedCategories,
-                              rainwater: e.target.checked,
-                            })
-                          }
-                          className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-emerald-500 accent-[#10b981]"
-                        />
-                        <span className="whitespace-nowrap">
-                          🌧️ Rainwater ({categoryCounts.rainwater})
-                        </span>
-                      </label>
-                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.iuwm}
-                          onChange={(e) =>
-                            setSelectedCategories({
-                              ...selectedCategories,
-                              iuwm: e.target.checked,
-                            })
-                          }
-                          className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-pink-500 accent-[#ec4899]"
-                        />
-                        <span className="whitespace-nowrap">
-                          🔄 IUWM ({categoryCounts.iuwm})
-                        </span>
-                      </label>
-                      {categoryCounts.other > 0 && (
-                        <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={selectedCategories.other}
-                            onChange={(e) =>
-                              setSelectedCategories({
-                                ...selectedCategories,
-                                other: e.target.checked,
-                              })
-                            }
-                            className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-slate-500 accent-[#64748b]"
-                          />
-                          <span className="whitespace-nowrap">
-                            ⚙️ Other ({categoryCounts.other})
-                          </span>
-                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (interventionFilterMode === "intervention") {
+                                setSelectedInterventionTypes({
+                                  lake: true,
+                                  flood: true,
+                                  groundwater: true,
+                                  rainwater: true,
+                                  iuwm: true,
+                                  other: true,
+                                });
+                              } else if (interventionFilterMode === "site") {
+                                setSelectedSiteTypes({
+                                  lake: true,
+                                  park: true,
+                                  drain: true,
+                                  road: true,
+                                });
+                              } else {
+                                setSelectedBGGTypes({
+                                  blue: true,
+                                  green: true,
+                                  grey: true,
+                                });
+                              }
+                            }}
+                            className="text-blue-600 hover:underline cursor-pointer border-none bg-transparent p-0 font-bold"
+                          >
+                            All
+                          </button>
+                          <span>·</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (interventionFilterMode === "intervention") {
+                                setSelectedInterventionTypes({
+                                  lake: false,
+                                  flood: false,
+                                  groundwater: false,
+                                  rainwater: false,
+                                  iuwm: false,
+                                  other: false,
+                                });
+                              } else if (interventionFilterMode === "site") {
+                                setSelectedSiteTypes({
+                                  lake: false,
+                                  park: false,
+                                  drain: false,
+                                  road: false,
+                                });
+                              } else {
+                                setSelectedBGGTypes({
+                                  blue: false,
+                                  green: false,
+                                  grey: false,
+                                });
+                              }
+                            }}
+                            className="text-slate-400 hover:underline cursor-pointer border-none bg-transparent p-0"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Mode 1: Interventions Type (Full forms) */}
+                      {interventionFilterMode === "intervention" && (
+                        <div className="flex flex-col gap-1.5">
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedInterventionTypes.lake}
+                              onChange={(e) =>
+                                setSelectedInterventionTypes((prev) => ({
+                                  ...prev,
+                                  lake: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-sky-500 accent-[#0284c7]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              🌊 Lake Rejuvenation ({filterCounts.intervention.lake})
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedInterventionTypes.flood}
+                              onChange={(e) =>
+                                setSelectedInterventionTypes((prev) => ({
+                                  ...prev,
+                                  flood: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-orange-500 accent-[#ea580c]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              🛡️ Flood Mitigation ({filterCounts.intervention.flood})
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedInterventionTypes.groundwater}
+                              onChange={(e) =>
+                                setSelectedInterventionTypes((prev) => ({
+                                  ...prev,
+                                  groundwater: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-purple-500 accent-[#8b5cf6]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              💧 Groundwater Mgmt ({filterCounts.intervention.groundwater})
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedInterventionTypes.rainwater}
+                              onChange={(e) =>
+                                setSelectedInterventionTypes((prev) => ({
+                                  ...prev,
+                                  rainwater: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-emerald-500 accent-[#10b981]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              🌧️ Rainwater Harvesting ({filterCounts.intervention.rainwater})
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedInterventionTypes.iuwm}
+                              onChange={(e) =>
+                                setSelectedInterventionTypes((prev) => ({
+                                  ...prev,
+                                  iuwm: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-pink-500 accent-[#ec4899]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              🔄 IUWM Systems ({filterCounts.intervention.iuwm})
+                            </span>
+                          </label>
+
+                          {filterCounts.intervention.other > 0 && (
+                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={selectedInterventionTypes.other}
+                                onChange={(e) =>
+                                  setSelectedInterventionTypes((prev) => ({
+                                    ...prev,
+                                    other: e.target.checked,
+                                  }))
+                                }
+                                className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-slate-500 accent-[#64748b]"
+                              />
+                              <span className="leading-tight text-[11px]">
+                                ⚙️ Other Infrastructure ({filterCounts.intervention.other})
+                              </span>
+                            </label>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Mode 2: Site Type (Parks, Lakes, Drains, Roads) */}
+                      {interventionFilterMode === "site" && (
+                        <div className="flex flex-col gap-1.5">
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedSiteTypes.lake}
+                              onChange={(e) =>
+                                setSelectedSiteTypes((prev) => ({
+                                  ...prev,
+                                  lake: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-sky-500 accent-[#0284c7]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              🌊 Lakes &amp; Water Bodies ({filterCounts.site.lake})
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedSiteTypes.park}
+                              onChange={(e) =>
+                                setSelectedSiteTypes((prev) => ({
+                                  ...prev,
+                                  park: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-emerald-500 accent-[#16a34a]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              🟢 Parks &amp; Green Spaces ({filterCounts.site.park})
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedSiteTypes.drain}
+                              onChange={(e) =>
+                                setSelectedSiteTypes((prev) => ({
+                                  ...prev,
+                                  drain: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-slate-500 accent-[#475569]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              ⚫ Storm Drains &amp; Channels ({filterCounts.site.drain})
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedSiteTypes.road}
+                              onChange={(e) =>
+                                setSelectedSiteTypes((prev) => ({
+                                  ...prev,
+                                  road: e.target.checked,
+                                }))
+                              }
+                              className="w-3.5 h-3.5 rounded border-slate-300 focus:ring-amber-500 accent-[#d97706]"
+                            />
+                            <span className="leading-tight text-[11px]">
+                              🛣️ Roads &amp; Campuses ({filterCounts.site.road})
+                            </span>
+                          </label>
+                        </div>
+                      )}
+
+                      {/* Mode 3: BGG Type (Blue, Green, Grey) */}
+                      {interventionFilterMode === "bgg" && (
+                        <div className="flex flex-col gap-1.5">
+                          <label className="flex items-start gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedBGGTypes.blue}
+                              onChange={(e) =>
+                                setSelectedBGGTypes((prev) => ({
+                                  ...prev,
+                                  blue: e.target.checked,
+                                }))
+                              }
+                              className="mt-0.5 w-3.5 h-3.5 rounded border-slate-300 focus:ring-sky-500 accent-[#0284c7]"
+                            />
+                            <div className="flex flex-col leading-tight">
+                              <span className="text-[11px] font-bold text-sky-800">
+                                🔵 Blue ({filterCounts.bgg.blue})
+                              </span>
+                              <span className="text-[9.5px] text-slate-400 font-normal">
+                                Lakes &amp; Water Bodies
+                              </span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-start gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedBGGTypes.green}
+                              onChange={(e) =>
+                                setSelectedBGGTypes((prev) => ({
+                                  ...prev,
+                                  green: e.target.checked,
+                                }))
+                              }
+                              className="mt-0.5 w-3.5 h-3.5 rounded border-slate-300 focus:ring-emerald-500 accent-[#16a34a]"
+                            />
+                            <div className="flex flex-col leading-tight">
+                              <span className="text-[11px] font-bold text-emerald-800">
+                                🟢 Green ({filterCounts.bgg.green})
+                              </span>
+                              <span className="text-[9.5px] text-slate-400 font-normal">
+                                Parks &amp; Green Spaces
+                              </span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-start gap-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={selectedBGGTypes.grey}
+                              onChange={(e) =>
+                                setSelectedBGGTypes((prev) => ({
+                                  ...prev,
+                                  grey: e.target.checked,
+                                }))
+                              }
+                              className="mt-0.5 w-3.5 h-3.5 rounded border-slate-300 focus:ring-slate-500 accent-[#475569]"
+                            />
+                            <div className="flex flex-col leading-tight">
+                              <span className="text-[11px] font-bold text-slate-800">
+                                ⚫ Grey ({filterCounts.bgg.grey})
+                              </span>
+                              <span className="text-[9.5px] text-slate-400 font-normal">
+                                Roads, Layouts &amp; Campuses
+                              </span>
+                            </div>
+                          </label>
+                        </div>
                       )}
                     </div>
                   )}
@@ -4173,31 +4643,44 @@ const DataLayersView = () => {
                     </>
                   ) : selectedItem.projName !== undefined ? (
                     <>
-                      <div className="flex justify-between items-center border-b border-slate-100 pb-3 flex-wrap gap-2 text-left">
-                        {selectedItem.categoryInfo ? (
-                          <span
-                            className="text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-500"
-                            style={{
-                              backgroundColor:
-                                selectedItem.categoryInfo.color + "15",
-                              color: selectedItem.categoryInfo.color,
-                            }}
+                      <div className="flex flex-col gap-2 border-b border-slate-100 pb-3 text-left">
+                        <div className="flex justify-between items-center flex-wrap gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {selectedItem.categoryInfo && (
+                              <span
+                                className="text-[9.5px] font-extrabold tracking-wider px-2 py-0.5 rounded-md"
+                                style={{
+                                  backgroundColor:
+                                    selectedItem.categoryInfo.color + "15",
+                                  color: selectedItem.categoryInfo.color,
+                                }}
+                              >
+                                {selectedItem.categoryInfo.icon}{" "}
+                                {selectedItem.categoryInfo.name.toUpperCase()}
+                              </span>
+                            )}
+                            {selectedItem.siteTypeInfo && (
+                              <span className="text-[9.5px] font-extrabold tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                {selectedItem.siteTypeInfo.icon}{" "}
+                                {selectedItem.siteTypeInfo.name}
+                              </span>
+                            )}
+                            {selectedItem.bggTypeInfo && (
+                              <span className="text-[9.5px] font-extrabold tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                                {selectedItem.bggTypeInfo.icon}{" "}
+                                {selectedItem.bggTypeInfo.name}
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${selectedItem.status?.toLowerCase().includes("completed") ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-indigo-500/10 border-indigo-500/20 text-indigo-600"}`}
                           >
-                            {selectedItem.categoryInfo.name.toUpperCase()}
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-500">
-                            PROJECT
-                          </span>
-                        )}
-                        <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-[200px] text-left">
+                            {selectedItem.status || "Active"}
+                          </div>
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 m-0 leading-snug">
                           {selectedItem.projName}
                         </h3>
-                        <div
-                          className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${selectedItem.status?.toLowerCase().includes("completed") ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-indigo-500/10 border-indigo-500/20 text-indigo-600"}`}
-                        >
-                          {selectedItem.status || "Active"}
-                        </div>
                       </div>
 
                       <div className="flex flex-col gap-5 text-left">
