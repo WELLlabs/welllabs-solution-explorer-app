@@ -29,7 +29,7 @@ const Header = ({ user, onLogout }) => {
             <p className="logo-subtitle">WELL Labs & Citizen Hydrology Hub</p>
           </div>
         </div>
-        
+
         <div className="user-section">
           {user && (
             <>

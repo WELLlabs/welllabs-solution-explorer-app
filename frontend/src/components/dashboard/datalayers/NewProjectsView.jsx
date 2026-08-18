@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getProjectImage } from '../../data/projectImages';
+import { getProjectImage } from '../../../data/projectImages';
 
 /* ============ helpers ============ */
 export const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
