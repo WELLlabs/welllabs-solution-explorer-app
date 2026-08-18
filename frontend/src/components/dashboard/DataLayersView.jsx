@@ -1706,12 +1706,11 @@ const DataLayersView = () => {
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       {
         attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 20,
+          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+        maxZoom: 19,
       },
     ).addTo(map);
 
@@ -2336,11 +2335,11 @@ const DataLayersView = () => {
             addGeoJsonLayer(
               mod.default,
               greenspacesLayerRef,
-              "#22c55e",
+              "#15803d",
               "greenspaces",
-              1.2,
-              0.08,
-            ); // Green
+              1.5,
+              0.22,
+            ); // Forest Green
             setLoadingGreenspaces(false);
           })
           .catch((err) => {
@@ -4113,7 +4112,7 @@ const DataLayersView = () => {
                   type="checkbox"
                   checked={showGreenspaces}
                   onChange={(e) => setShowGreenspaces(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500 accent-[#22c55e] mt-0.5"
+                  className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500 accent-[#15803d] mt-0.5"
                 />
                 <span>
                   Greenspaces{" "}
