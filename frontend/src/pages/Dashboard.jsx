@@ -11,13 +11,13 @@ import Header from '../components/layout/Header';
 import PendingApproval from '../components/layout/PendingApproval';
 
 // Tab Components
-import BggIntroduction from '../components/dashboard/BggIntroduction';
+import BggIntroduction from '../components/dashboard/home/BggIntroduction';
 import Analytics from './Analytics';
-import CaseStudies from '../components/dashboard/CaseStudies';
-import Interventions from '../components/dashboard/Interventions';
-import FloodRiskMap from '../components/dashboard/FloodRiskMap';
-import DataLayersView from '../components/dashboard/DataLayersView';
-import NewProjectsView from '../components/dashboard/NewProjectsView';
+import CaseStudies from '../components/dashboard/casestudies/CaseStudies';
+import Interventions from '../components/dashboard/datalayers/Interventions';
+import FloodRiskMap from '../components/dashboard/datalayers/FloodRiskMap';
+import DataLayersView from '../components/dashboard/datalayers/DataLayersView';
+import NewProjectsView from '../components/dashboard/datalayers/NewProjectsView';
 
 // Export FIELD_PERMISSIONS to keep references intact
 export const FIELD_PERMISSIONS = {

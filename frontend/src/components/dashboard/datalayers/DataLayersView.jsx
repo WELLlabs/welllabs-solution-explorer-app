@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import api from "../../config/api";
-import Analytics from "../../pages/Analytics";
+import api from "../../../config/api";
+import Analytics from "../../../pages/Analytics";
 import NewProjectsView, {
   normaliseProject,
   preprocessProject,
@@ -15,11 +16,11 @@ import NewProjectsView, {
 import Interventions from "./Interventions";
 
 // Fallback local datasets (both JSON and rich CSV v1 with ward mapping telemetry)
-import localProjects from "../../data/projects.json";
-import localWells from "../../data/wells.json";
-import v1WellsCsv from "../../data/v1_wells_with_wards.csv?raw";
-import v1ProjectsCsv from "../../data/v1_projects_with_wards.csv?raw";
-import { getProjectImage } from "../../data/projectImages";
+import localProjects from "../../../data/projects.json";
+import localWells from "../../../data/wells.json";
+import v1WellsCsv from "../../../data/v1_wells_with_wards.csv?raw";
+import v1ProjectsCsv from "../../../data/v1_projects_with_wards.csv?raw";
+import { getProjectImage } from "../../../data/projectImages";
 
 const NEW_PROJECTS_DATA = [
   {
@@ -631,8 +632,8 @@ const normalizeWell = (w) => {
     w.salinity !== undefined && w.salinity !== null
       ? parseFloat(w.salinity)
       : w["Salinity"] !== undefined &&
-          w["Salinity"] !== null &&
-          w["Salinity"] !== ""
+        w["Salinity"] !== null &&
+        w["Salinity"] !== ""
         ? parseFloat(w["Salinity"])
         : null;
 
@@ -1234,6 +1235,17 @@ const DataLayersView = () => {
   const [committedPicks, setCommittedPicks] = useState(new Set());
   const [commitSuccess, setCommitSuccess] = useState(false);
 
+  // Lock background scrolling when funder popup is open
+  useEffect(() => {
+    if (showFunderModal) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [showFunderModal]);
+
   // Normalize all live site projects for the funding deck
   const cityProjectsList = useMemo(() => {
     if (!sitesData || sitesData.length === 0) return [];
@@ -1320,9 +1332,9 @@ const DataLayersView = () => {
   // Load GeoJSON data for the 3 searchable layers on mount
   useEffect(() => {
     Promise.all([
-      import("../../data/assembly_const2/bengaluru_assembly_const.json"),
-      import("../../data/gba_wards.json"),
-      import("../../data/gba_corporations.json"),
+      import("../../../data/assembly_const2/bengaluru_assembly_const.json"),
+      import("../../../data/gba_wards.json"),
+      import("../../../data/gba_corporations.json"),
     ])
       .then(([assemblyMod, wardMod, corpMod]) => {
         const items = [];
@@ -2156,7 +2168,7 @@ const DataLayersView = () => {
     if (showAssemblyConst2) {
       if (!assemblyConst2LayerRef.current) {
         setLoadingAssemblyConst2(true);
-        import("../../data/assembly_const2/assembly_const2.json")
+        import("../../../data/assembly_const2/assembly_const2.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2184,7 +2196,7 @@ const DataLayersView = () => {
     if (showBengaluruAssembly) {
       if (!bengaluruAssemblyLayerRef.current) {
         setLoadingBengaluruAssembly(true);
-        import("../../data/assembly_const2/bengaluru_assembly_const.json")
+        import("../../../data/assembly_const2/bengaluru_assembly_const.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2215,7 +2227,7 @@ const DataLayersView = () => {
     if (showKarnatakaAssembly) {
       if (!karnatakaAssemblyLayerRef.current) {
         setLoadingKarnatakaAssembly(true);
-        import("../../data/assembly_const2/karnataka_assembly_const.json")
+        import("../../../data/assembly_const2/karnataka_assembly_const.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2246,7 +2258,7 @@ const DataLayersView = () => {
     if (showGbaWards) {
       if (!gbaWardsLayerRef.current) {
         setLoadingGbaWards(true);
-        import("../../data/gba_wards.json")
+        import("../../../data/gba_wards.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2274,7 +2286,7 @@ const DataLayersView = () => {
     if (showGbaCorporations) {
       if (!gbaCorporationsLayerRef.current) {
         setLoadingGbaCorporations(true);
-        import("../../data/gba_corporations.json")
+        import("../../../data/gba_corporations.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2302,7 +2314,7 @@ const DataLayersView = () => {
     if (showValleys) {
       if (!valleysLayerRef.current) {
         setLoadingValleys(true);
-        import("../../data/valleys.json")
+        import("../../../data/valleys.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2330,7 +2342,7 @@ const DataLayersView = () => {
     if (showGreenspaces) {
       if (!greenspacesLayerRef.current) {
         setLoadingGreenspaces(true);
-        import("../../data/greenspaces.json")
+        import("../../../data/greenspaces.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2358,7 +2370,7 @@ const DataLayersView = () => {
     if (showNewFloodRisk) {
       if (!floodHazardLayerRef.current) {
         setLoadingFloodHazard(true);
-        import("../../data/flood_hazard_jasin.json")
+        import("../../../data/flood_hazard_jasin.json")
           .then((mod) => {
             addGeoJsonLayer(
               mod.default,
@@ -2387,8 +2399,8 @@ const DataLayersView = () => {
       if (!floodingHotspotsLayerRef.current) {
         setLoadingFloodingHotspots(true);
         Promise.all([
-          import("../../data/flood_points.json"),
-          import("../../data/borewell_road_delineation.json"),
+          import("../../../data/flood_points.json"),
+          import("../../../data/borewell_road_delineation.json"),
         ])
           .then(([pointsMod, delineationMod]) => {
             const geojsonData = pointsMod.default;
@@ -2467,34 +2479,31 @@ const DataLayersView = () => {
                   <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">
                     🏢 Zone: <strong style="color: #334155;">${props.zone || "N/A"}</strong>
                   </p>
-                  ${
-                    props.remarks
-                      ? `
+                  ${props.remarks
+                  ? `
                     <div style="margin: 6px 0 0 0; font-size: 11px; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;">
                       <strong>Remarks / Status:</strong><br/>
                       <span style="color: #64748b;">${props.remarks}</span>
                     </div>
                   `
-                      : ""
-                  }
-                  ${
-                    props.vulnerabilityMeasure
-                      ? `
+                  : ""
+                }
+                  ${props.vulnerabilityMeasure
+                  ? `
                     <p style="margin: 4px 0 0 0; font-size: 10.5px; color: #64748b;">
                       📏 Measure: <strong>${props.vulnerabilityMeasure}</strong>
                     </p>
                   `
-                      : ""
-                  }
-                  ${
-                    props.reducedLevel
-                      ? `
+                  : ""
+                }
+                  ${props.reducedLevel
+                  ? `
                     <p style="margin: 2px 0 0 0; font-size: 10.5px; color: #64748b;">
                       📐 Reduced Level (RL): <strong>${props.reducedLevel} m</strong>
                     </p>
                   `
-                      : ""
-                  }
+                  : ""
+                }
                   <p style="margin: 6px 0 0 0; font-size: 9.5px; color: #94a3b8; border-top: 1px dashed #e2e8f0; padding-top: 4px;">
                     📍 Lat: ${lat.toFixed(5)}°, Lng: ${lng.toFixed(5)}°
                   </p>
@@ -2911,26 +2920,24 @@ const DataLayersView = () => {
           <span style="font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 6px; border-radius: 4px; align-self: flex-start; margin-bottom: 6px; text-transform: uppercase; background-color: ${color}20; color: ${color};">${badgeLabel}: ${String(type || "UNSPECIFIED").toUpperCase()}</span>
           <h4 style="font-size: 13.5px; font-weight: 750; color: #0f172a; margin: 0 0 4px 0;">${name}</h4>
           <p style="font-size: 11px; color: #64748b; margin: 0 0 6px 0;">📍 ${item.wardName || "Unknown Ward"}</p>
-          ${
-            isProj
-              ? `
+          ${isProj
+          ? `
             <div style="display: flex; flex-direction: column; gap: 3px; font-size: 10.5px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px;">
               <span style="color: #475569;">🏷️ <strong>Intervention:</strong> <strong style="color: ${color};">${item.categoryInfo?.name || "Standard Solution"}</strong></span>
               <span style="color: #475569;">📍 <strong>Site Type:</strong> <strong style="color: #0f172a;">${item.siteTypeInfo?.name || "General Site"}</strong></span>
               <span style="color: #475569;">🎨 <strong>BGG:</strong> <strong style="color: ${item.bggTypeInfo?.color || "#0284c7"};">${item.bggTypeInfo?.name || "Blue Infrastructure"}</strong></span>
             </div>
           `
-              : ""
-          }
-          ${
-            isProj
-              ? `
+          : ""
+        }
+          ${isProj
+          ? `
             <button onclick="window.openInterventionDetailInPlace && window.openInterventionDetailInPlace()" style="display: block; width: 100%; border: none; background-color: ${color}; color: white !important; text-align: center; padding: 7px; border-radius: 6px; font-size: 11.5px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 4px ${color}20;">
               View Details →
             </button>
           `
-              : ""
-          }
+          : ""
+        }
           <span style="font-size: 9.5px; color: #94a3b8; display: block; margin-top: 6px; font-weight: 600;">Click point for full telemetry</span>
         </div>
       `);
@@ -2962,11 +2969,11 @@ const DataLayersView = () => {
 
       const visibleSites = activeWatershedId
         ? liveProjects.filter((site) => {
-            const wsCoords = WATERSHEDS_POLYGONS[activeWatershedId]?.coords;
-            return wsCoords
-              ? pointInPolygon(site.latitude, site.longitude, wsCoords)
-              : true;
-          })
+          const wsCoords = WATERSHEDS_POLYGONS[activeWatershedId]?.coords;
+          return wsCoords
+            ? pointInPolygon(site.latitude, site.longitude, wsCoords)
+            : true;
+        })
         : liveProjects;
 
       const SITE_COLOR = {
@@ -3313,11 +3320,10 @@ const DataLayersView = () => {
       */}
 
         <div
-          className={`grid grid-cols-1 ${
-            showFloodingHotspots && isRightDeckOpen
+          className={`grid grid-cols-1 ${showFloodingHotspots && isRightDeckOpen
               ? "xl:grid-cols-[250px_1fr_305px] 2xl:grid-cols-[265px_1fr_315px]"
               : "xl:grid-cols-[280px_1fr]"
-          } gap-3.5 items-start`}
+            } gap-3.5 items-start`}
         >
           {/* Left Sidebar Control Panel - Free Dynamic Height */}
           <div className="bg-white border border-slate-200 rounded-[20px] p-5 flex flex-col gap-4 shadow-sm h-auto">
@@ -3378,33 +3384,30 @@ const DataLayersView = () => {
                         <button
                           type="button"
                           onClick={() => setInterventionFilterMode("intervention")}
-                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${
-                            interventionFilterMode === "intervention"
+                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${interventionFilterMode === "intervention"
                               ? "bg-white text-blue-700 shadow-2xs font-extrabold"
                               : "bg-transparent text-slate-500 hover:text-slate-800"
-                          }`}
+                            }`}
                         >
                           🏷️ Type
                         </button>
                         <button
                           type="button"
                           onClick={() => setInterventionFilterMode("site")}
-                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${
-                            interventionFilterMode === "site"
+                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${interventionFilterMode === "site"
                               ? "bg-white text-emerald-700 shadow-2xs font-extrabold"
                               : "bg-transparent text-slate-500 hover:text-slate-800"
-                          }`}
+                            }`}
                         >
                           📍 Site
                         </button>
                         <button
                           type="button"
                           onClick={() => setInterventionFilterMode("bgg")}
-                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${
-                            interventionFilterMode === "bgg"
+                          className={`flex-1 py-1 px-1.5 rounded-md transition-all text-center cursor-pointer border-none ${interventionFilterMode === "bgg"
                               ? "bg-white text-indigo-700 shadow-2xs font-extrabold"
                               : "bg-transparent text-slate-500 hover:text-slate-800"
-                          }`}
+                            }`}
                         >
                           🎨 BGG
                         </button>
@@ -4603,14 +4606,14 @@ const DataLayersView = () => {
                           selectedItem.interventions.length > 0) ||
                           (selectedItem.linked_intervention_ids &&
                             selectedItem.linked_intervention_ids.length >
-                              0)) && (
-                          <div className="border-t border-dashed border-slate-200 pt-3 flex flex-col gap-2">
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                              Planned Nature-Based Interventions
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                              {selectedItem.interventions?.length > 0
-                                ? selectedItem.interventions.map((iv, idx) => (
+                            0)) && (
+                            <div className="border-t border-dashed border-slate-200 pt-3 flex flex-col gap-2">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                Planned Nature-Based Interventions
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {selectedItem.interventions?.length > 0
+                                  ? selectedItem.interventions.map((iv, idx) => (
                                     <span
                                       key={idx}
                                       className="text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200"
@@ -4619,7 +4622,7 @@ const DataLayersView = () => {
                                       {iv.quantity ? `×${iv.quantity}` : ""}
                                     </span>
                                   ))
-                                : selectedItem.linked_intervention_ids.map(
+                                  : selectedItem.linked_intervention_ids.map(
                                     (id, idx) => {
                                       const parts = id.split("__");
                                       const typeName = parts[1]
@@ -4635,9 +4638,9 @@ const DataLayersView = () => {
                                       );
                                     },
                                   )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     </>
                   ) : selectedItem.projName !== undefined ? (
@@ -4834,24 +4837,24 @@ const DataLayersView = () => {
                           "hoodi_lake",
                           "sheelavanthakere_lake",
                         ].includes(selectedItem.id) && (
-                          <div className="mt-5 border-t border-dashed border-slate-200 pt-4 text-left">
-                            <h5 className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1.5">
-                              🎮 Interactive 3D Walkthrough Simulator
-                            </h5>
-                            <p
-                              style={{
-                                fontSize: "11.5px",
-                                color: "#64748b",
-                                marginBottom: "12px",
-                                margin: "0 0 12px 0",
-                              }}
-                            >
-                              Simulate stormwater storage & infiltration by
-                              toggling individual watershed assets.
-                            </p>
-                            <ThreeDWalkthrough project={selectedItem} />
-                          </div>
-                        )}
+                            <div className="mt-5 border-t border-dashed border-slate-200 pt-4 text-left">
+                              <h5 className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1.5">
+                                🎮 Interactive 3D Walkthrough Simulator
+                              </h5>
+                              <p
+                                style={{
+                                  fontSize: "11.5px",
+                                  color: "#64748b",
+                                  marginBottom: "12px",
+                                  margin: "0 0 12px 0",
+                                }}
+                              >
+                                Simulate stormwater storage & infiltration by
+                                toggling individual watershed assets.
+                              </p>
+                              <ThreeDWalkthrough project={selectedItem} />
+                            </div>
+                          )}
                       </div>
                     </>
                   ) : (
@@ -4929,7 +4932,7 @@ const DataLayersView = () => {
                               </span>
                               <strong className="text-sm text-slate-800 font-extrabold">
                                 {selectedItem.ph !== null &&
-                                selectedItem.ph !== undefined
+                                  selectedItem.ph !== undefined
                                   ? selectedItem.ph
                                   : "—"}
                               </strong>
@@ -4940,7 +4943,7 @@ const DataLayersView = () => {
                               </span>
                               <strong className="text-sm text-slate-800 font-extrabold">
                                 {selectedItem.tds !== null &&
-                                selectedItem.tds !== undefined
+                                  selectedItem.tds !== undefined
                                   ? selectedItem.tds
                                   : "—"}
                               </strong>
@@ -4951,7 +4954,7 @@ const DataLayersView = () => {
                               </span>
                               <strong className="text-sm text-slate-800 font-extrabold">
                                 {selectedItem.salinity !== null &&
-                                selectedItem.salinity !== undefined
+                                  selectedItem.salinity !== undefined
                                   ? selectedItem.salinity
                                   : "—"}
                               </strong>
@@ -4964,7 +4967,7 @@ const DataLayersView = () => {
                                 className={`text-[10px] font-bold self-start px-1.5 py-0.5 rounded ${selectedItem.hasFluoride?.toLowerCase() === "true" ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"}`}
                               >
                                 {selectedItem.hasFluoride?.toLowerCase() ===
-                                "true"
+                                  "true"
                                   ? "Detected"
                                   : "Safe"}
                               </span>
@@ -5170,13 +5173,12 @@ const DataLayersView = () => {
                           <div className="flex items-center justify-between text-[10.5px] pt-1 border-t border-slate-200/60">
                             <button
                               onClick={() => toggleProjectAllAssets(proj)}
-                              className={`text-[9.5px] font-bold px-2 py-0.5 rounded transition-colors cursor-pointer border ${
-                                allInProjSelected
+                              className={`text-[9.5px] font-bold px-2 py-0.5 rounded transition-colors cursor-pointer border ${allInProjSelected
                                   ? "bg-teal-100 text-teal-800 border-teal-300"
                                   : selectedCountInProj > 0
                                     ? "bg-teal-50 text-teal-700 border-teal-200"
                                     : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
-                              }`}
+                                }`}
                             >
                               {allInProjSelected
                                 ? "✓ All"
@@ -5204,13 +5206,12 @@ const DataLayersView = () => {
                                   !isCommitted &&
                                   toggleFundPick(proj.id, idx)
                                 }
-                                className={`shrink-0 p-2 rounded-lg border transition-all duration-150 cursor-pointer flex flex-col gap-1 ${
-                                  isCommitted
+                                className={`shrink-0 p-2 rounded-lg border transition-all duration-150 cursor-pointer flex flex-col gap-1 ${isCommitted
                                     ? "bg-slate-100 border-slate-200 opacity-75 cursor-default"
                                     : isSelected
                                       ? "bg-teal-50/90 border-teal-400 shadow-2xs"
                                       : "bg-slate-50/50 border-slate-200/70 hover:border-teal-300 hover:bg-slate-50"
-                                }`}
+                                  }`}
                               >
                                 <div className="flex items-start justify-between gap-1.5">
                                   <div className="flex items-start gap-2 overflow-hidden">
@@ -5228,13 +5229,12 @@ const DataLayersView = () => {
                                       <span className="text-[11px] font-bold text-slate-800 flex items-center gap-1 flex-wrap leading-tight">
                                         {a.n}
                                         <span
-                                          className={`text-[8px] font-extrabold uppercase px-1 py-0.2 rounded ${
-                                            a.t === "blue"
+                                          className={`text-[8px] font-extrabold uppercase px-1 py-0.2 rounded ${a.t === "blue"
                                               ? "bg-[#E2EEF4] text-[#1D5E8C]"
                                               : a.t === "green"
                                                 ? "bg-[#E7EFDF] text-[#3E6325]"
                                                 : "bg-[#E5E9EB] text-[#475760]"
-                                          }`}
+                                            }`}
                                         >
                                           {a.t}
                                         </span>
@@ -5294,7 +5294,7 @@ const DataLayersView = () => {
                       : "bg-[#C8743C] hover:bg-[#b8602c] hover:shadow active:scale-[0.99]"
                   }`}
                 >
-                  <span>Fund Selected</span>
+                  <span>Fund</span>
                   <span>→</span>
                 </button>
               </div>
@@ -5316,227 +5316,232 @@ const DataLayersView = () => {
         )}
 
         {/* Funder Commitment & Term Sheet Modal */}
-        {showFunderModal && (
-          <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4"
-            onClick={() => setShowFunderModal(false)}
-          >
+        {showFunderModal &&
+          typeof document !== "undefined" &&
+          createPortal(
             <div
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-[560px] max-h-[90vh] flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 bg-slate-900/15 backdrop-blur-[2px] z-[999999] flex items-center justify-center p-4 overflow-hidden"
+              style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+              onClick={() => setShowFunderModal(false)}
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
-              <div className="px-6 py-5 bg-gradient-to-br from-slate-50 to-white border-b border-slate-100 relative text-left">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
-                  Funder Term Sheet
-                </span>
-                <h3 className="text-lg font-bold text-slate-900 mt-1 mb-0.5">
-                  Commit CSR Funding for Flood Mitigation
-                </h3>
-                <p className="text-xs text-slate-500 m-0">
-                  Selected {fundSummary.totalAssets} assets across{" "}
-                  {fundSummary.projectsCount} projects
-                </p>
-                <button
-                  onClick={() => setShowFunderModal(false)}
-                  className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 text-lg cursor-pointer border-none bg-transparent"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-6 overflow-y-auto flex flex-col gap-4 text-left custom-scrollbar">
-                {commitSuccess ? (
-                  <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center flex flex-col items-center gap-3">
-                    <span className="text-4xl">🎉</span>
-                    <h4 className="text-base font-bold text-emerald-900 m-0">
-                      Funding Commitment Confirmed!
-                    </h4>
-                    <p className="text-xs text-emerald-700 leading-relaxed max-w-[380px] m-0">
-                      Thank you{" "}
-                      <strong>{funderFormData.orgName || "Funder"}</strong>! Your
-                      commitment of{" "}
-                      <strong>{rs(fundSummary.totalCost)}</strong> has been
-                      recorded for the selected flood mitigation assets.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setCommitSuccess(false);
-                        setShowFunderModal(false);
-                      }}
-                      className="mt-2 px-5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 cursor-pointer border-none"
-                    >
-                      Done
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    {/* Selected Summary Card */}
-                    <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-mono uppercase font-bold text-teal-800">
-                          Total Commitment Amount
-                        </span>
-                        <strong className="text-2xl font-bold font-mono text-teal-950">
-                          {rs(fundSummary.totalCost)}
-                        </strong>
-                      </div>
-                      <span className="text-xs font-bold text-teal-700 bg-white px-3 py-1.5 rounded-xl border border-teal-200 shadow-2xs">
-                        {fundSummary.totalAssets} Interventions
+              <div
+                className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-[500px] max-h-[85vh] flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out] z-[1000000]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-left">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[9.5px] uppercase font-bold tracking-wider text-amber-800 bg-amber-100/80 border border-amber-200 px-2 py-0.5 rounded">
+                        CSR Term Sheet
                       </span>
                     </div>
+                    <h3 className="text-base font-bold text-slate-900 mt-1 mb-0">
+                      Commit Funding for Flood Mitigation
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5 mb-0">
+                      Selected {fundSummary.totalAssets} asset{fundSummary.totalAssets !== 1 ? "s" : ""} across {fundSummary.projectsCount} project{fundSummary.projectsCount !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowFunderModal(false)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors text-base cursor-pointer border-none bg-transparent"
+                    title="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-                    {/* Funder Form */}
-                    <div className="flex flex-col gap-3">
-                      <div>
-                        <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                          Organization / Corporate Name *
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Infosys Foundation, Wipro Cares, Tata Trusts"
-                          value={funderFormData.orgName}
-                          onChange={(e) =>
-                            setFunderFormData({
-                              ...funderFormData,
-                              orgName: e.target.value,
-                            })
-                          }
-                          className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                        />
+                {/* Modal Body */}
+                <div className="p-5 overflow-y-auto flex flex-col gap-3.5 text-left custom-scrollbar">
+                  {commitSuccess ? (
+                    <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center flex flex-col items-center gap-3">
+                      <span className="text-3xl">🎉</span>
+                      <h4 className="text-base font-bold text-emerald-900 m-0">
+                        Funding Commitment Confirmed!
+                      </h4>
+                      <p className="text-xs text-emerald-700 leading-relaxed max-w-[380px] m-0">
+                        Thank you <strong>{funderFormData.orgName || "Funder"}</strong>! Your commitment of <strong>{rs(fundSummary.totalCost)}</strong> has been recorded for the selected flood mitigation assets.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setCommitSuccess(false);
+                          setShowFunderModal(false);
+                        }}
+                        className="mt-2 px-5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 cursor-pointer border-none transition-colors"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Selected Summary Card */}
+                      <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-mono uppercase font-bold text-amber-800">
+                            Total Commitment Amount
+                          </span>
+                          <strong className="text-xl font-bold font-mono text-slate-900">
+                            {rs(fundSummary.totalCost)}
+                          </strong>
+                        </div>
+                        <span className="text-xs font-bold text-amber-800 bg-white px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">
+                          {fundSummary.totalAssets} Asset{fundSummary.totalAssets !== 1 ? "s" : ""}
+                        </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Funder Form */}
+                      <div className="flex flex-col gap-3">
                         <div>
-                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                            CSR Sector Focus
-                          </label>
-                          <select
-                            value={funderFormData.csrSector}
-                            onChange={(e) =>
-                              setFunderFormData({
-                                ...funderFormData,
-                                csrSector: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                          >
-                            <option value="Water Security & Flood Mitigation">
-                              Water Security &amp; Flood Mitigation
-                            </option>
-                            <option value="Climate Resilience & Urban Ecology">
-                              Climate Resilience &amp; Urban Ecology
-                            </option>
-                            <option value="Schedule VII - Environmental Sustainability">
-                              Schedule VII - Sustainability
-                            </option>
-                            <option value="Community Infrastructure">
-                              Community Infrastructure
-                            </option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                            Contact Email *
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Organization / Corporate Name *
                           </label>
                           <input
-                            type="email"
-                            placeholder="csr-lead@company.com"
-                            value={funderFormData.email}
+                            type="text"
+                            placeholder="e.g. Infosys Foundation, Wipro Cares, Tata Trusts"
+                            value={funderFormData.orgName}
                             onChange={(e) =>
                               setFunderFormData({
                                 ...funderFormData,
-                                email: e.target.value,
+                                orgName: e.target.value,
                               })
                             }
-                            className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
                           />
                         </div>
-                      </div>
-                    </div>
 
-                    {/* List of Selected Assets */}
-                    <div className="flex flex-col gap-1.5 mt-1">
-                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        Committed Allocation Breakdown:
-                      </span>
-                      <div className="max-h-[160px] overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50/50 flex flex-col gap-1.5 custom-scrollbar text-xs">
-                        {cityProjectsList.map((p) => {
-                          const pickedInThisProj = p.assets
-                            .map((a, i) => ({ a, i }))
-                            .filter(({ i }) =>
-                              selectedFundPicks.has(`${p.id}__${i}`),
-                            );
-
-                          if (pickedInThisProj.length === 0) return null;
-
-                          return (
-                            <div
-                              key={p.id}
-                              className="p-2 bg-white rounded-lg border border-slate-200/80 flex flex-col gap-1"
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              CSR Sector Focus
+                            </label>
+                            <select
+                              value={funderFormData.csrSector}
+                              onChange={(e) =>
+                                setFunderFormData({
+                                  ...funderFormData,
+                                  csrSector: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all cursor-pointer"
                             >
-                              <div className="font-bold text-slate-800 text-[11.5px]">
-                                {p.name}
-                              </div>
-                              {pickedInThisProj.map(({ a, i }) => (
-                                <div
-                                  key={i}
-                                  className="flex justify-between items-center text-[10.5px] text-slate-600 pl-2"
-                                >
-                                  <span>
-                                    • {a.n} (⏱️ {a.timeline})
-                                  </span>
-                                  <span className="font-mono font-bold text-teal-800">
-                                    {rs(a.cost)}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })}
+                              <option value="Water Security & Flood Mitigation">
+                                Water Security &amp; Flood Mitigation
+                              </option>
+                              <option value="Climate Resilience & Urban Ecology">
+                                Climate Resilience &amp; Urban Ecology
+                              </option>
+                              <option value="Schedule VII - Environmental Sustainability">
+                                Schedule VII - Sustainability
+                              </option>
+                              <option value="Community Infrastructure">
+                                Community Infrastructure
+                              </option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Contact Email *
+                            </label>
+                            <input
+                              type="email"
+                              placeholder="csr-lead@company.com"
+                              value={funderFormData.email}
+                              onChange={(e) =>
+                                setFunderFormData({
+                                  ...funderFormData,
+                                  email: e.target.value,
+                                })
+                              }
+                              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 justify-end pt-3 border-t border-slate-100">
-                      <button
-                        type="button"
-                        onClick={() => setShowFunderModal(false)}
-                        className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer border-none bg-transparent"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Commit selected picks
-                          setCommittedPicks(
-                            (prev) =>
-                              new Set([...prev, ...selectedFundPicks]),
-                          );
-                          setCommitSuccess(true);
-                        }}
-                        disabled={
-                          !funderFormData.orgName.trim() ||
-                          !funderFormData.email.trim()
-                        }
-                        className={`px-5 py-2.5 text-xs font-bold text-white rounded-xl cursor-pointer transition-all border-none ${
-                          !funderFormData.orgName.trim() ||
-                          !funderFormData.email.trim()
-                            ? "bg-slate-300 cursor-not-allowed"
-                            : "bg-[#C8743C] hover:bg-[#b8602c] shadow-sm"
-                        }`}
-                      >
-                        Confirm CSR Funding →
-                      </button>
-                    </div>
-                  </>
-                )}
+                      {/* List of Selected Assets */}
+                      <div className="flex flex-col gap-1.5 mt-0.5">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                          Committed Allocation Breakdown:
+                        </span>
+                        <div className="max-h-[130px] overflow-y-auto border border-slate-200 rounded-xl p-2.5 bg-slate-50 flex flex-col gap-1.5 custom-scrollbar text-xs">
+                          {cityProjectsList.map((p) => {
+                            const pickedInThisProj = p.assets
+                              .map((a, i) => ({ a, i }))
+                              .filter(({ i }) =>
+                                selectedFundPicks.has(`${p.id}__${i}`),
+                              );
+
+                            if (pickedInThisProj.length === 0) return null;
+
+                            return (
+                              <div
+                                key={p.id}
+                                className="p-2 bg-white rounded-lg border border-slate-200 flex flex-col gap-1 shadow-2xs"
+                              >
+                                <div className="font-bold text-slate-800 text-[11.5px]">
+                                  {p.name}
+                                </div>
+                                {pickedInThisProj.map(({ a, i }) => (
+                                  <div
+                                    key={i}
+                                    className="flex justify-between items-center text-[10.5px] text-slate-600 pl-2"
+                                  >
+                                    <span>
+                                      • {a.n} (⏱️ {a.timeline})
+                                    </span>
+                                    <span className="font-mono font-bold text-teal-800">
+                                      {rs(a.cost)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 justify-end pt-3 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => setShowFunderModal(false)}
+                          className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer border-none bg-transparent transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCommittedPicks(
+                              (prev) =>
+                                new Set([...prev, ...selectedFundPicks]),
+                            );
+                            setCommitSuccess(true);
+                          }}
+                          disabled={
+                            !funderFormData.orgName.trim() ||
+                            !funderFormData.email.trim()
+                          }
+                          className={`px-5 py-2 text-xs font-bold text-white rounded-xl cursor-pointer transition-all border-none ${
+                            !funderFormData.orgName.trim() ||
+                            !funderFormData.email.trim()
+                              ? "bg-slate-300 cursor-not-allowed"
+                              : "bg-[#C8743C] hover:bg-[#b8602c] shadow-xs"
+                          }`}
+                        >
+                          Confirm CSR Funding →
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </div>
     </div>
   );
