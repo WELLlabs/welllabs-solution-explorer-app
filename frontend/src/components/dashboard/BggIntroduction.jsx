@@ -161,14 +161,6 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
     }
   };
 
-  const handleNavigateFromPopup = (targetTab) => {
-    setActiveMarker(null);
-    if (onSetActiveTab) {
-      onSetActiveTab(targetTab || 'interventions');
-    } else {
-      navigate('/' + (targetTab || 'interventions'));
-    }
-  };
 
   const getPopupPlacement = () => {
     if (!activeMarker) return null;
@@ -316,16 +308,6 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
                 </p>
               </div>
 
-              {/* Simple & Small View Details Action */}
-              <div className="flex items-center justify-end pt-0.5">
-                <button
-                  onClick={() => handleNavigateFromPopup(MARKER_DETAILS[activeMarker].targetTab)}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 border border-blue-200/80 transition-colors cursor-pointer"
-                >
-                  <span>view full details</span>
-                  <span className="text-xs leading-none">→</span>
-                </button>
-              </div>
             </div>
           )}
         </div>
