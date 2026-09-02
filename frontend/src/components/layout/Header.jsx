@@ -23,9 +23,7 @@ const Header = ({ user, onLogout }) => {
           </div>
 
           <div className="logo-text-container">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="logo-text">Climate Solutions</h1>
-            </div>
+            <h1 className="logo-text">Climate Solutions</h1>
             <p className="logo-subtitle">WELL Labs & Citizen Hydrology Hub</p>
           </div>
         </div>
@@ -36,17 +34,17 @@ const Header = ({ user, onLogout }) => {
               <div className="user-info">
                 <span className="user-greeting">Logged in as:</span>
                 <strong className="user-name">{user.name}</strong>
-                <div className={`role-badge role-${user.role?.toLowerCase().replace(' ', '-') || ''}`}>
+                <div className={`role-badge role-${user.role?.toLowerCase().replace(/\s+/g, '-') || ''}`}>
                   {user.role}
                 </div>
               </div>
-              <button onClick={onLogout} className="logout-button">
+              <button onClick={onLogout} className="logout-button" title="Sign Out" aria-label="Sign Out">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                   <polyline points="16 17 21 12 16 7" />
                   <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
-                Sign Out
+                <span className="logout-text">Sign Out</span>
               </button>
             </>
           )}
@@ -57,4 +55,3 @@ const Header = ({ user, onLogout }) => {
 };
 
 export default Header;
-

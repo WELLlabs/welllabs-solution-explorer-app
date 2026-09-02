@@ -18,6 +18,7 @@ import Interventions from "./Interventions";
 // Fallback local datasets (both JSON and rich CSV v1 with ward mapping telemetry)
 import localProjects from "../../../data/projects.json";
 import localWells from "../../../data/wells.json";
+import fallbackSites from "../../../data/fallbackSites.json";
 import v1WellsCsv from "../../../data/v1_wells_with_wards.csv?raw";
 import v1ProjectsCsv from "../../../data/v1_projects_with_wards.csv?raw";
 import { getProjectImage } from "../../../data/projectImages";
@@ -1174,14 +1175,22 @@ const DataLayersView = () => {
     fetch(url)
       .then((r) => (r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)))
       .then((data) => {
-        console.log(
-          `%c🗺️ [SITES LAYER] Loaded ${data.length} sites from ${url}`,
-          "color:#3b82f6;font-weight:bold;font-size:13px;",
-        );
-        console.log("All fetched sites details (full list):", data);
-        setSitesData(data);
+        if (Array.isArray(data) && data.length > 0) {
+          console.log(
+            `%c🗺️ [SITES LAYER] Loaded ${data.length} sites from ${url}`,
+            "color:#3b82f6;font-weight:bold;font-size:13px;",
+          );
+          console.log("All fetched sites details (full list):", data);
+          setSitesData(data);
+        } else {
+          console.warn("Sites API returned empty data, using local fallback dataset");
+          setSitesData(fallbackSites);
+        }
       })
-      .catch((err) => console.warn("Could not load sites layer data:", err));
+      .catch((err) => {
+        console.warn("Could not load sites layer data from API, using local fallback:", err);
+        setSitesData(fallbackSites);
+      });
   }, []);
 
   // Refs for access inside Leaflet event listeners
@@ -3128,6 +3137,7 @@ const DataLayersView = () => {
     selectedSiteTypes,
     selectedBGGTypes,
     sitesData,
+    activeWatershedId,
   ]);
 
   const handleSelectItem = (item) => {

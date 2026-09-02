@@ -103,7 +103,7 @@ const Dashboard = () => {
   // No longer redirecting unauthenticated users to login
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper" style={activeTab === 'home' ? { backgroundColor: '#c9d8bd', minHeight: '100vh' } : {}}>
       {/* 1. Header component */}
       <Header user={user} onLogout={logout} />
 
