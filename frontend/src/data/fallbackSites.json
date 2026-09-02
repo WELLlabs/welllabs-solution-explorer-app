@@ -1,0 +1,1630 @@
+[
+  {
+    "_id": "6a5ca7574fb07a2de3a237a5",
+    "site_id": "kadugodi_tree_park",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.627Z",
+    "latitude": 12.9865833,
+    "linked_intervention_ids": [
+      "kadugodi_tree_park__rain_garden__3",
+      "kadugodi_tree_park__infiltration_trench__4",
+      "kadugodi_tree_park__bioswale__5"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7448389,
+        12.9865833
+      ]
+    },
+    "longitude": 77.7448389,
+    "name": "Kadugodi tree park",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 3,920 KL and storage of 185 KL",
+    "subcatchment_level_impact": "Runoff reduced by 3% from 66.4 mm to 64.5 mm. Infiltration increased by 9% from 20.3 mm to 22.1 mm",
+    "type": "park",
+    "updatedAt": "2026-08-05T07:55:05.244Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237b2",
+        "intervention_id": "kadugodi_tree_park__rain_garden__3",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.026Z",
+        "details": {
+          "length_m": "6m",
+          "width_m": "5m",
+          "depth_m": "0.4m*",
+          "area": "30 sqm",
+          "tentative_cost": "100",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9865833,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7448389,
+            12.9865833
+          ]
+        },
+        "longitude": 77.7448389,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "kadugodi_tree_park",
+        "site_name": "Kadugodi tree park",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:06.148Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237b3",
+        "intervention_id": "kadugodi_tree_park__infiltration_trench__4",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.062Z",
+        "details": {
+          "length_m": "170m",
+          "width_m": "1m",
+          "depth_m": "1m",
+          "area": "170sqm",
+          "tentative_cost": "100",
+          "tentative_timeline": "2.5"
+        },
+        "latitude": 12.9865833,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7448389,
+            12.9865833
+          ]
+        },
+        "longitude": 77.7448389,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "kadugodi_tree_park",
+        "site_name": "Kadugodi tree park",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:06.210Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237b4",
+        "intervention_id": "kadugodi_tree_park__bioswale__5",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.094Z",
+        "details": {
+          "length_m": "50m",
+          "width_m": "2m",
+          "depth_m": "NA",
+          "area": "50sqm",
+          "tentative_cost": "100",
+          "tentative_timeline": "2"
+        },
+        "latitude": 12.9865833,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7448389,
+            12.9865833
+          ]
+        },
+        "longitude": 77.7448389,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "kadugodi_tree_park",
+        "site_name": "Kadugodi tree park",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:06.260Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237a6",
+    "site_id": "kadugodi_forest_children_park",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.663Z",
+    "latitude": 12.98745,
+    "linked_intervention_ids": [
+      "kadugodi_forest_children_park__infiltration_trench__6",
+      "kadugodi_forest_children_park__detention_basin__7",
+      "kadugodi_forest_children_park__rain_garden__8",
+      "kadugodi_forest_children_park__bioswale__9"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7459389,
+        12.98745
+      ]
+    },
+    "longitude": 77.7459389,
+    "name": "Kadugodi forest children park",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 3,920 KL and storage of 185 KL",
+    "subcatchment_level_impact": "Runoff reduced by 3% from 66.4 mm to 64.5 mm. Infiltration increased by 9% from 20.3 mm to 22.1 mm",
+    "type": "park",
+    "updatedAt": "2026-08-05T07:55:05.508Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237b5",
+        "intervention_id": "kadugodi_forest_children_park__infiltration_trench__6",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.122Z",
+        "details": {
+          "length_m": "100m",
+          "width_m": "1.2m",
+          "depth_m": "1m",
+          "area": "100sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "2.5"
+        },
+        "latitude": 12.98745,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7459389,
+            12.98745
+          ]
+        },
+        "longitude": 77.7459389,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "kadugodi_forest_children_park",
+        "site_name": "Kadugodi forest children park",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:06.296Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237b6",
+        "intervention_id": "kadugodi_forest_children_park__detention_basin__7",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.152Z",
+        "details": {
+          "length_m": "10m",
+          "width_m": "10m",
+          "depth_m": "3m",
+          "area": "100sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.98745,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7459389,
+            12.98745
+          ]
+        },
+        "longitude": 77.7459389,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "kadugodi_forest_children_park",
+        "site_name": "Kadugodi forest children park",
+        "type": "detention_basin",
+        "updatedAt": "2026-08-05T07:55:06.360Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237b7",
+        "intervention_id": "kadugodi_forest_children_park__rain_garden__8",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.182Z",
+        "details": {
+          "length_m": "6m",
+          "width_m": "5m",
+          "depth_m": "0.4m*",
+          "area": "30sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.98745,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7459389,
+            12.98745
+          ]
+        },
+        "longitude": 77.7459389,
+        "needs_review": false,
+        "quantity": 3,
+        "site_id": "kadugodi_forest_children_park",
+        "site_name": "Kadugodi forest children park",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:06.395Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237b8",
+        "intervention_id": "kadugodi_forest_children_park__bioswale__9",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.215Z",
+        "details": {
+          "length_m": "50m",
+          "width_m": "2m",
+          "depth_m": "NA",
+          "area": "50sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.98745,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7459389,
+            12.98745
+          ]
+        },
+        "longitude": 77.7459389,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "kadugodi_forest_children_park",
+        "site_name": "Kadugodi forest children park",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:06.430Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237a7",
+    "site_id": "inner_circle_park",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.691Z",
+    "latitude": 12.9716278,
+    "linked_intervention_ids": [
+      "inner_circle_park__rain_garden__10",
+      "inner_circle_park__infiltration_trench__11",
+      "inner_circle_park__bioswale__12"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7486139,
+        12.9716278
+      ]
+    },
+    "longitude": 77.7486139,
+    "name": "Inner circle park",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 3,920 KL and storage of 185 KL",
+    "subcatchment_level_impact": "Runoff reduced by 3% from 66.4 mm to 64.5 mm. Infiltration increased by 9% from 20.3 mm to 22.1 mm",
+    "type": "park",
+    "updatedAt": "2026-08-05T07:55:05.557Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237b9",
+        "intervention_id": "inner_circle_park__rain_garden__10",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.243Z",
+        "details": {
+          "length_m": "5m",
+          "width_m": "5m",
+          "depth_m": "0.4m*",
+          "area": "25sqm",
+          "tentative_cost": "50",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9716278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7486139,
+            12.9716278
+          ]
+        },
+        "longitude": 77.7486139,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "inner_circle_park",
+        "site_name": "Inner circle park",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:06.484Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237ba",
+        "intervention_id": "inner_circle_park__infiltration_trench__11",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.272Z",
+        "details": {
+          "length_m": "50m",
+          "width_m": "1.2m",
+          "depth_m": "1m",
+          "area": "50sqm",
+          "tentative_cost": "50",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9716278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7486139,
+            12.9716278
+          ]
+        },
+        "longitude": 77.7486139,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "inner_circle_park",
+        "site_name": "Inner circle park",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:06.525Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237bb",
+        "intervention_id": "inner_circle_park__bioswale__12",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.298Z",
+        "details": {
+          "length_m": "100m",
+          "width_m": "2m",
+          "depth_m": "NA",
+          "area": "100sqm",
+          "tentative_cost": "50",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9716278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7486139,
+            12.9716278
+          ]
+        },
+        "longitude": 77.7486139,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "inner_circle_park",
+        "site_name": "Inner circle park",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:06.571Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237a8",
+    "site_id": "pattandur_agrahare_1",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.724Z",
+    "latitude": 12.9873694,
+    "linked_intervention_ids": [
+      "pattandur_agrahare_1__infiltration_trench__13",
+      "pattandur_agrahare_1__percolation_well__14"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7563278,
+        12.9873694
+      ]
+    },
+    "longitude": 77.7563278,
+    "name": "Pattandur agrahare 1",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 3,920 KL and storage of 185 KL",
+    "subcatchment_level_impact": "Runoff reduced by 3% from 66.4 mm to 64.5 mm. Infiltration increased by 9% from 20.3 mm to 22.1 mm",
+    "type": "lake",
+    "updatedAt": "2026-08-05T07:55:05.596Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237bc",
+        "intervention_id": "pattandur_agrahare_1__infiltration_trench__13",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.328Z",
+        "details": {
+          "length_m": "100m",
+          "width_m": "1m",
+          "depth_m": "1m",
+          "area": "200sqm",
+          "tentative_cost": "70",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9873694,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7563278,
+            12.9873694
+          ]
+        },
+        "longitude": 77.7563278,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "pattandur_agrahare_1",
+        "site_name": "Pattandur agrahare 1",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:06.624Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237bd",
+        "intervention_id": "pattandur_agrahare_1__percolation_well__14",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.359Z",
+        "details": {
+          "length_m": "1.2m",
+          "width_m": "1.2m",
+          "depth_m": "6m",
+          "area": "1.44sqm",
+          "tentative_cost": "70",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9873694,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7563278,
+            12.9873694
+          ]
+        },
+        "longitude": 77.7563278,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "pattandur_agrahare_1",
+        "site_name": "Pattandur agrahare 1",
+        "type": "percolation",
+        "updatedAt": "2026-08-05T07:55:06.682Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237a9",
+    "site_id": "sheelavanthakerer_lake",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.753Z",
+    "latitude": 12.9647333,
+    "linked_intervention_ids": [
+      "sheelavanthakerer_lake__infiltration_trench_near_bund__15",
+      "sheelavanthakerer_lake__raingarden_inside_park__16",
+      "sheelavanthakerer_lake__bioswale_inside_park__17"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7427056,
+        12.9647333
+      ]
+    },
+    "longitude": 77.7427056,
+    "name": "Sheelavanthakerer lake",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 3,920 KL and storage of 185 KL",
+    "subcatchment_level_impact": "Runoff reduced by 3% from 66.4 mm to 64.5 mm. Infiltration increased by 9% from 20.3 mm to 22.1 mm",
+    "type": "lake",
+    "updatedAt": "2026-08-05T07:55:05.631Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237be",
+        "intervention_id": "sheelavanthakerer_lake__infiltration_trench_near_bund__15",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.388Z",
+        "details": {
+          "length_m": "100m",
+          "width_m": "1m",
+          "depth_m": "1m",
+          "area": "100sqm",
+          "tentative_cost": "80",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9647333,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7427056,
+            12.9647333
+          ]
+        },
+        "longitude": 77.7427056,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "sheelavanthakerer_lake",
+        "site_name": "Sheelavanthakerer lake",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:06.725Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237bf",
+        "intervention_id": "sheelavanthakerer_lake__raingarden_inside_park__16",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.418Z",
+        "details": {
+          "length_m": "6m",
+          "width_m": "5m",
+          "depth_m": "0.4m*",
+          "area": "30sqm",
+          "tentative_cost": "80",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9647333,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7427056,
+            12.9647333
+          ]
+        },
+        "longitude": 77.7427056,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "sheelavanthakerer_lake",
+        "site_name": "Sheelavanthakerer lake",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:06.759Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237c0",
+        "intervention_id": "sheelavanthakerer_lake__bioswale_inside_park__17",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.447Z",
+        "details": {
+          "length_m": "50m",
+          "width_m": "1m",
+          "depth_m": "NA",
+          "area": "50sqm",
+          "tentative_cost": "80",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9647333,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7427056,
+            12.9647333
+          ]
+        },
+        "longitude": 77.7427056,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "sheelavanthakerer_lake",
+        "site_name": "Sheelavanthakerer lake",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:06.834Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237aa",
+    "site_id": "nallurhalli_park",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.788Z",
+    "latitude": 12.9699778,
+    "linked_intervention_ids": [
+      "nallurhalli_park__rain_garden__18",
+      "nallurhalli_park__bioswale__19",
+      "nallurhalli_park__infiltration_trench_at_boundary__20",
+      "nallurhalli_park__retention_basin__21"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7290083,
+        12.9699778
+      ]
+    },
+    "longitude": 77.7290083,
+    "name": "Nallurhalli park",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 330 KL and storage of 37 KL",
+    "subcatchment_level_impact": "Runoff reduced by 4% from 112.9 mm to 108.5 mm. Infiltration increased by 25% from 15.4 mm to 19.1 mm",
+    "type": "park",
+    "updatedAt": "2026-08-05T07:55:05.666Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237c1",
+        "intervention_id": "nallurhalli_park__rain_garden__18",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.476Z",
+        "details": {
+          "length_m": "6m",
+          "width_m": "5m",
+          "depth_m": "0.4m*",
+          "area": "30sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9699778,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7290083,
+            12.9699778
+          ]
+        },
+        "longitude": 77.7290083,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "nallurhalli_park",
+        "site_name": "Nallurhalli park",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:06.877Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237c2",
+        "intervention_id": "nallurhalli_park__bioswale__19",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.503Z",
+        "details": {
+          "length_m": "50m",
+          "width_m": "1.2m",
+          "depth_m": "NA",
+          "area": "50sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9699778,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7290083,
+            12.9699778
+          ]
+        },
+        "longitude": 77.7290083,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "nallurhalli_park",
+        "site_name": "Nallurhalli park",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:06.919Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237c3",
+        "intervention_id": "nallurhalli_park__infiltration_trench_at_boundary__20",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.530Z",
+        "details": {
+          "length_m": "100m",
+          "width_m": "1m",
+          "depth_m": "1m",
+          "area": "100sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9699778,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7290083,
+            12.9699778
+          ]
+        },
+        "longitude": 77.7290083,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "nallurhalli_park",
+        "site_name": "Nallurhalli park",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:06.970Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237c4",
+        "intervention_id": "nallurhalli_park__retention_basin__21",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.556Z",
+        "details": {
+          "length_m": "10m",
+          "width_m": "10m",
+          "depth_m": "3m",
+          "area": "120sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9699778,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7290083,
+            12.9699778
+          ]
+        },
+        "longitude": 77.7290083,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "nallurhalli_park",
+        "site_name": "Nallurhalli park",
+        "type": "detention_basin",
+        "updatedAt": "2026-08-05T07:55:07.011Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237ab",
+    "site_id": "hoodi_lake",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.816Z",
+    "latitude": 12.9867667,
+    "linked_intervention_ids": [
+      "hoodi_lake__infiltration_trench__22",
+      "hoodi_lake__raingarden__23",
+      "hoodi_lake__bioswale__24"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7230306,
+        12.9867667
+      ]
+    },
+    "longitude": 77.7230306,
+    "name": "Hoodi lake",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 183 KL and storage of 51 KL",
+    "subcatchment_level_impact": "Runoff reduced by 1% from 51.9 mm to 51.5 mm. Infiltration increased by 7% from 7.9 mm to 8.4 mm",
+    "type": "lake",
+    "updatedAt": "2026-08-05T07:55:05.702Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237c5",
+        "intervention_id": "hoodi_lake__infiltration_trench__22",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.582Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "100sqm",
+          "tentative_cost": null,
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9867667,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7230306,
+            12.9867667
+          ]
+        },
+        "longitude": 77.7230306,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "hoodi_lake",
+        "site_name": "Hoodi lake",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:07.059Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237c6",
+        "intervention_id": "hoodi_lake__raingarden__23",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.608Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "30sqm",
+          "tentative_cost": null,
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9867667,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7230306,
+            12.9867667
+          ]
+        },
+        "longitude": 77.7230306,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "hoodi_lake",
+        "site_name": "Hoodi lake",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:07.104Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237c7",
+        "intervention_id": "hoodi_lake__bioswale__24",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.637Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "100sqm",
+          "tentative_cost": null,
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9867667,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7230306,
+            12.9867667
+          ]
+        },
+        "longitude": 77.7230306,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "hoodi_lake",
+        "site_name": "Hoodi lake",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:07.140Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237ac",
+    "site_id": "seetharampalya_lake",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.845Z",
+    "latitude": 12.9820278,
+    "linked_intervention_ids": [
+      "seetharampalya_lake__infiltration_trench__25",
+      "seetharampalya_lake__raingarden__26",
+      "seetharampalya_lake__bioswale__27"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7128722,
+        12.9820278
+      ]
+    },
+    "longitude": 77.7128722,
+    "name": "Seetharampalya lake",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 183 KL and storage of 51 KL",
+    "subcatchment_level_impact": "Runoff reduced by 1% from 51.9 mm to 51.5 mm. Infiltration increased by 7% from 7.9 mm to 8.4 mm",
+    "type": "lake",
+    "updatedAt": "2026-08-05T07:55:05.749Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237c8",
+        "intervention_id": "seetharampalya_lake__infiltration_trench__25",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.668Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "150sqm",
+          "tentative_cost": null,
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9820278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7128722,
+            12.9820278
+          ]
+        },
+        "longitude": 77.7128722,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "seetharampalya_lake",
+        "site_name": "Seetharampalya lake",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:07.182Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237c9",
+        "intervention_id": "seetharampalya_lake__raingarden__26",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.701Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "30sqm",
+          "tentative_cost": null,
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9820278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7128722,
+            12.9820278
+          ]
+        },
+        "longitude": 77.7128722,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "seetharampalya_lake",
+        "site_name": "Seetharampalya lake",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:07.217Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237ca",
+        "intervention_id": "seetharampalya_lake__bioswale__27",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.727Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "100sqm",
+          "tentative_cost": null,
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9820278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7128722,
+            12.9820278
+          ]
+        },
+        "longitude": 77.7128722,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "seetharampalya_lake",
+        "site_name": "Seetharampalya lake",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:07.284Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237ad",
+    "site_id": "ktpo_office",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.875Z",
+    "latitude": 12.97965,
+    "linked_intervention_ids": [
+      "ktpo_office__infiltration_trench__28",
+      "ktpo_office__raingarden__29",
+      "ktpo_office__bioswale__30",
+      "ktpo_office__detention_basin__31",
+      "ktpo_office__ecobloc_underground_tank__32"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7192972,
+        12.97965
+      ]
+    },
+    "longitude": 77.7192972,
+    "name": "KTPO office",
+    "needs_review": false,
+    "site_level_impact": "Infiltration of 183 KL and storage of 51 KL",
+    "subcatchment_level_impact": "Runoff reduced by 1% from 51.9 mm to 51.5 mm. Infiltration increased by 7% from 7.9 mm to 8.4 mm",
+    "type": "campus",
+    "updatedAt": "2026-08-05T07:55:05.804Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237cb",
+        "intervention_id": "ktpo_office__infiltration_trench__28",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.755Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "400sqm",
+          "tentative_cost": "200",
+          "tentative_timeline": "2"
+        },
+        "latitude": 12.97965,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7192972,
+            12.97965
+          ]
+        },
+        "longitude": 77.7192972,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "ktpo_office",
+        "site_name": "KTPO office",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:07.319Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237cc",
+        "intervention_id": "ktpo_office__raingarden__29",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.786Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "30sqm",
+          "tentative_cost": "200",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.97965,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7192972,
+            12.97965
+          ]
+        },
+        "longitude": 77.7192972,
+        "needs_review": false,
+        "quantity": 4,
+        "site_id": "ktpo_office",
+        "site_name": "KTPO office",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:07.385Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237cd",
+        "intervention_id": "ktpo_office__bioswale__30",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.813Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "100sqm",
+          "tentative_cost": "200",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.97965,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7192972,
+            12.97965
+          ]
+        },
+        "longitude": 77.7192972,
+        "needs_review": false,
+        "quantity": 4,
+        "site_id": "ktpo_office",
+        "site_name": "KTPO office",
+        "type": "bioswale",
+        "updatedAt": "2026-08-05T07:55:07.420Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237ce",
+        "intervention_id": "ktpo_office__detention_basin__31",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.849Z",
+        "details": {
+          "length_m": "10m",
+          "width_m": "10m",
+          "depth_m": "3m",
+          "area": "100sqm",
+          "tentative_cost": "200",
+          "tentative_timeline": "2"
+        },
+        "latitude": 12.97965,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7192972,
+            12.97965
+          ]
+        },
+        "longitude": 77.7192972,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "ktpo_office",
+        "site_name": "KTPO office",
+        "type": "detention_basin",
+        "updatedAt": "2026-08-05T07:55:07.475Z"
+      },
+      {
+        "_id": "6a5ca7584fb07a2de3a237cf",
+        "intervention_id": "ktpo_office__ecobloc_underground_tank__32",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.886Z",
+        "details": {
+          "length_m": "10m",
+          "width_m": "10m",
+          "depth_m": "3m",
+          "area": "1000sqm",
+          "tentative_cost": "200",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.97965,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7192972,
+            12.97965
+          ]
+        },
+        "longitude": 77.7192972,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "ktpo_office",
+        "site_name": "KTPO office",
+        "type": "underground_tank",
+        "updatedAt": "2026-08-05T07:55:07.510Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7574fb07a2de3a237ae",
+    "site_id": "gba_storm_water_drain_inlet_2_to_nallurhalli_lake",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.906Z",
+    "latitude": 12.9732139,
+    "linked_intervention_ids": [
+      "gba_storm_water_drain_inlet_2_to_nallurhalli_lake__rain_garden__33",
+      "gba_storm_water_drain_inlet_2_to_nallurhalli_lake__infiltration_trench__34",
+      "gba_storm_water_drain_inlet_2_to_nallurhalli_lake__percolation_well__35"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7271944,
+        12.9732139
+      ]
+    },
+    "longitude": 77.7271944,
+    "name": "GBA storm water drain- Inlet 2 to Nallurhalli Lake",
+    "needs_review": false,
+    "site_level_impact": null,
+    "subcatchment_level_impact": null,
+    "type": "lake",
+    "updatedAt": "2026-08-05T07:55:05.836Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7584fb07a2de3a237d0",
+        "intervention_id": "gba_storm_water_drain_inlet_2_to_nallurhalli_lake__rain_garden__33",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.912Z",
+        "details": {
+          "length_m": "5m",
+          "width_m": "5m",
+          "depth_m": "1m",
+          "area": "25sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9732139,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7271944,
+            12.9732139
+          ]
+        },
+        "longitude": 77.7271944,
+        "needs_review": false,
+        "quantity": 4,
+        "site_id": "gba_storm_water_drain_inlet_2_to_nallurhalli_lake",
+        "site_name": "GBA storm water drain- Inlet 2 to Nallurhalli Lake",
+        "type": "raingarden",
+        "updatedAt": "2026-08-05T07:55:07.551Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237d1",
+        "intervention_id": "gba_storm_water_drain_inlet_2_to_nallurhalli_lake__infiltration_trench__34",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.956Z",
+        "details": {
+          "length_m": "50m",
+          "width_m": "1.2m",
+          "depth_m": "2m",
+          "area": "1.5sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9732139,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7271944,
+            12.9732139
+          ]
+        },
+        "longitude": 77.7271944,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "gba_storm_water_drain_inlet_2_to_nallurhalli_lake",
+        "site_name": "GBA storm water drain- Inlet 2 to Nallurhalli Lake",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:07.592Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237d2",
+        "intervention_id": "gba_storm_water_drain_inlet_2_to_nallurhalli_lake__percolation_well__35",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:48.985Z",
+        "details": {
+          "length_m": "1.2m",
+          "width_m": "1.2m",
+          "depth_m": "6m",
+          "area": "1.44sqm",
+          "tentative_cost": "120",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9732139,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7271944,
+            12.9732139
+          ]
+        },
+        "longitude": 77.7271944,
+        "needs_review": false,
+        "quantity": 4,
+        "site_id": "gba_storm_water_drain_inlet_2_to_nallurhalli_lake",
+        "site_name": "GBA storm water drain- Inlet 2 to Nallurhalli Lake",
+        "type": "percolation",
+        "updatedAt": "2026-08-05T07:55:07.644Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7584fb07a2de3a237af",
+    "site_id": "pattandur_agrahare_2",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.935Z",
+    "latitude": 12.9804278,
+    "linked_intervention_ids": [
+      "pattandur_agrahare_2__infiltration_trench__36",
+      "pattandur_agrahare_2__percolation_well__37",
+      "pattandur_agrahare_2__ecobloc_underground_tank__38"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.74655,
+        12.9804278
+      ]
+    },
+    "longitude": 77.74655,
+    "name": "Pattandur agrahare 2",
+    "needs_review": false,
+    "site_level_impact": null,
+    "subcatchment_level_impact": null,
+    "type": "lake",
+    "updatedAt": "2026-08-05T07:55:05.869Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7594fb07a2de3a237d3",
+        "intervention_id": "pattandur_agrahare_2__infiltration_trench__36",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.014Z",
+        "details": {
+          "length_m": null,
+          "width_m": null,
+          "depth_m": null,
+          "area": "200sqm",
+          "tentative_cost": "150",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9804278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.74655,
+            12.9804278
+          ]
+        },
+        "longitude": 77.74655,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "pattandur_agrahare_2",
+        "site_name": "Pattandur agrahare 2",
+        "type": "infiltration_trench",
+        "updatedAt": "2026-08-05T07:55:07.680Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237d4",
+        "intervention_id": "pattandur_agrahare_2__percolation_well__37",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.043Z",
+        "details": {
+          "length_m": "1.2m",
+          "width_m": "1.2m",
+          "depth_m": "6m",
+          "area": "1.44sqm",
+          "tentative_cost": "150",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9804278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.74655,
+            12.9804278
+          ]
+        },
+        "longitude": 77.74655,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "pattandur_agrahare_2",
+        "site_name": "Pattandur agrahare 2",
+        "type": "percolation",
+        "updatedAt": "2026-08-05T07:55:07.717Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237d5",
+        "intervention_id": "pattandur_agrahare_2__ecobloc_underground_tank__38",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.072Z",
+        "details": {
+          "length_m": "10",
+          "width_m": "3m",
+          "depth_m": "6m",
+          "area": "30sqm",
+          "tentative_cost": "150",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9804278,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.74655,
+            12.9804278
+          ]
+        },
+        "longitude": 77.74655,
+        "needs_review": false,
+        "quantity": 1,
+        "site_id": "pattandur_agrahare_2",
+        "site_name": "Pattandur agrahare 2",
+        "type": "underground_tank",
+        "updatedAt": "2026-08-05T07:55:07.758Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7584fb07a2de3a237b0",
+    "site_id": "nallurhalli_main_road",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.969Z",
+    "latitude": 12.9671083,
+    "linked_intervention_ids": [
+      "nallurhalli_main_road__permeable_pathway__39",
+      "nallurhalli_main_road__ecobloc__40",
+      "nallurhalli_main_road__tree_trenches__41",
+      "nallurhalli_main_road__swd_inlet_placements__42"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.7338583,
+        12.9671083
+      ]
+    },
+    "longitude": 77.7338583,
+    "name": "Nallurhalli main road",
+    "needs_review": false,
+    "site_level_impact": null,
+    "subcatchment_level_impact": null,
+    "type": "stormdrain",
+    "updatedAt": "2026-08-05T07:55:06.077Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7594fb07a2de3a237d6",
+        "intervention_id": "nallurhalli_main_road__permeable_pathway__39",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.099Z",
+        "details": {
+          "length_m": "1.2m",
+          "width_m": "1.2m",
+          "depth_m": "-",
+          "area": "1000m",
+          "tentative_cost": "220",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9671083,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7338583,
+            12.9671083
+          ]
+        },
+        "longitude": 77.7338583,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "nallurhalli_main_road",
+        "site_name": "Nallurhalli main road",
+        "type": "permeable_pathway",
+        "updatedAt": "2026-08-05T07:55:07.808Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237d7",
+        "intervention_id": "nallurhalli_main_road__ecobloc__40",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.128Z",
+        "details": {
+          "length_m": "1.2m",
+          "width_m": "1.2m",
+          "depth_m": "3m",
+          "area": null,
+          "tentative_cost": "220",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9671083,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7338583,
+            12.9671083
+          ]
+        },
+        "longitude": 77.7338583,
+        "needs_review": false,
+        "quantity": 10,
+        "site_id": "nallurhalli_main_road",
+        "site_name": "Nallurhalli main road",
+        "type": "ecobloc",
+        "updatedAt": "2026-08-05T07:55:07.851Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237d8",
+        "intervention_id": "nallurhalli_main_road__tree_trenches__41",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.155Z",
+        "details": {
+          "length_m": "2.5m",
+          "width_m": "2.5m",
+          "depth_m": "3m",
+          "area": null,
+          "tentative_cost": "220",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9671083,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7338583,
+            12.9671083
+          ]
+        },
+        "longitude": 77.7338583,
+        "needs_review": false,
+        "quantity": 10,
+        "site_id": "nallurhalli_main_road",
+        "site_name": "Nallurhalli main road",
+        "type": "tree_trench",
+        "updatedAt": "2026-08-05T07:55:07.889Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237d9",
+        "intervention_id": "nallurhalli_main_road__swd_inlet_placements__42",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.182Z",
+        "details": {
+          "length_m": "0.6m",
+          "width_m": null,
+          "depth_m": "0.15m",
+          "area": null,
+          "tentative_cost": "220",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9671083,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.7338583,
+            12.9671083
+          ]
+        },
+        "longitude": 77.7338583,
+        "needs_review": false,
+        "quantity": 40,
+        "site_id": "nallurhalli_main_road",
+        "site_name": "Nallurhalli main road",
+        "type": "swd_inlet",
+        "updatedAt": "2026-08-05T07:55:07.931Z"
+      }
+    ]
+  },
+  {
+    "_id": "6a5ca7584fb07a2de3a237b1",
+    "site_id": "borewell_road",
+    "__v": 0,
+    "createdAt": "2026-07-19T10:30:47.997Z",
+    "latitude": 12.9691583,
+    "linked_intervention_ids": [
+      "borewell_road__permeable_pathway__43",
+      "borewell_road__ecobloc__44",
+      "borewell_road__swd_inlet_placements__45"
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        77.74275,
+        12.9691583
+      ]
+    },
+    "longitude": 77.74275,
+    "name": "Borewell road",
+    "needs_review": false,
+    "site_level_impact": null,
+    "subcatchment_level_impact": null,
+    "type": "stormdrain",
+    "updatedAt": "2026-08-05T07:55:06.111Z",
+    "watershed": "Nallurhalli Micro Watershed- Borewell road flood hotspot",
+    "interventions": [
+      {
+        "_id": "6a5ca7594fb07a2de3a237da",
+        "intervention_id": "borewell_road__permeable_pathway__43",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.210Z",
+        "details": {
+          "length_m": "1.2m",
+          "width_m": "1.2m",
+          "depth_m": "-",
+          "area": "750m",
+          "tentative_cost": "200",
+          "tentative_timeline": "1.5"
+        },
+        "latitude": 12.9691583,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.74275,
+            12.9691583
+          ]
+        },
+        "longitude": 77.74275,
+        "needs_review": false,
+        "quantity": 2,
+        "site_id": "borewell_road",
+        "site_name": "Borewell road",
+        "type": "permeable_pathway",
+        "updatedAt": "2026-08-05T07:55:08.016Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237db",
+        "intervention_id": "borewell_road__ecobloc__44",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.239Z",
+        "details": {
+          "length_m": "1.2m",
+          "width_m": "1.2m",
+          "depth_m": "3m",
+          "area": null,
+          "tentative_cost": "200",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9691583,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.74275,
+            12.9691583
+          ]
+        },
+        "longitude": 77.74275,
+        "needs_review": false,
+        "quantity": 6,
+        "site_id": "borewell_road",
+        "site_name": "Borewell road",
+        "type": "ecobloc",
+        "updatedAt": "2026-08-05T07:55:08.053Z"
+      },
+      {
+        "_id": "6a5ca7594fb07a2de3a237dc",
+        "intervention_id": "borewell_road__swd_inlet_placements__45",
+        "__v": 0,
+        "createdAt": "2026-07-19T10:30:49.269Z",
+        "details": {
+          "length_m": "0.6m",
+          "width_m": null,
+          "depth_m": "0.15m",
+          "area": null,
+          "tentative_cost": "200",
+          "tentative_timeline": "1"
+        },
+        "latitude": 12.9691583,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.74275,
+            12.9691583
+          ]
+        },
+        "longitude": 77.74275,
+        "needs_review": false,
+        "quantity": 30,
+        "site_id": "borewell_road",
+        "site_name": "Borewell road",
+        "type": "swd_inlet",
+        "updatedAt": "2026-08-05T07:55:08.092Z"
+      }
+    ]
+  }
+]

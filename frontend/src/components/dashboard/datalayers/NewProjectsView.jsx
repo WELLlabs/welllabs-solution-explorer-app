@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import fallbackSites from '../../../data/fallbackSites.json';
 import { getProjectImage } from '../../../data/projectImages';
 
 /* ============ helpers ============ */
@@ -298,12 +299,16 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
         return r.json();
       })
       .then(data => {
-        setRawSites(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setRawSites(data);
+        } else {
+          setRawSites(fallbackSites);
+        }
         setLoading(false);
       })
       .catch(err => {
-        console.error('Failed to fetch sites:', err);
-        setFetchErr(err.message);
+        console.error('Failed to fetch sites from API, using fallback:', err);
+        setRawSites(fallbackSites);
         setLoading(false);
       });
   }, []);

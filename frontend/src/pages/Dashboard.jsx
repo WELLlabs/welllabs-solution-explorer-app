@@ -2,15 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import api from '../config/api';
-
-// Styling
 import './Dashboard.css';
-
-// Layout Components
 import Header from '../components/layout/Header';
 import PendingApproval from '../components/layout/PendingApproval';
-
-// Tab Components
 import BggIntroduction from '../components/dashboard/home/BggIntroduction';
 import Analytics from './Analytics';
 import CaseStudies from '../components/dashboard/casestudies/CaseStudies';
@@ -18,8 +12,6 @@ import Interventions from '../components/dashboard/datalayers/Interventions';
 import FloodRiskMap from '../components/dashboard/datalayers/FloodRiskMap';
 import DataLayersView from '../components/dashboard/datalayers/DataLayersView';
 import NewProjectsView from '../components/dashboard/datalayers/NewProjectsView';
-
-// Export FIELD_PERMISSIONS to keep references intact
 export const FIELD_PERMISSIONS = {
   'Admin': ['ALL_FIELDS'],
   'WELL Labs1': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
@@ -36,12 +28,12 @@ const Dashboard = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState(null);
-  
+
   // Custom Workspace Tabs System driven by URL path name
   const { activeTab: urlActiveTab } = useParams();
   const navigate = useNavigate();
   const activeTab = urlActiveTab || 'home';
-  
+
   // Shocking news linking state
   const [highlightedCaseTitle, setHighlightedCaseTitle] = useState(null);
 
@@ -70,11 +62,16 @@ const Dashboard = () => {
     }
   };
 
+
+
+
+
+
   const handleRoleChange = async (userId, newRole) => {
     setUpdatingUserId(userId);
     try {
       const storedUser = JSON.parse(localStorage.getItem('user'));
-      await api.put(`/auth/users/${userId}/role`, 
+      await api.put(`/auth/users/${userId}/role`,
         { role: newRole },
         { headers: { Authorization: `Bearer ${storedUser.token}` } }
       );
@@ -106,7 +103,7 @@ const Dashboard = () => {
   // No longer redirecting unauthenticated users to login
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper" style={activeTab === 'home' ? { backgroundColor: '#c9d8bd', minHeight: '100vh' } : {}}>
       {/* 1. Header component */}
       <Header user={user} onLogout={logout} />
 
@@ -174,11 +171,15 @@ const Dashboard = () => {
         )}
         */}
 
+
+
+        
+
         {/* 1. HOME VIEW */}
         {user?.role !== 'Pending' && activeTab === 'home' && (
-          <BggIntroduction 
-            onNavigateToCase={handleNavigateToCase} 
-            onSetActiveTab={(tab) => navigate('/' + tab)} 
+          <BggIntroduction
+            onNavigateToCase={handleNavigateToCase}
+            onSetActiveTab={(tab) => navigate('/' + tab)}
           />
         )}
 
@@ -189,9 +190,9 @@ const Dashboard = () => {
 
         {/* 3. CASE STUDY VIEW */}
         {user?.role !== 'Pending' && activeTab === 'casestudy' && (
-          <CaseStudies 
-            highlightedCaseTitle={highlightedCaseTitle} 
-            clearHighlight={() => setHighlightedCaseTitle(null)} 
+          <CaseStudies
+            highlightedCaseTitle={highlightedCaseTitle}
+            clearHighlight={() => setHighlightedCaseTitle(null)}
           />
         )}
 
@@ -266,7 +267,7 @@ const Dashboard = () => {
                             </div>
                           </td>
                           <td>
-                            <select 
+                            <select
                               value={u.role}
                               onChange={(e) => handleRoleChange(u._id, e.target.value)}
                               disabled={updatingUserId === u._id}

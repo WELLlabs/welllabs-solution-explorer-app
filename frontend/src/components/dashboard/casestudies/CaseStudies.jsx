@@ -292,7 +292,7 @@ const CaseStudyBeforeAfterSlider = ({ beforeAfter, cityColor }) => {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-xl sm:rounded-2xl overflow-hidden cursor-ew-resize select-none bg-slate-900 border border-slate-200 shadow-md touch-none focus:outline-hidden focus:ring-2 focus:ring-sky-500/50"
+        className="relative w-full aspect-[16/10] sm:aspect-[16/9] lg:aspect-[21/9] max-h-[640px] rounded-xl sm:rounded-2xl overflow-hidden cursor-ew-resize select-none bg-slate-900 border border-slate-200 shadow-md touch-none focus:outline-hidden focus:ring-2 focus:ring-sky-500/50"
       >
         {/* AFTER Image (Full Background) */}
         <img
@@ -426,7 +426,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
   const active = CASE_STUDIES.find(cs => cs.id === activeId);
 
   return (
-    <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 animate-[fadeInUp_0.4s_ease_both]" id="cs-top">
+    <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 flex flex-col gap-8 animate-[fadeInUp_0.4s_ease_both]" id="cs-top">
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(12px); }
@@ -443,11 +443,11 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
       </div>
 
       {/* City Tab Switcher */}
-      <div className="flex gap-1 border-b-2 border-slate-200 pb-0">
+      <div className="flex gap-1 border-b-2 border-slate-200 pb-0 overflow-x-auto">
         {CASE_STUDIES.map(cs => (
           <button
             key={cs.id}
-            className={`flex items-center gap-2 px-6 py-3 bg-transparent border-none border-b-3 -mb-[2px] text-[15px] font-semibold transition-all duration-200 cursor-pointer rounded-t-lg ${activeId === cs.id ? 'bg-slate-50' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
+            className={`flex items-center gap-2 px-6 py-3 bg-transparent border-none border-b-3 -mb-[2px] text-[15px] font-semibold transition-all duration-200 cursor-pointer rounded-t-lg whitespace-nowrap ${activeId === cs.id ? 'bg-slate-50' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
             style={activeId === cs.id ? { borderBottomColor: cs.color, color: cs.color } : {}}
             onClick={() => setActiveId(cs.id)}
           >
@@ -462,7 +462,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
         <div className="flex flex-col gap-7 animate-[fadeInUp_0.4s_ease_both]" key={active.id}>
 
           {/* Document Hero */}
-          <div className="border-l-5 rounded-2xl p-8 flex flex-col gap-5 text-left" style={{ borderLeftColor: active.color, background: active.colorLight }}>
+          <div className="border-l-5 rounded-2xl p-6 sm:p-8 flex flex-col gap-5 text-left" style={{ borderLeftColor: active.color, background: active.colorLight }}>
             <div className="flex items-center gap-5 md:flex-row flex-col text-left md:items-center items-start">
               <span className="text-[48px] leading-none shrink-0">{active.emoji}</span>
               <div>
@@ -493,12 +493,12 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
 
           {/* Challenge + Solution */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-white border border-slate-200 rounded-2xl p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-amber-500">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-amber-500">
               <div className="text-[22px]">⚠️</div>
               <h3 className="text-base font-bold text-slate-900 m-0">{active.challenge.title}</h3>
               <p className="text-[14.5px] text-slate-600 leading-relaxed m-0">{active.challenge.text}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-emerald-500">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-emerald-500">
               <div className="text-[22px]">✅</div>
               <h3 className="text-base font-bold text-slate-900 m-0">{active.solution.title}</h3>
               <p className="text-[14.5px] text-slate-600 leading-relaxed m-0">{active.solution.text}</p>
@@ -514,9 +514,9 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
           )}
 
           {/* Key Project Data */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-7 md:px-8 text-left shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 md:px-8 text-left shadow-sm">
             <h3 className="text-base md:text-[17px] font-bold text-slate-900 m-0 mb-4">🏗️ Key Project Data</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {active.keyData.map((item, i) => (
                 <div key={i} className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col gap-1 text-left">
                   <div className="text-[11.5px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</div>

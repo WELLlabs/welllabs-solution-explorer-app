@@ -194,16 +194,12 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
   };
 
   return (
-    <div className="w-full bg-white animate-[fadeIn_0.4s_ease-out_forwards]">
+    <div className="w-full min-h-[calc(100vh-80px)] bg-[#c9d8bd] animate-[fadeIn_0.4s_ease-out_forwards]">
       {/* ========================================== */}
       {/* ACTIVE HERO SECTION WITH ISOMETRIC BANNER */}
       {/* ========================================== */}
       <div
-        className="relative w-full aspect-[979/502] min-h-[520px] overflow-hidden bg-cover bg-center select-none"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,.55), rgba(255,255,255,.15)), url(${ASSETS.background})`,
-          backgroundColor: "#c9d8bd",
-        }}
+        className="relative w-full aspect-[979/502] min-h-[520px] overflow-hidden select-none bg-[#c9d8bd]"
       >
         {/* Transparent Click-Away Overlay to dismiss popup without darkening background */}
         {activeMarker && (
@@ -242,9 +238,8 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
                 />
               ) : (
                 <div
-                  className={`flex h-[2.6vw] w-[2.6vw] items-center justify-center rounded-full border-2 border-white text-center text-[0.45vw] font-bold leading-[1.15] text-white shadow-lg ${
-                    m.type === "dark" ? "bg-[#1B3A57]" : "bg-[#2F6B3A]"
-                  }`}
+                  className={`flex h-[2.6vw] w-[2.6vw] items-center justify-center rounded-full border-2 border-white text-center text-[0.45vw] font-bold leading-[1.15] text-white shadow-lg ${m.type === "dark" ? "bg-[#1B3A57]" : "bg-[#2F6B3A]"
+                    }`}
                 >
                   <span className="whitespace-pre-line px-[0.2vw]">{m.text}</span>
                 </div>
