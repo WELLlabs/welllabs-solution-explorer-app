@@ -94,8 +94,8 @@ console.log('🚀 [START] INIT: importFromGoogleSheets.js executing...');
 console.log(`⏱️  Timestamp: ${new Date().toISOString()}`);
 console.log('=============================================================================');
 
-const SiteProject  = require('../models/SiteProject');
-const Intervention = require('../models/Intervention');
+const SiteProject  = require('../src/models/SiteProject');
+const Intervention = require('../src/models/Intervention');
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  CONFIG & SECRETS MANAGER                                                   */
