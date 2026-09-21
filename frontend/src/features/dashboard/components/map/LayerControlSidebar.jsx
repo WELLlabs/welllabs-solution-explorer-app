@@ -386,9 +386,7 @@ const LayerControlSidebar = ({
                           type="checkbox"
                           checked={showFloodingHotspots}
                           onChange={(e) => {
-                            const checked = e.target.checked;
-                            setShowFloodingHotspots(checked);
-                            if (checked) setIsRightDeckOpen(true);
+                            setShowFloodingHotspots(e.target.checked);
                           }}
                           className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 accent-[#d97706] mt-0.5"
                         />

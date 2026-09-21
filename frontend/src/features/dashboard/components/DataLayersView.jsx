@@ -180,6 +180,16 @@ const DataLayersView = () => {
     return sitesData.map((s) => preprocessProject(normaliseProject(s)));
   }, [sitesData]);
 
+  // Active clicked project for the right-side funding & assets deck
+  const activeProject = useMemo(() => {
+    if (!selectedItem || !selectedItem.isSiteProject) return null;
+    return (
+      cityProjectsList.find(
+        (p) => p.id === selectedItem.site_id || p.id === selectedItem._raw?.site_id
+      ) || null
+    );
+  }, [selectedItem, cityProjectsList]);
+
   // Compute total funding summary based on funder selections
   const fundSummary = useMemo(() => {
     let totalCost = 0;
@@ -215,7 +225,8 @@ const DataLayersView = () => {
   };
 
   const toggleProjectAllAssets = (proj) => {
-    const projKeys = proj.assets.map((_, i) => `${proj.id}__${i}`);
+    if (!proj) return;
+    const projKeys = (proj.assets || []).map((_, i) => `${proj.id}__${i}`);
     const allSelected = projKeys.every((k) => selectedFundPicks.has(k));
     setSelectedFundPicks((prev) => {
       const next = new Set(prev);
@@ -228,16 +239,24 @@ const DataLayersView = () => {
     });
   };
 
-  const selectAllAvailableAssets = () => {
-    const allKeys = [];
-    cityProjectsList.forEach((p) => {
-      p.assets.forEach((_, i) => allKeys.push(`${p.id}__${i}`));
+  const selectAllAvailableAssets = (targetProj = activeProject) => {
+    if (!targetProj) return;
+    const projKeys = (targetProj.assets || []).map((_, i) => `${targetProj.id}__${i}`);
+    setSelectedFundPicks((prev) => {
+      const next = new Set(prev);
+      projKeys.forEach((k) => next.add(k));
+      return next;
     });
-    setSelectedFundPicks(new Set(allKeys));
   };
 
-  const clearAllSelections = () => {
-    setSelectedFundPicks(new Set());
+  const clearAllSelections = (targetProj = activeProject) => {
+    if (!targetProj) return;
+    const projKeys = (targetProj.assets || []).map((_, i) => `${targetProj.id}__${i}`);
+    setSelectedFundPicks((prev) => {
+      const next = new Set(prev);
+      projKeys.forEach((k) => next.delete(k));
+      return next;
+    });
   };
 
   const toggleSection = (sectionKey) => {
@@ -779,7 +798,7 @@ const DataLayersView = () => {
     };
   }, []);
 
-  // Invalidate map size whenever right funding deck or flooding hotspots toggle
+  // Invalidate map size whenever right funding deck or active project toggle
   useEffect(() => {
     const t1 = setTimeout(() => mapRef.current?.invalidateSize({ pan: false }), 60);
     const t2 = setTimeout(() => mapRef.current?.invalidateSize({ pan: false }), 200);
@@ -789,7 +808,7 @@ const DataLayersView = () => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [showFloodingHotspots, isRightDeckOpen]);
+  }, [showNewProjects, activeProject, isRightDeckOpen]);
 
   // Load and render boundaries layers dynamically via modular hook
   useBoundaryLayers({
@@ -1375,6 +1394,7 @@ const DataLayersView = () => {
         `);
 
         marker.on("click", () => {
+          setIsRightDeckOpen(true);
           setSelectedItem({
             isSiteProject: true,
             site_id: site.site_id,
@@ -1830,10 +1850,11 @@ const DataLayersView = () => {
         */}
 
           <div
-            className={`grid grid-cols-1 ${showFloodingHotspots && isRightDeckOpen
-              ? "xl:grid-cols-[350px_1fr_310px] 2xl:grid-cols-[360px_1fr_320px]"
-              : "xl:grid-cols-[380px_1fr]"
-              } gap-3.5 items-start`}
+            className={`grid grid-cols-1 ${
+              showNewProjects && activeProject && isRightDeckOpen
+                ? "xl:grid-cols-[350px_1fr_320px] 2xl:grid-cols-[360px_1fr_340px]"
+                : "xl:grid-cols-[380px_1fr]"
+            } gap-3.5 items-start`}
           >
             {/* Left Sidebar Control Panel - Free Dynamic Height */}
             {/* Left Sidebar Control Panel */}
@@ -1998,15 +2019,14 @@ const DataLayersView = () => {
               />
             </div>
 
-            {/* Right Side Section: City Level Projects & Funding Deck */}
+            {/* Right Side Section: Clicked Project Assets & Funding Deck */}
             <FundingDeckPanel
-              showFloodingHotspots={showFloodingHotspots}
+              showNewProjects={showNewProjects}
+              activeProject={activeProject}
               isRightDeckOpen={isRightDeckOpen}
               setIsRightDeckOpen={setIsRightDeckOpen}
-              cityProjectsList={cityProjectsList}
               selectAllAvailableAssets={selectAllAvailableAssets}
               clearAllSelections={clearAllSelections}
-              fundSummary={fundSummary}
               selectedFundPicks={selectedFundPicks}
               committedPicks={committedPicks}
               toggleProjectAllAssets={toggleProjectAllAssets}
