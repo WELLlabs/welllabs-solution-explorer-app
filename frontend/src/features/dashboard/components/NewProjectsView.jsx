@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import api from '@/shared/config/api';
 import fallbackSites from '@/data/fallbackSites.json';
 import { getProjectImage } from '@/data/projectImages';
 
@@ -289,17 +290,9 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
   const [fetchErr, setFetchErr]   = useState(null);
 
   useEffect(() => {
-    // Dynamic URL: Use Vite proxy locally, and absolute URL on AWS to prevent HTML routing errors
-    const url = import.meta.env.DEV 
-      ? '/api/sites' 
-      : 'https://api.climatesolutions.ai/api/sites';
-
-    fetch(url)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then(data => {
+    api.get('/sites')
+      .then(res => {
+        const data = res.data;
         if (Array.isArray(data) && data.length > 0) {
           setRawSites(data);
         } else {

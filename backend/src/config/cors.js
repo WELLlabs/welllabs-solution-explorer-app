@@ -4,6 +4,8 @@ const allowedOrigins = [
   'https://climatesolutions.ai',       // Production frontend
   'https://blr.climatesolutions.ai',   // Bangalore frontend
   'https://beta.climatesolutions.ai',  // Beta frontend
+  'https://betaapi.climatesolutions.ai', // Beta backend / origin
+  'https://api.climatesolutions.ai',   // Production API origin
 ];
 
 const corsOptions = {
