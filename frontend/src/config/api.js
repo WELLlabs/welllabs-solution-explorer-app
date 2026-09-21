@@ -1,10 +1,2 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://api.climatesolutions.ai/api',
-  withCredentials: true,
-});
-
-// console.log('🔧 API configured with baseURL:', api.defaults.baseURL);
-
-export default api;
+export * from '../shared/config/api';
+export { default } from '../shared/config/api';

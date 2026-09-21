@@ -1,24 +1,22 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../context/AuthContext';
 import { Navigate, useParams, useNavigate } from 'react-router-dom';
-import api from '../config/api';
+import { AuthContext } from '@/features/auth';
+import api from '@/shared/config/api';
 import './Dashboard.css';
-import Header from '../components/layout/Header';
-import PendingApproval from '../components/layout/PendingApproval';
-import BggIntroduction from '../components/dashboard/home/BggIntroduction';
-import Analytics from './Analytics';
-import CaseStudies from '../components/dashboard/casestudies/CaseStudies';
-import Interventions from '../components/dashboard/datalayers/Interventions';
-import FloodRiskMap from '../components/dashboard/datalayers/FloodRiskMap';
-import DataLayersView from '../components/dashboard/datalayers/DataLayersView';
-import NewProjectsView from '../components/dashboard/datalayers/NewProjectsView';
+import { Header, PendingApproval } from '@/layouts';
+import BggIntroduction from '@/features/home';
+import Analytics from '@/features/analytics';
+import CaseStudies, { Interventions } from '@/features/casestudies';
+import DataLayersView, { FloodRiskMap, NewProjectsView } from '@/features/dashboard';
 export const FIELD_PERMISSIONS = {
   'Admin': ['ALL_FIELDS'],
   'WELL Labs1': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
   'WELL Labs2': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
   'Consultant': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
   'GBA': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
-  'Donor': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support']
+  'Donor': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
+  'Funder': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
+  'Citizen': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support']
 };
 
 const Dashboard = () => {
@@ -32,7 +30,33 @@ const Dashboard = () => {
   // Custom Workspace Tabs System driven by URL path name
   const { activeTab: urlActiveTab } = useParams();
   const navigate = useNavigate();
-  const activeTab = urlActiveTab || 'home';
+  const activeTab = urlActiveTab || (user ? 'dashboard' : 'home');
+
+  // If user is already authenticated and visits /home or presses back to landing page,
+  // automatically redirect them to /dashboard so they cannot go back to pre-login screens
+  useEffect(() => {
+    if (!authLoading && user && (!urlActiveTab || urlActiveTab === 'home')) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, urlActiveTab, navigate]);
+
+  // Prevent browser back button from leaving the dashboard when logged in
+  useEffect(() => {
+    if (!user) return;
+
+    // Push dummy history entry to absorb back button
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      // Keep the user on the dashboard
+      window.history.pushState(null, '', window.location.href);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [user]);
 
   // Shocking news linking state
   const [highlightedCaseTitle, setHighlightedCaseTitle] = useState(null);
@@ -50,9 +74,10 @@ const Dashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const token = storedUser?.token || localStorage.getItem('token');
       const res = await api.get('/auth/users', {
-        headers: { Authorization: `Bearer ${storedUser.token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setAllUsers(res.data);
     } catch (error) {
@@ -62,18 +87,14 @@ const Dashboard = () => {
     }
   };
 
-
-
-
-
-
   const handleRoleChange = async (userId, newRole) => {
     setUpdatingUserId(userId);
     try {
-      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const token = storedUser?.token || localStorage.getItem('token');
       await api.put(`/auth/users/${userId}/role`,
         { role: newRole },
-        { headers: { Authorization: `Bearer ${storedUser.token}` } }
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
       await fetchUsers();
     } catch (error) {
@@ -100,12 +121,21 @@ const Dashboard = () => {
     );
   }
 
-  // No longer redirecting unauthenticated users to login
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate('/home', { replace: true });
+    }
+  };
 
   return (
-    <div className="dashboard-wrapper" style={activeTab === 'home' ? { backgroundColor: '#c9d8bd', minHeight: '100vh' } : {}}>
+    <div
+      className={`dashboard-wrapper ${activeTab === 'home' ? 'home-dashboard-wrapper' : ''}`}
+      style={{ backgroundColor: activeTab === 'home' ? '#c9d8bd' : 'var(--bg-page)', minHeight: '100vh' }}
+    >
       {/* 1. Header component */}
-      <Header user={user} onLogout={logout} />
+      <Header user={user} onLogout={handleLogout} />
 
       <main>
         {/* PENDING VIEW */}
@@ -279,6 +309,7 @@ const Dashboard = () => {
                               <option value="Consultant">Consultant</option>
                               <option value="GBA">GBA</option>
                               <option value="Donor">Donor</option>
+                              <option value="Funder">Funder</option>
                             </select>
                             {updatingUserId === u._id && <div className="inline-spinner"></div>}
                           </td>

@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const Project = require('../models/Project');
-const Well = require('../models/Well');
+const Project = require('../src/models/Project');
+const Well = require('../src/models/Well');
 
 // Helper to parse coordinate string (e.g. "12.95435900° N" or "77.59416100° E") into a float
 function parseCoordinate(val) {

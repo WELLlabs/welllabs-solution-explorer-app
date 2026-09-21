@@ -1,1 +1,158 @@
 @import "tailwindcss";
+
+:root {
+  /* Generated palette */
+  --tea-green:    #dfebd5;
+  --white:        #FFFFFF;
+  --khaki-beige:  #A99E8A;
+  --tuscan-sun:   #F2C230;
+  --turf-green:   #347745;
+  --blue-grey:    #6D9EC9;
+  --ocean-deep:   #3669A9;
+
+  /* Two additions, not from the generator */
+  --ink:          #1F2A24;
+  --ink-muted:    #6E6455;
+
+  /* Roles: use these in the CSS, not the names above */
+  --bg-page:         rgba(223, 235, 213, 0.45);
+  --bg-section:      rgba(223, 235, 213, 0.25);
+  --bg-inverse:      var(--turf-green);
+  --bg-highlight:    var(--tuscan-sun);
+
+  --text-body:       var(--ink);
+  --text-muted:      var(--ink-muted);
+  --text-heading:    var(--ink);
+  --text-brand:      var(--turf-green);
+  --text-on-dark:    var(--white);
+
+  --link:            var(--ocean-deep);
+  --link-hover:      var(--turf-green);
+
+  --btn-bg:          var(--ocean-deep);
+  --btn-text:        var(--white);
+  --btn-hover:       var(--turf-green);
+  --btn-accent-bg:   var(--tuscan-sun);
+  --btn-accent-text: var(--ink);
+
+  --border:          var(--khaki-beige);
+  --border-light:    var(--tea-green);
+}
+
+@theme {
+  --color-tea-green:    var(--tea-green);
+  --color-khaki-beige:  var(--khaki-beige);
+  --color-tuscan-sun:   var(--tuscan-sun);
+  --color-turf-green:   var(--turf-green);
+  --color-blue-grey:    var(--blue-grey);
+  --color-ocean-deep:   var(--ocean-deep);
+  --color-ink:          var(--ink);
+  --color-ink-muted:    var(--ink-muted);
+
+  --color-page:         var(--bg-page);
+  --color-section:      var(--bg-section);
+  --color-inverse:      var(--bg-inverse);
+  --color-highlight:    var(--bg-highlight);
+
+  --color-body:         var(--text-body);
+  --color-muted:        var(--text-muted);
+  --color-heading:      var(--text-heading);
+  --color-brand:        var(--text-brand);
+  --color-on-dark:      var(--text-on-dark);
+
+  --color-link:         var(--link);
+  --color-link-hover:   var(--link-hover);
+
+  --color-btn:          var(--btn-bg);
+  --color-btn-hover:    var(--btn-hover);
+  --color-accent:       var(--btn-accent-bg);
+
+  --color-border:       var(--border);
+  --color-border-light: var(--border-light);
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-body);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-heading);
+  }
+  .text-brand {
+    color: var(--text-brand);
+  }
+  a {
+    color: var(--link);
+  }
+  a:hover {
+    color: var(--link-hover);
+  }
+  .caption, figcaption, small {
+    color: var(--text-muted);
+  }
+  hr, .card {
+    border-color: var(--border);
+  }
+}
+
+.section-alt {
+  background-color: var(--bg-section);
+}
+
+.btn {
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: var(--btn-hover);
+  color: var(--white);
+}
+
+.btn-accent {
+  background-color: var(--btn-accent-bg);
+  color: var(--btn-accent-text);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-accent:hover {
+  filter: brightness(0.95);
+}
+
+.btn-secondary {
+  background-color: var(--white);
+  color: var(--ocean-deep);
+  border: 1.5px solid var(--ocean-deep);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(54, 105, 169, 0.08);
+  border-color: var(--turf-green);
+  color: var(--turf-green);
+}
