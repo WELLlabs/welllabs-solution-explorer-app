@@ -15,8 +15,20 @@ phases:
 
   build:
     commands:
-      - echo "[BUILD] Setting VITE_API_URL..."
-      - export VITE_API_URL="https://api.climatesolutions.ai/api"
+      - echo "[BUILD] Configuring VITE_API_URL based on environment..."
+      - |
+        if [ -n "${VITE_API_URL:-}" ]; then
+          echo "Using pre-set VITE_API_URL: ${VITE_API_URL}"
+        else
+          GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+          DETECTED_REF="${CODEBUILD_WEBHOOK_HEAD_REF:-${CODEBUILD_SOURCE_VERSION:-$GIT_BRANCH}}"
+          echo "Detected Ref/Branch: ${DETECTED_REF} | Project: ${PROJECT_NAME:-}"
+          if echo "${DETECTED_REF} ${PROJECT_NAME:-}" | grep -qiE "beta|dev"; then
+            export VITE_API_URL="https://betaapi.climatesolutions.ai/api"
+          else
+            export VITE_API_URL="https://api.climatesolutions.ai/api"
+          fi
+        fi
       - echo "  VITE_API_URL=$VITE_API_URL"
       - cd frontend && npm run build && cd ..
       - echo "[BUILD] Build complete."

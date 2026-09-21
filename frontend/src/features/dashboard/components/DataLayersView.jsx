@@ -90,17 +90,12 @@ const DataLayersView = () => {
   const [sitesData, setSitesData] = useState([]);
 
   useEffect(() => {
-    // Dynamic URL: Use Vite proxy locally, and absolute URL on AWS to prevent HTML routing errors
-    const url = import.meta.env.DEV
-      ? "/api/sites"
-      : "https://api.climatesolutions.ai/api/sites";
-
-    fetch(url)
-      .then((r) => (r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)))
-      .then((data) => {
+    api.get('/sites')
+      .then((res) => {
+        const data = res.data;
         if (Array.isArray(data) && data.length > 0) {
           console.log(
-            `%c🗺️ [SITES LAYER] Loaded ${data.length} sites from ${url}`,
+            `%c🗺️ [SITES LAYER] Loaded ${data.length} sites`,
             "color:#3b82f6;font-weight:bold;font-size:13px;",
           );
           console.log("All fetched sites details (full list):", data);
