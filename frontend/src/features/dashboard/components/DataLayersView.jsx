@@ -150,7 +150,9 @@ const DataLayersView = () => {
     projects: true,
   });
 
-  // ── Flood Hotspot Right-Side Projects & Funding Deck State ─────────────────
+  // ── Selected Item & Funding Deck State ─────────────────────────────────
+  // Selected item (project, well, corporation, or flood hotspot) for full details panel
+  const [selectedItem, setSelectedItem] = useState(null);
   const [selectedFundPicks, setSelectedFundPicks] = useState(new Set());
   const [isRightDeckOpen, setIsRightDeckOpen] = useState(true);
   const [showFunderModal, setShowFunderModal] = useState(false);
@@ -591,9 +593,6 @@ const DataLayersView = () => {
   const [loadingGreenspaces, setLoadingGreenspaces] = useState(false);
   const [loadingFloodHazard, setLoadingFloodHazard] = useState(false);
   const [loadingFloodingHotspots, setLoadingFloodingHotspots] = useState(false);
-
-  // Selected item (project, well, corporation, or flood hotspot) for full details panel
-  const [selectedItem, setSelectedItem] = useState(null);
 
   // Corporation counts for City-Wide BGG projects (hoisted for corporation layer popups and click handlers)
   const corpProjectCounts = useMemo(() => {
