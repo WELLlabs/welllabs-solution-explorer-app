@@ -10,6 +10,7 @@ export { default as FunderModal } from './components/map/FunderModal';
 export { default as ThreeDWalkthrough } from './components/map/ThreeDWalkthrough';
 export { default as TourLaunchButton } from './components/map/TourLaunchButton';
 export { default as MapBoundarySearch } from './components/map/MapBoundarySearch';
+export { default as FundAProjectModal } from './components/map/FundAProjectModal';
 
 // Hooks & Utils
 export { default as useBoundaryLayers } from './hooks/useBoundaryLayers';

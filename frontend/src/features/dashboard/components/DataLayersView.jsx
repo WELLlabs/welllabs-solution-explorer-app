@@ -44,6 +44,7 @@ import MapBoundarySearch from "./map/MapBoundarySearch";
 import ItemDetailsPane from "./map/ItemDetailsPane";
 import FundingDeckPanel from "./map/FundingDeckPanel";
 import FunderModal from "./map/FunderModal";
+import FundAProjectModal from "./map/FundAProjectModal";
 import useBoundaryLayers from "../hooks/useBoundaryLayers";
 
 // Re-export for external consumers / backwards compatibility
@@ -164,6 +165,10 @@ const DataLayersView = () => {
   });
   const [committedPicks, setCommittedPicks] = useState(new Set());
   const [commitSuccess, setCommitSuccess] = useState(false);
+
+  // "Fund a project" Questionnaire Modal state
+  const [showFundAProjectModal, setShowFundAProjectModal] = useState(false);
+  const [appliedFundFilters, setAppliedFundFilters] = useState(null);
 
   // Lock background scrolling when funder popup is open
   useEffect(() => {
@@ -567,6 +572,82 @@ const DataLayersView = () => {
     Central: true,
   });
   const [hotspotSearchQuery, setHotspotSearchQuery] = useState("");
+
+  // Handler for applying filters from "Fund a project" questionnaire modal (Targets Citywide BGG projects only)
+  const handleApplyFundFilters = ({ selectedCorps, selectedTypes, solveFlooding }) => {
+    setAppliedFundFilters({ selectedCorps, selectedTypes, solveFlooding });
+
+    // 1. Corporation: enable browseByCorporations with selected corporations
+    setBrowseByCorporations(true);
+    const newCorpRegions = {
+      North: selectedCorps.includes("North"),
+      South: selectedCorps.includes("South"),
+      East: selectedCorps.includes("East"),
+      West: selectedCorps.includes("West"),
+      Central: selectedCorps.includes("Central"),
+    };
+    setSelectedCorpRegions(newCorpRegions);
+
+    // 2. Citywide BGG projects only — explicitly exclude Existing Interventions
+    setShowProjects(false);
+    setShowNewProjects(true);
+
+    // 3. Flooding problem
+    if (solveFlooding === "yes") {
+      setShowNewFloodRisk(true);
+      setShowFloodingHotspots(true);
+    } else {
+      setShowNewFloodRisk(false);
+      setShowFloodingHotspots(false);
+    }
+
+    // 4. Open relevant accordion sections in sidebar (Focus on Explore Potential Projects)
+    setOpenSections({
+      happening: false,
+      risks: solveFlooding === "yes",
+      groundwater: false,
+      projects: true,
+    });
+
+    // 5. If single corporation selected, fly to its bounding box
+    if (selectedCorps.length === 1 && mapRef.current) {
+      const corpName = selectedCorps[0];
+      const corpFeat = (gbaCorporationsGeo?.features || []).find(
+        (f) => (f.properties?.name || "").toLowerCase() === corpName.toLowerCase()
+      );
+      if (corpFeat) {
+        try {
+          const bounds = L.geoJSON(corpFeat).getBounds();
+          if (bounds.isValid()) {
+            mapRef.current.flyToBounds(bounds, { padding: [40, 40], duration: 1.2 });
+          }
+        } catch (e) {
+          console.warn("Could not fly to corporation bounds:", e);
+        }
+      }
+    } else if (mapRef.current) {
+      mapRef.current.flyTo([12.9716, 77.5946], 11, { duration: 1.2 });
+    }
+  };
+
+  const handleClearFundFilters = () => {
+    setAppliedFundFilters(null);
+    setBrowseByCorporations(false);
+    setSelectedCorpRegions({
+      East: true,
+      West: true,
+      North: true,
+      South: true,
+      Central: true,
+    });
+    setShowProjects(false);
+    setShowNewProjects(false);
+    setShowNewFloodRisk(false);
+    setShowFloodingHotspots(false);
+    if (mapRef.current) {
+      mapRef.current.flyTo([12.9716, 77.5946], 11, { duration: 1 });
+    }
+  };
 
   const assemblyConst2LayerRef = useRef(null);
   const bengaluruAssemblyLayerRef = useRef(null);
@@ -1086,6 +1167,11 @@ const DataLayersView = () => {
           w.wardName.toLowerCase().includes(search) ||
           w.wellType.toLowerCase().includes(search);
 
+        if (browseByCorporations) {
+          const corp = w.corporation || w.Corporation || getCorporationForPoint(w.lat, w.lng, w.wardName || "");
+          if (corp && !selectedCorpRegions[corp]) return false;
+        }
+
         if (activeWatershedId) {
           const wsCoords = WATERSHEDS_POLYGONS[activeWatershedId].coords;
           return matchesSearch && pointInPolygon(w.lat, w.lng, wsCoords);
@@ -1110,6 +1196,11 @@ const DataLayersView = () => {
         if (enableInterventionTypologyFilter) {
           const intId = p.interventionTypologyInfo?.id || "detention";
           if (!selectedInterventionTypologies[intId]) matchesFilter = false;
+        }
+
+        if (browseByCorporations) {
+          const corp = p.corporation || p.Corporation || getCorporationForPoint(p.lat, p.lng, p.wardName || "");
+          if (corp && !selectedCorpRegions[corp]) matchesFilter = false;
         }
 
         if (activeWatershedId) {
@@ -1300,14 +1391,23 @@ const DataLayersView = () => {
         "🔄 Rendering City Wide BGG projects:",
         sitesData,
       );
-      const liveProjects = sitesData.filter(
+      const liveProjects = (sitesData && sitesData.length > 0 ? sitesData : fallbackSites).filter(
         (site) => site.latitude != null && site.longitude != null,
       );
 
       let visibleSites = liveProjects;
 
-      // If showNewProjects is false, filter by active corporation regions
-      if (!showNewProjects && browseByCorporations) {
+      // Filter by active corporation regions
+      if (appliedFundFilters?.selectedCorps) {
+        visibleSites = visibleSites.filter((site) => {
+          const corp = getCorporationForPoint(
+            site.latitude,
+            site.longitude,
+            site.corporation || site.wardName || ""
+          );
+          return appliedFundFilters.selectedCorps.includes(corp);
+        });
+      } else if (browseByCorporations) {
         visibleSites = visibleSites.filter((site) => {
           const corp = getCorporationForPoint(
             site.latitude,
@@ -1315,6 +1415,19 @@ const DataLayersView = () => {
             site.corporation || site.wardName || ""
           );
           return !!selectedCorpRegions[corp];
+        });
+      }
+
+      // Filter by site typologies (Citywide BGG projects)
+      if (appliedFundFilters?.selectedTypes) {
+        visibleSites = visibleSites.filter((site) => {
+          const typeKey = site.type === "stormdrain" ? "road" : site.type;
+          return appliedFundFilters.selectedTypes.includes(typeKey) || appliedFundFilters.selectedTypes.includes(site.type);
+        });
+      } else if (enableSiteTypologyFilter) {
+        visibleSites = visibleSites.filter((site) => {
+          const typeKey = site.type === "stormdrain" ? "road" : site.type;
+          return !!selectedSiteTypologies[typeKey] || !!selectedSiteTypologies[site.type];
         });
       }
 
@@ -1483,6 +1596,7 @@ const DataLayersView = () => {
     selectedInterventionTypologies,
     sitesData,
     activeWatershedId,
+    appliedFundFilters,
   ]);
 
   const handleSelectItem = (item) => {
@@ -1965,22 +2079,53 @@ const DataLayersView = () => {
                         </button>
                       </div>
                     )}
+                    {appliedFundFilters && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#dfebd5]/40 text-[#1F2A24] border border-[#C8D7BC]">
+                        <span>
+                          <strong className="text-[#347745]">Citywide BGG:</strong> {appliedFundFilters.selectedCorps.join(", ")} • {appliedFundFilters.selectedTypes.map((t) => t.charAt(0).toUpperCase() + t.slice(1)).join(", ")} • Flood: {appliedFundFilters.solveFlooding === "yes" ? "Yes" : "No"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleClearFundFilters}
+                          title="Reset filters"
+                          className="text-[#6E6455] hover:text-[#1F2A24] font-bold ml-1 cursor-pointer border-none bg-transparent p-0"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Enhanced Layer Search & Dropdown Box */}
-                  <MapBoundarySearch
-                    searchDropdownContainerRef={searchDropdownContainerRef}
-                    handleLocationSearch={handleLocationSearch}
-                    selectedSearchCategory={selectedSearchCategory}
-                    setSelectedSearchCategory={setSelectedSearchCategory}
-                    locationSearchQuery={locationSearchQuery}
-                    setLocationSearchQuery={setLocationSearchQuery}
-                    isSearchDropdownOpen={isSearchDropdownOpen}
-                    setIsSearchDropdownOpen={setIsSearchDropdownOpen}
-                    filteredSearchItems={filteredSearchItems}
-                    searchLayerItems={searchLayerItems}
-                    handleSelectBoundaryItem={handleSelectBoundaryItem}
-                  />
+                  {/* Right Header Actions: "Fund a project" button placed to the left of Search Bar */}
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <button
+                      type="button"
+                      id="fund-a-project-btn"
+                      onClick={() => setShowFundAProjectModal(true)}
+                      className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-[#dfebd5]/30 text-[#1F2A24] hover:text-[#347745] border border-[#C8D7BC] shadow-xs transition-colors cursor-pointer shrink-0"
+                      title="Fund a project"
+                    >
+                      <span>Fund a project</span>
+                      {appliedFundFilters && (
+                        <span className="w-2 h-2 rounded-full bg-[#347745]" title="Filter active" />
+                      )}
+                    </button>
+
+                    {/* Enhanced Layer Search & Dropdown Box */}
+                    <MapBoundarySearch
+                      searchDropdownContainerRef={searchDropdownContainerRef}
+                      handleLocationSearch={handleLocationSearch}
+                      selectedSearchCategory={selectedSearchCategory}
+                      setSelectedSearchCategory={setSelectedSearchCategory}
+                      locationSearchQuery={locationSearchQuery}
+                      setLocationSearchQuery={setLocationSearchQuery}
+                      isSearchDropdownOpen={isSearchDropdownOpen}
+                      setIsSearchDropdownOpen={setIsSearchDropdownOpen}
+                      filteredSearchItems={filteredSearchItems}
+                      searchLayerItems={searchLayerItems}
+                      handleSelectBoundaryItem={handleSelectBoundaryItem}
+                    />
+                  </div>
                 </div>
 
                 {searchError && (
@@ -2048,6 +2193,20 @@ const DataLayersView = () => {
             setCommittedPicks={setCommittedPicks}
             commitSuccess={commitSuccess}
             setCommitSuccess={setCommitSuccess}
+          />
+
+          {/* Fund a Project Questionnaire Modal (85-90% screen) */}
+          <FundAProjectModal
+            key={showFundAProjectModal ? "open" : "closed"}
+            isOpen={showFundAProjectModal}
+            onClose={() => setShowFundAProjectModal(false)}
+            onApplyFilters={handleApplyFundFilters}
+            currentFilters={appliedFundFilters || {
+              selectedCorps: ["East"],
+              selectedTypes: ["lake"],
+              solveFlooding: "yes",
+            }}
+            corpProjectCounts={corpProjectCounts}
           />
         </div>
       </div>
