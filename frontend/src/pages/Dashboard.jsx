@@ -1,13 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Navigate, useParams, useNavigate } from 'react-router-dom';
-import { AuthContext } from '@/features/auth';
-import api from '@/shared/config/api';
-import './Dashboard.css';
-import { Header, PendingApproval } from '@/layouts';
-import BggIntroduction from '@/features/home';
-import Analytics from '@/features/analytics';
-import CaseStudies, { Interventions } from '@/features/casestudies';
-import DataLayersView, { FloodRiskMap, NewProjectsView } from '@/features/dashboard';
+import { AuthContext } from '@/context/AuthContext';
+import Header from '@/components/Header';
+import PendingApproval from '@/components/PendingApproval';
+import BggIntroduction from '@/components/BggIntroduction';
+import CaseStudies from '@/components/CaseStudies';
+import Interventions from '@/components/Interventions';
+import DataLayersView from '@/components/DataLayersView';
+import NewProjectsView from '@/components/NewProjectsView';
+import UserManagement from '@/components/UserManagement';
+
+const spinnerClass = 'w-10 h-10 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4';
 export const FIELD_PERMISSIONS = {
   'Admin': ['ALL_FIELDS'],
   'WELL Labs1': ['Name of the Project', 'Location', 'Ward No', 'GBA Corporation', 'Surface Area', 'Implementation Start Date', 'Implementation Completion Date', 'Proposed By', 'Proposal Date', 'Other Stakeholders', 'Project Assets', 'Project Consultant', 'DPR', 'Diagrams', 'Cost', 'Impact', 'Donor Name', 'Donor Asset', 'Donor Support'],
@@ -23,9 +26,6 @@ const Dashboard = () => {
   const { user, loading: authLoading, logout } = useContext(AuthContext);
 
   const SHOW_PLATFORM_TAB = true;
-  const [allUsers, setAllUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [updatingUserId, setUpdatingUserId] = useState(null);
 
   // Custom Workspace Tabs System driven by URL path name
   const { activeTab: urlActiveTab } = useParams();
@@ -64,47 +64,6 @@ const Dashboard = () => {
   // Platform Permission Matrix Simulator State
   const [simulatedRole, setSimulatedRole] = useState(user?.role || 'WELL Labs1');
 
-  useEffect(() => {
-    if (user && user.role === 'Admin') {
-      fetchUsers();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchUsers = async () => {
-    try {
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const token = storedUser?.token || localStorage.getItem('token');
-      const res = await api.get('/auth/users', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      setAllUsers(res.data);
-    } catch (error) {
-      console.error('Error fetching users', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRoleChange = async (userId, newRole) => {
-    setUpdatingUserId(userId);
-    try {
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const token = storedUser?.token || localStorage.getItem('token');
-      await api.put(`/auth/users/${userId}/role`,
-        { role: newRole },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-      );
-      await fetchUsers();
-    } catch (error) {
-      console.error('Error updating role', error);
-      alert('Failed to update role');
-    } finally {
-      setUpdatingUserId(null);
-    }
-  };
-
   const handleNavigateToCase = (title) => {
     setHighlightedCaseTitle(title);
     navigate('/casestudy');
@@ -112,9 +71,9 @@ const Dashboard = () => {
 
   if (authLoading) {
     return (
-      <div className="dashboard-loading-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div className="loading-state">
-          <div className="spinner"></div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center py-[60px] px-5">
+          <div className={spinnerClass}></div>
           <p>Loading session...</p>
         </div>
       </div>
@@ -131,8 +90,7 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`dashboard-wrapper ${activeTab === 'home' ? 'home-dashboard-wrapper' : ''}`}
-      style={{ backgroundColor: activeTab === 'home' ? '#c9d8bd' : 'var(--bg-page)', minHeight: '100vh' }}
+      className={`min-h-screen text-ink font-[Inter,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif] ${activeTab === 'home' ? 'bg-[#c9d8bd]' : 'bg-page'}`}
     >
       {/* 1. Header component */}
       <Header user={user} onLogout={handleLogout} />
@@ -238,89 +196,7 @@ const Dashboard = () => {
 
         {/* 8. ADMIN USER MANAGEMENT VIEW */}
         {user?.role === 'Admin' && activeTab === 'usermanagement' && (
-          <div className="admin-section animate-fade-in">
-            <div className="section-header">
-              <div>
-                <h2>User Management</h2>
-                <p>Manage user roles and permissions for the platform</p>
-              </div>
-              <div className="stats-card">
-                <span className="stats-label">Total Users</span>
-                <span className="stats-number">{allUsers.length}</span>
-              </div>
-            </div>
-
-            <div className="users-table-container">
-              {loading ? (
-                <div className="loading-state">
-                  <div className="spinner"></div>
-                  <p>Loading users...</p>
-                </div>
-              ) : (
-                <table className="users-table">
-                  <thead>
-                    <tr>
-                      <th>User</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allUsers.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="empty-state">
-                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                          </svg>
-                          <p>No other users registered yet</p>
-                        </td>
-                      </tr>
-                    ) : (
-                      allUsers.map((u) => (
-                        <tr key={u._id}>
-                          <td>
-                            <div className="user-cell">
-                              <div className="user-avatar">
-                                {u.name.charAt(0).toUpperCase()}
-                              </div>
-                              <span className="user-name-cell">{u.name}</span>
-                            </div>
-                          </td>
-                          <td className="email-cell">{u.email}</td>
-                          <td>
-                            <div className={`role-badge role-${u.role.toLowerCase().replace(' ', '-')}`}>
-                              {u.role}
-                            </div>
-                          </td>
-                          <td>
-                            <select
-                              value={u.role}
-                              onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                              disabled={updatingUserId === u._id}
-                              className="role-select"
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="WELL Labs1">WELL Labs1</option>
-                              <option value="WELL Labs2">WELL Labs2</option>
-                              <option value="Consultant">Consultant</option>
-                              <option value="GBA">GBA</option>
-                              <option value="Donor">Donor</option>
-                              <option value="Funder">Funder</option>
-                            </select>
-                            {updatingUserId === u._id && <div className="inline-spinner"></div>}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
+          <UserManagement />
         )}
       </main>
     </div>
