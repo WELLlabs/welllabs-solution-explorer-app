@@ -169,6 +169,43 @@ const login = async (req, res) => {
   }
 };
 
+// @desc    Authenticate an administrator (hidden admin portal)
+// @route   POST /api/auth/admin/login
+const adminLogin = async (req, res) => {
+  // Same message for every failure so the response never reveals
+  // whether the email exists or whether the account is an admin.
+  const INVALID = 'Invalid admin credentials';
+
+  try {
+    const { email, password } = req.body || {};
+    if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const passwordOk = !!(user && user.password && (await bcrypt.compare(password, user.password)));
+
+    if (!passwordOk || user.role !== 'Admin') {
+      console.warn(`⚠️  Failed admin login for "${email}" from ${req.ip}`);
+      return res.status(401).json({ message: INVALID });
+    }
+
+    const token = generateToken(user._id, user.role);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    console.log(`🛡️  Admin login: ${user.email} from ${req.ip}`);
+    res.json(formatUserResponse(user, token));
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({ message: 'Server error during admin login' });
+  }
+};
+
 // @desc    Authenticate or register with Google OAuth
 // @route   POST /api/auth/google
 const googleAuth = async (req, res) => {
@@ -202,6 +239,12 @@ const googleAuth = async (req, res) => {
     let user = await User.findOne({ email: googleUserEmail.toLowerCase() });
 
     if (user) {
+      // The Google credential is not signature-verified here, so it must never
+      // grant an admin session. Admins sign in only through the admin portal.
+      if (user.role === 'Admin') {
+        return res.status(403).json({ message: 'This account must sign in with email and password.' });
+      }
+
       // Role / Persona verification: prevent logging in with a different role
       if (persona && user.role !== 'Admin' && user.isProfileComplete) {
         const userPersona = (user.persona || 'citizen').toLowerCase();
@@ -378,6 +421,98 @@ const updateUserRole = async (req, res) => {
   }
 };
 
+// Profile fields an admin may edit. Role, persona and password are deliberately
+// excluded: role comes from what the user chose at registration.
+const ADMIN_EDITABLE_FIELDS = [
+  'name',
+  'email',
+  'phone',
+  'address',
+  'organization',
+  'userType',
+  'profile',
+  'areasOfInterest',
+  'focusThemes',
+  'pastProjects',
+];
+
+// @desc    Update a user's details (Admin only)
+// @route   PUT /api/auth/users/:id
+const updateUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const body = req.body || {};
+
+    if (body.name !== undefined && !String(body.name).trim()) {
+      return res.status(400).json({ message: 'Name cannot be empty' });
+    }
+
+    if (body.email !== undefined) {
+      const email = String(body.email).toLowerCase().trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ message: 'Please enter a valid email address' });
+      }
+      const taken = await User.findOne({ email, _id: { $ne: user._id } });
+      if (taken) {
+        return res.status(400).json({ message: 'Another account already uses this email' });
+      }
+      body.email = email;
+    }
+
+    for (const field of ADMIN_EDITABLE_FIELDS) {
+      if (body[field] !== undefined) {
+        user[field] = typeof body[field] === 'string' ? body[field].trim() : body[field];
+      }
+    }
+
+    if (body.roleSpecificData && typeof body.roleSpecificData === 'object') {
+      const current = user.roleSpecificData?.toObject?.() || user.roleSpecificData || {};
+      user.roleSpecificData = {
+        ...current,
+        ...['cinNumber', 'department', 'notes'].reduce((acc, key) => {
+          if (body.roleSpecificData[key] !== undefined) acc[key] = String(body.roleSpecificData[key]).trim();
+          return acc;
+        }, {}),
+      };
+    }
+
+    const updatedUser = await user.save();
+    console.log(`✏️  Admin ${req.user.email} updated user ${updatedUser.email}`);
+    res.json({ ...formatUserResponse(updatedUser), createdAt: updatedUser.createdAt });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ message: 'Server error updating user' });
+  }
+};
+
+// @desc    Delete a user (Admin only)
+// @route   DELETE /api/auth/users/:id
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (user._id.equals(req.user._id)) {
+      return res.status(400).json({ message: 'You cannot delete your own account' });
+    }
+    if (user.role === 'Admin') {
+      return res.status(403).json({ message: 'Admin accounts cannot be deleted' });
+    }
+
+    await user.deleteOne();
+    console.log(`🗑️  Admin ${req.user.email} deleted user ${user.email}`);
+    res.json({ message: 'User deleted', _id: user._id });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ message: 'Server error deleting user' });
+  }
+};
+
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
@@ -414,10 +549,13 @@ const generateToken = (id, role) => {
 module.exports = {
   register,
   login,
+  adminLogin,
   googleAuth,
   completeProfile,
   getAllUsers,
   updateUserRole,
+  updateUser,
+  deleteUser,
   getMe,
   logout,
 };

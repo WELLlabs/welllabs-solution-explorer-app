@@ -5,6 +5,10 @@ const { corsOptions } = require('./config/cors');
 
 const app = express();
 
+// Behind one nginx proxy in production; lets req.ip (used by the admin login
+// rate limiter) be the real client IP instead of nginx's.
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors(corsOptions));
 app.use(cookieParser());
