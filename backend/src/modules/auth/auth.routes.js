@@ -5,6 +5,8 @@ const {
   register,
   login,
   adminLogin,
+  getPasswordTokenInfo,
+  setPasswordWithToken,
   googleAuth,
   completeProfile,
   getAllUsers,
@@ -37,6 +39,17 @@ const adminLoginLimiter = rateLimit({
 });
 
 router.post('/admin/login', adminLoginLimiter, adminLogin);
+
+const passwordLinkLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Too many attempts. Please try again in 15 minutes.' },
+});
+
+router.get('/password-token/:token', passwordLinkLimiter, getPasswordTokenInfo);
+router.post('/set-password', passwordLinkLimiter, setPasswordWithToken);
 
 router.post('/google', (req, res) => {
   console.log('🌐 Google auth request received');

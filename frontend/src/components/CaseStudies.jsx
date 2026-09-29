@@ -436,23 +436,25 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
 
       {/* Page Header */}
       <div className="border-b-1.5 border-[#A99E8A]/40 pb-5 text-left">
-        <h2 className="text-[26px] font-extrabold text-[#1F2A24] m-0 mb-1.5 tracking-tight">Global Case Studies</h2>
-        <p className="text-[15px] text-[#6E6455] m-0 leading-relaxed">
+        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#1F2A24] m-0 mb-1.5 tracking-tight">Global Case Studies</h2>
+        <p className="text-sm sm:text-[15px] text-[#6E6455] m-0 leading-relaxed">
           Three cities. Three flood crises solved. One proven strategy: Blue-Green-Grey infrastructure.
         </p>
       </div>
 
       {/* City Tab Switcher */}
-      <div className="flex gap-1 border-b-2 border-slate-200 pb-0 overflow-x-auto">
+      <div className="grid grid-cols-3 sm:flex gap-1 border-b-2 border-slate-200" role="tablist">
         {CASE_STUDIES.map(cs => (
           <button
             key={cs.id}
-            className={`flex items-center gap-2 px-6 py-3 bg-transparent border-none border-b-3 -mb-[2px] text-[15px] font-semibold transition-all duration-200 cursor-pointer rounded-t-lg whitespace-nowrap ${activeId === cs.id ? 'bg-slate-50' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
+            role="tab"
+            aria-selected={activeId === cs.id}
+            className={`min-w-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-transparent border-0 border-b-[3px] border-solid -mb-[2px] text-xs sm:text-sm lg:text-[15px] font-semibold transition-all duration-200 cursor-pointer rounded-t-lg ${activeId === cs.id ? 'bg-slate-50' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
             style={activeId === cs.id ? { borderBottomColor: cs.color, color: cs.color } : {}}
             onClick={() => setActiveId(cs.id)}
           >
-            <span className="text-lg">{cs.emoji}</span>
-            <span>{cs.city}</span>
+            <span className="text-xl sm:text-lg leading-none">{cs.emoji}</span>
+            <span className="max-w-full truncate">{cs.city}</span>
           </button>
         ))}
       </div>
@@ -462,12 +464,12 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
         <div className="flex flex-col gap-7 animate-[fadeInUp_0.4s_ease_both]" key={active.id}>
 
           {/* Document Hero */}
-          <div className="border-l-5 rounded-2xl p-6 sm:p-8 flex flex-col gap-5 text-left" style={{ borderLeftColor: active.color, background: active.colorLight }}>
-            <div className="flex items-center gap-5 md:flex-row flex-col text-left md:items-center items-start">
-              <span className="text-[48px] leading-none shrink-0">{active.emoji}</span>
+          <div className="border-l-5 rounded-2xl p-5 sm:p-8 flex flex-col gap-5 text-left" style={{ borderLeftColor: active.color, background: active.colorLight }}>
+            <div className="flex items-center gap-3 sm:gap-5 md:flex-row flex-col text-left md:items-center items-start">
+              <span className="text-[36px] sm:text-[48px] leading-none shrink-0">{active.emoji}</span>
               <div>
                 <div className="text-[13px] font-bold tracking-wider uppercase mb-1" style={{ color: active.color }}>{active.programme}</div>
-                <h2 className="text-2xl font-extrabold text-[#1F2A24] m-0 mb-1.5 tracking-tight">{active.city}: {active.programme}</h2>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-[#1F2A24] m-0 mb-1.5 tracking-tight">{active.city}: {active.programme}</h2>
                 <div className="text-sm text-[#6E6455] font-medium">📍 {active.project}</div>
               </div>
             </div>
@@ -484,7 +486,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-black/7 pt-5">
               {active.heroStats.map((s, i) => (
                 <div key={i} className="flex flex-col gap-1 text-left">
-                  <div className="text-[26px] font-extrabold leading-tight" style={{ color: active.color }}>{s.value}</div>
+                  <div className="text-xl sm:text-[26px] font-extrabold leading-tight" style={{ color: active.color }}>{s.value}</div>
                   <div className="text-xs text-slate-500 font-medium leading-normal">{s.label}</div>
                 </div>
               ))}
@@ -527,7 +529,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
           </div>
 
           {/* Measured Outcomes Table */}
-          <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-7 md:px-8 text-left shadow-sm">
+          <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-5 sm:p-7 md:px-8 text-left shadow-sm">
             <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">📊 Measured Outcomes</h3>
             <div className="overflow-x-auto rounded-xl border border-[#C8D7BC]/70">
               <table className="w-full border-collapse text-sm">
@@ -552,7 +554,7 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
           </div>
 
           {/* Sources & References */}
-          <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-7 md:px-8 flex flex-col gap-4 text-left shadow-sm">
+          <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-5 sm:p-7 md:px-8 flex flex-col gap-4 text-left shadow-sm">
             <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">📚 Sources & References</h3>
             <ul className="list-none p-0 m-0 flex flex-col gap-2 text-left">
               {active.sources.map((src, i) => (

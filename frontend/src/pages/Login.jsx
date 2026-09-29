@@ -189,7 +189,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-x-hidden font-sans select-none bg-gradient-to-b from-[#C8D7BC]/40 via-[#f2f6ee] to-[#FFFFFF]">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-x-hidden font-sans select-none bg-gradient-to-b from-[#C8D7BC]/40 via-[#f2f6ee] to-[#FFFFFF]">
       {/* ========================================================================= */}
       {/* ATMOSPHERIC BACKGROUND: TOPOGRAPHICAL CONTOURS & GIS HYDROLOGY ELEMENTS */}
       {/* ========================================================================= */}
@@ -261,19 +261,19 @@ const Login = () => {
         </svg>
 
         {/* Subtle GIS Architectural Grid Crosshairs & Coordinates */}
-        <div className="absolute top-12 left-12 text-[#6E6455]/40 font-mono text-[11px] select-none flex items-center gap-1.5">
+        <div className="absolute top-12 left-12 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
           <span className="text-base leading-none text-[#347745]/50">+</span>
           <span>12.9716° N, 77.5946° E</span>
         </div>
-        <div className="absolute top-16 right-16 text-[#6E6455]/40 font-mono text-[11px] select-none flex items-center gap-1.5">
+        <div className="absolute top-16 right-16 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
           <span className="text-base leading-none text-[#3669A9]/50">+</span>
           <span>ELEV. 920M · BENGALURU WATERSHED</span>
         </div>
-        <div className="absolute bottom-12 left-16 text-[#6E6455]/40 font-mono text-[11px] select-none flex items-center gap-1.5">
+        <div className="absolute bottom-12 left-16 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
           <span className="text-base leading-none text-[#347745]/50">+</span>
           <span>BGG INFRASTRUCTURE PLATFORM</span>
         </div>
-        <div className="absolute bottom-14 right-14 text-[#6E6455]/40 font-mono text-[11px] select-none flex items-center gap-1.5">
+        <div className="absolute bottom-14 right-14 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
           <span className="text-base leading-none text-[#F2C230]/70">+</span>
           <span>CITIZEN HYDROLOGY INITIATIVE</span>
         </div>
@@ -286,11 +286,11 @@ const Login = () => {
       {/* ========================================================================= */}
       {/* MAIN FROSTED GLASS CONTAINER */}
       {/* ========================================================================= */}
-      <div className="relative z-10 w-full max-w-[500px] my-6 transition-all duration-300">
-        <div className="relative bg-white/95 backdrop-blur-2xl rounded-[32px] p-6 sm:p-9 shadow-[0_25px_60px_-15px_rgba(52,119,69,0.14)] border border-[#C8D7BC]/80 max-h-[92vh] overflow-y-auto">
+      <div className={`relative z-10 w-full ${mode === 'signin' ? 'max-w-[420px]' : 'max-w-[480px]'} my-3 sm:my-6 transition-all duration-300`}>
+        <div className="relative bg-white/95 backdrop-blur-2xl rounded-3xl sm:rounded-[28px] p-5 sm:p-7 shadow-[0_25px_60px_-15px_rgba(52,119,69,0.14)] border border-[#C8D7BC]/80 max-h-[94vh] overflow-y-auto">
 
           {/* Back to Role Selection Button */}
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#C8D7BC]/40">
+          <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[#C8D7BC]/40">
             <button
               type="button"
               onClick={() => navigate('/home', { replace: true })}
@@ -303,21 +303,21 @@ const Login = () => {
               </svg>
               <span>Change Role</span>
             </button>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#1F2A24] bg-[#F2C230] px-3 py-1 rounded-full shadow-2xs border border-[#F2C230]/80">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#1F2A24] bg-[#F2C230] px-2.5 sm:px-3 py-1 rounded-full shadow-2xs border border-[#F2C230]/80 whitespace-nowrap">
               Role: {personaConfig.label}
             </span>
           </div>
 
           {/* Heading and Subtitle */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl sm:text-[26px] font-extrabold text-[#1F2A24] tracking-tight leading-tight">
+          <div className="text-center mb-5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-[#1F2A24] tracking-tight leading-tight">
               {mode === 'signin'
                 ? 'Sign in with email'
                 : mode === 'google_complete'
                 ? 'Complete your profile'
                 : `Register as ${personaConfig.label}`}
             </h1>
-            <p className="text-xs sm:text-[13px] text-[#6E6455] mt-1.5 leading-relaxed max-w-[380px] mx-auto">
+            <p className="text-xs sm:text-[13px] text-[#6E6455] mt-1.5 leading-relaxed max-w-[340px] mx-auto">
               {mode === 'signin'
                 ? `Sign in as ${personaConfig.label} to access Bengaluru’s flood maps and resilience projects.`
                 : mode === 'google_complete'
@@ -339,7 +339,7 @@ const Login = () => {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 select-text">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5 select-text">
             {/* Google Verified Notice Banner if in google_complete mode */}
             {mode === 'google_complete' && (
               <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
@@ -370,7 +370,7 @@ const Login = () => {
                     placeholder="e.g. Ramesh Kumar"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                   />
                 </div>
               </div>
@@ -397,7 +397,7 @@ const Login = () => {
                   placeholder="Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all ${
+                  className={`w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all ${
                     mode === 'google_complete' ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                 />
@@ -425,7 +425,7 @@ const Login = () => {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                   />
                   <button
                     type="button"
@@ -466,7 +466,7 @@ const Login = () => {
             {/* EXTENDED FIELDS (Only displayed during Register / Onboarding) */}
             {/* ============================================================= */}
             {mode !== 'signin' && (
-              <div className="space-y-4 pt-1 border-t border-slate-100">
+              <div className="space-y-3 sm:space-y-3.5 pt-3 border-t border-slate-100">
                 {/* User Type Dropdown (Filtered strictly based on role selected in dashboard) */}
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
@@ -477,7 +477,7 @@ const Login = () => {
                       required
                       value={userType}
                       onChange={(e) => setUserType(e.target.value)}
-                      className="w-full py-3 px-3.5 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all cursor-pointer text-sm text-[#1F2A24]"
+                      className="w-full py-2.5 sm:py-3 px-3.5 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all cursor-pointer text-base sm:text-sm text-[#1F2A24]"
                     >
                       {personaConfig.userTypes.map((type) => (
                         <option key={type} value={type}>
@@ -512,7 +512,7 @@ const Login = () => {
                       placeholder="e.g. Bangalore Climate Foundation"
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                     />
                   </div>
                 </div>
@@ -541,7 +541,7 @@ const Login = () => {
                             cinNumber: e.target.value.toUpperCase(),
                           })
                         }
-                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all text-sm text-[#1F2A24] font-mono placeholder:text-[#6E6455]/60"
+                        className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all text-[#1F2A24] font-mono placeholder:text-[#6E6455]/60"
                       />
                     </div>
                     <p className="text-[10.5px] text-slate-400 mt-1 pl-1">
@@ -568,7 +568,7 @@ const Login = () => {
                         placeholder="+91 9876543210"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                        className="w-full pl-9 pr-3 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                       />
                     </div>
                   </div>
@@ -590,7 +590,7 @@ const Login = () => {
                         placeholder="e.g. Indiranagar, Bengaluru"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                        className="w-full pl-9 pr-3 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                       />
                     </div>
                   </div>
@@ -607,7 +607,7 @@ const Login = () => {
                     placeholder="e.g. Lead Sustainability Officer, Landscape Architect, Citizen Activist"
                     value={profile}
                     onChange={(e) => setProfile(e.target.value)}
-                    className="w-full px-3.5 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                    className="w-full px-3.5 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                   />
                 </div>
 
@@ -633,7 +633,7 @@ const Login = () => {
                       placeholder="e.g. Lakes & Wetlands, Bioswales, Groundwater Recharge"
                       value={areasOfInterest}
                       onChange={(e) => setAreasOfInterest(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                     />
                   </div>
                 </div>
@@ -656,7 +656,7 @@ const Login = () => {
                       placeholder="e.g. Flood Mitigation, Water Security, Urban Ecology"
                       value={focusThemes}
                       onChange={(e) => setFocusThemes(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl bg-[#f2f4f7] text-base sm:text-sm hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all"
                     />
                   </div>
                 </div>
@@ -672,7 +672,7 @@ const Login = () => {
                     placeholder="Describe your previous climate, urban, or infrastructure projects..."
                     value={pastProjects}
                     onChange={(e) => setPastProjects(e.target.value)}
-                    className="w-full p-3 rounded-xl bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all resize-none"
+                    className="w-full p-3 rounded-xl text-base sm:text-sm bg-[#f2f4f7] hover:bg-[#ebedf1] focus:bg-white focus:ring-2 focus:ring-[#3669A9]/30 focus:border-[#3669A9] border border-[#A99E8A]/30 transition-all resize-none"
                   />
                 </div>
               </div>
@@ -683,7 +683,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 px-6 rounded-xl bg-[#3669A9] hover:bg-[#347745] active:scale-[0.99] text-white font-bold text-sm tracking-wide shadow-md shadow-[#3669A9]/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="w-full py-3 px-6 rounded-xl bg-[#3669A9] hover:bg-[#347745] active:scale-[0.99] text-white font-bold text-sm tracking-wide shadow-md shadow-[#3669A9]/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {submitting ? (
                   <span>Processing...</span>
@@ -699,7 +699,7 @@ const Login = () => {
           </form>
 
           {/* Divider: "Or sign in with" */}
-          <div className="relative my-5 flex items-center justify-center">
+          <div className="relative my-4 flex items-center justify-center">
             <div className="border-t border-[#A99E8A]/30 w-full"></div>
             <span className="bg-white/90 px-3 text-[11px] font-medium text-[#6E6455] uppercase tracking-wider shrink-0">
               Or sign in with
@@ -739,7 +739,7 @@ const Login = () => {
           </div>
 
           {/* Footer toggle: Switch between Sign in and Register */}
-          <div className="mt-5 text-center text-xs text-[#6E6455]">
+          <div className="mt-4 text-center text-xs text-[#6E6455] leading-relaxed">
             {mode === 'signin' ? (
               <p>
                 Don&apos;t have an account yet?{' '}

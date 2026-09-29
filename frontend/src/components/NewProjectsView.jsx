@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import api from '@/utils/api';
 import fallbackSites from '@/data/fallbackSites.json';
@@ -276,9 +277,8 @@ const TABS = [
   ['assets', 'Assets and Timelines'],
   ['impact', 'Impact'],
   ['funding', 'Funding'],
-  ['agency', 'Agency'],
-  ['docs', 'Docs'],
-  ['consultants', 'Find Consultants']
+  ['agency', 'Find Consultants'],
+  ['docs', 'Docs']
 ];
 
 const NewProjectsView = ({ initialProjectId, onBack }) => {
@@ -341,6 +341,15 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
   const [openAccordions, setOpenAccordions] = useState(new Set(['m-vwba']));
   const [searchText, setSearchText] = useState('');
   const [showCommitDialog, setShowCommitDialog] = useState(false);
+
+  useEffect(() => {
+    if (!showCommitDialog) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showCommitDialog]);
   const [simulationRainfall, setSimulationRainfall] = useState(90);
 
   // Once data loads, set the initial selected project
@@ -932,9 +941,9 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
         }
 
         return (
-          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 items-start text-left animate-[fadeInUp_0.3s_ease-out_forwards]">
+          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 md:gap-8 items-start text-left animate-[fadeInUp_0.3s_ease-out_forwards]">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="w-full max-w-[200px] h-[300px] rounded-2xl overflow-hidden border border-slate-200 mx-auto shrink-0">{tankSVG}</div>
+              <div className="w-full max-w-[150px] h-[210px] md:max-w-[200px] md:h-[300px] rounded-2xl overflow-hidden border border-slate-200 mx-auto shrink-0">{tankSVG}</div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--ink-2)', marginTop: '8px', textAlign: 'center' }}>
                 <b>{Math.round(currentFundedPct * 100)}%</b> committed {fundingMode === 'assets' && picksSum > 0 ? <span>+ <b>{Math.round(addedFundedPct * 100)}%</b> selected</span> : ''}
               </div>
@@ -1224,26 +1233,6 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
           </div>
         );
 
-      case 'consultants':
-        return (
-          <div className="animate-[fadeInUp_0.3s_ease-out_forwards] text-left">
-            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm flex flex-col items-center justify-center min-h-[300px]">
-              <div className="w-16 h-16 rounded-full bg-[#C8D7BC]/30 text-[#347745] flex items-center justify-center text-2xl mb-4">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-[#1F2A24] mb-2">No consultants found</h3>
-              <p className="text-sm text-[#6E6455] max-w-md leading-relaxed m-0">
-                No technical consultants or implementation partners are currently listed for this project.
-              </p>
-            </div>
-          </div>
-        );
-
       default:
         return null;
     }
@@ -1279,7 +1268,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
         {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#C8D7BC]/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-[#F2C230]/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-9 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-7 sm:pb-9 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 lg:gap-8 relative z-10">
           <div className="text-left max-w-2xl">
             {onBack && (
               <button
@@ -1292,7 +1281,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
             <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-[#C8D7BC] bg-white/10 border border-white/20 px-3 py-1 rounded-full mb-4">
               🌊 Corporate water stewardship · Bengaluru
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
               Fund flood-mitigation interventions,{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F2C230] to-[#C8D7BC]">
                 asset by asset.
@@ -1302,15 +1291,15 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               Each intervention is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.
             </p>
           </div>
-          <div className="flex gap-4 flex-wrap text-left shrink-0">
+          <div className="grid grid-cols-2 w-full sm:w-auto sm:flex gap-3 sm:gap-4 sm:flex-wrap text-left shrink-0">
             {[
               { v: totalProjects, l: 'Projects listed' },
               { v: `${(totalVwb / 1e6).toFixed(2)}M m³`, l: 'Annual VWB' },
               { v: `₹${(totalCost / 100).toFixed(1)} Cr`, l: 'Total cost' },
               { v: totalPeople.toLocaleString('en-IN'), l: 'People in scope' },
             ].map(({ v, l }) => (
-              <div key={l} className="flex flex-col text-left bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-5 py-4 min-w-[100px]">
-                <b className="font-bold text-xl md:text-2xl text-white tracking-tight">{v}</b>
+              <div key={l} className="flex flex-col text-left bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 min-w-[100px]">
+                <b className="font-bold text-lg sm:text-xl md:text-2xl text-white tracking-tight">{v}</b>
                 <span className="font-mono text-[10px] tracking-wider uppercase text-[#C8D7BC] mt-1">{l}</span>
               </div>
             ))}
@@ -1319,17 +1308,17 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
       </section>
 
       {/* Main app content - full width single project details */}
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-7 pb-14">
+      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-7 pb-10 sm:pb-14">
         <div className="w-full">
           {/* Main details panel */}
           <section className="bg-white rounded-3xl border border-[#C8D7BC]/80 shadow-sm overflow-hidden text-left flex flex-col w-full">
 
             {/* Panel header */}
-            <div className="px-7 pt-7 pb-0 bg-white">
+            <div className="px-4 sm:px-7 pt-5 sm:pt-7 pb-0 bg-white">
               <div className="flex justify-between items-start flex-wrap gap-4 mb-5">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#1F2A24] m-0 tracking-tight">{p.name}</h2>
-                  <div className="text-sm text-[#6E6455] font-medium mt-1 flex items-center gap-1.5">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#1F2A24] m-0 tracking-tight">{p.name}</h2>
+                  <div className="text-sm text-[#6E6455] font-medium mt-1 flex items-start sm:items-center gap-1.5">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#6E6455] shrink-0">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                       <circle cx="12" cy="10" r="3"/>
@@ -1356,22 +1345,25 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                 {TABS.map(([k, label]) => (
                   <button
                     key={k}
-                    className={`text-[13px] font-semibold px-4 py-2.5 whitespace-nowrap rounded-t-xl border-b-2 -mb-[1px] cursor-pointer transition-all duration-150 bg-transparent ${
+                    className={`text-[13px] font-semibold px-3 sm:px-4 py-2.5 whitespace-nowrap rounded-t-xl border-b-2 -mb-[1px] cursor-pointer transition-all duration-150 bg-transparent ${
                       activeTab === k
                         ? 'text-[#347745] border-b-[#347745] font-bold'
                         : 'text-[#6E6455] border-transparent hover:text-[#1F2A24]'
                     }`}
-                    onClick={() => setActiveTab(k)}
+                    onClick={(e) => {
+                      setActiveTab(k);
+                      e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                    }}
                   >
                     {label}
                   </button>
                 ))}
               </nav>
-              <div className="h-px bg-[#C8D7BC]/60 -mx-7"></div>
+              <div className="h-px bg-[#C8D7BC]/60 -mx-4 sm:-mx-7"></div>
             </div>
 
             {/* Panel content */}
-            <div className="p-7 text-left">
+            <div className="p-4 sm:p-7 text-left">
               {renderActivePanel()}
             </div>
           </section>
@@ -1380,16 +1372,16 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
       </main>
 
       {/* Commitment modal */}
-      {showCommitDialog && (
+      {showCommitDialog && createPortal(
         <div
-          className="fixed inset-0 bg-[#1F2A24]/50 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-[#1F2A24]/50 backdrop-blur-md z-[3000] flex items-center justify-center p-3 sm:p-4"
           onClick={() => setShowCommitDialog(false)}
         >
           <div
-            className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[520px] overflow-hidden animate-[fadeInUp_0.25s_ease-out_forwards] border border-[#C8D7BC]"
+            className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[520px] max-h-[calc(100vh-24px)] flex flex-col overflow-hidden animate-[fadeInUp_0.25s_ease-out_forwards] border border-[#C8D7BC]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-7 pt-6 pb-5 bg-gradient-to-br from-[#C8D7BC]/20 to-white relative text-left">
+            <div className="shrink-0 px-5 sm:px-7 pt-5 sm:pt-6 pb-4 sm:pb-5 bg-gradient-to-br from-[#C8D7BC]/20 to-white relative text-left">
               <div className="font-mono text-[10px] uppercase tracking-widest text-[#6E6455] mb-1">Funding term sheet</div>
               <h3 className="text-xl font-bold text-[#1F2A24] m-0">Review your commitment</h3>
               <button
@@ -1398,12 +1390,13 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                 aria-label="Close"
               >×</button>
             </div>
-            <div className="h-px bg-[#C8D7BC]/60"></div>
-            <div className="p-7 text-left">
+            <div className="shrink-0 h-px bg-[#C8D7BC]/60"></div>
+            <div className="p-5 sm:p-7 text-left overflow-y-auto">
               {renderCommitBody()}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

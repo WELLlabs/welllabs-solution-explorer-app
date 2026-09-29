@@ -313,7 +313,7 @@ const BeforeAfterSlider = ({ pair }) => {
 
         {/* Drag Interaction Prompt */}
         {!isDragging && position === 50 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium px-3.5 py-1 rounded-full pointer-events-none shadow-sm flex items-center gap-1.5 animate-pulse z-10">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-medium px-3 sm:px-3.5 py-1 rounded-full whitespace-nowrap pointer-events-none shadow-sm flex items-center gap-1.5 animate-pulse z-10">
             <span>⟵ Drag stick to compare ⟶</span>
           </div>
         )}
@@ -354,7 +354,7 @@ const BeforeAfterSection = () => {
   const active = SLIDER_PAIRS.find(p => p.id === activeSlider) || SLIDER_PAIRS[0];
 
   return (
-    <div className="bg-white border border-slate-200 rounded-[24px] p-6 md:p-8 flex flex-col gap-6 shadow-sm text-left">
+    <div className="bg-white border border-slate-200 rounded-[24px] p-4 sm:p-6 md:p-8 flex flex-col gap-5 sm:gap-6 shadow-sm text-left">
       <div className="text-left">
         <h3 className="text-lg font-bold text-[#1F2A24] m-0 mb-1 flex items-center gap-2">
           <span>Transformation: Before &amp; After</span>
@@ -370,7 +370,7 @@ const BeforeAfterSection = () => {
           <button
             key={pair.id}
             onClick={() => setActiveSlider(pair.id)}
-            className={`text-[13.5px] font-bold px-4 py-2.5 cursor-pointer transition-colors duration-200 bg-transparent border-b-2 -mb-[2px] whitespace-nowrap flex items-center gap-2 ${activeSlider === pair.id ? 'text-[#3669A9] border-[#3669A9] bg-[#C8D7BC]/30 rounded-t-lg' : 'text-[#6E6455] hover:text-[#1F2A24] border-transparent'}`}
+            className={`text-[13px] sm:text-[13.5px] font-bold px-3 sm:px-4 py-2.5 cursor-pointer transition-colors duration-200 bg-transparent border-b-2 -mb-[2px] whitespace-nowrap flex items-center gap-2 ${activeSlider === pair.id ? 'text-[#3669A9] border-[#3669A9] bg-[#C8D7BC]/30 rounded-t-lg' : 'text-[#6E6455] hover:text-[#1F2A24] border-transparent'}`}
           >
             <span>{pair.label}</span>
           </button>
@@ -410,7 +410,7 @@ const Interventions = () => {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 animate-[fadeInUp_0.4s_ease_both]">
+    <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-6 flex flex-col gap-6 sm:gap-8 animate-[fadeInUp_0.4s_ease_both]">
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(12px); }
@@ -419,7 +419,7 @@ const Interventions = () => {
       `}</style>
 
       <div className="text-center flex flex-col items-center w-full">
-        <h2 className="text-[#1F2A24] text-3xl font-black tracking-tight m-0">K100 Citizens’ Waterway</h2>
+        <h2 className="text-[#1F2A24] text-2xl sm:text-3xl font-black tracking-tight m-0">K100 Citizens’ Waterway</h2>
         <h3 className="text-base font-semibold text-[#6E6455] mt-1 mb-2 text-center">From open sewer to citizens’ waterway</h3>
         <p className="text-sm leading-relaxed text-[#1F2A24] max-w-full mt-2 mx-auto text-center">
           A 9.6 km pilot project that restores a neglected storm-water drain (rajakaluve) as a working part of Bengaluru’s water ecosystem, and as a vibrant public space. Formerly carrying up to 135 million litres of sewage a day from Majestic bus stand to Bellandur Lake, the drain was desilted, intercepted, and reopened as a stone-edged, planted public waterway.
@@ -427,9 +427,9 @@ const Interventions = () => {
       </div>
 
       {/* 2. Top KPIs stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-2">
         {K100_STATS.map((stat, idx) => (
-          <div key={idx} className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-4.5 flex flex-col justify-between shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-left">
+          <div key={idx} className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-3.5 sm:p-4.5 flex flex-col justify-between shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-left">
             <div className="flex flex-col gap-0.5">
               <div className="text-lg font-black text-[#1F2A24] leading-tight">{stat.value}</div>
               <div className="text-[10px] font-bold text-[#6E6455] uppercase tracking-wider leading-none mt-1">{stat.label}</div>
@@ -440,29 +440,29 @@ const Interventions = () => {
       </div>
 
       {/* 3. Main Timeline Workspace */}
-      <h3 className="text-2xl font-bold text-[#1F2A24] text-center mt-4 mb-6 w-full">Timeline</h3>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+      <h3 className="text-xl sm:text-2xl font-bold text-[#1F2A24] text-center mt-2 sm:mt-4 mb-0 sm:mb-6 w-full">Timeline</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
         {/* Left pane: Interactive timeline tree */}
-        <div className="flex flex-col gap-5 relative pl-6">
-          <div className="absolute top-6 bottom-6 left-[31px] w-0.5 bg-slate-200 z-1"></div>
+        <div className="flex flex-col gap-3 sm:gap-5 relative pl-1 sm:pl-6">
+          <div className="absolute top-6 bottom-6 left-[11px] sm:left-[31px] w-0.5 bg-slate-200 z-1"></div>
           {K100_TIMELINE_DATA.map((item) => {
             const isSelected = item.yearKey === selectedPhase;
             return (
               <div 
                 key={item.yearKey}
-                className="flex items-center gap-5 cursor-pointer z-2 relative transition-all duration-250 hover:translate-x-1"
+                className="flex items-center gap-3 sm:gap-5 cursor-pointer z-2 relative transition-all duration-250 hover:translate-x-1"
                 onClick={() => setSelectedPhase(item.yearKey)}
               >
                 <div className={getDotClass(item, isSelected)}>
                   <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-transparent'}`}></span>
                 </div>
-                <div className={`flex-1 bg-white border rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm transition-all duration-250 ${isSelected ? 'border-slate-300 bg-slate-50 shadow-md' : 'border-slate-100'}`}>
+                <div className={`flex-1 min-w-0 bg-white border rounded-2xl px-3.5 sm:px-5 py-3 sm:py-4 flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-2 sm:gap-4 shadow-sm transition-all duration-250 ${isSelected ? 'border-slate-300 bg-slate-50 shadow-md' : 'border-slate-100'}`}>
                   <span className={`text-xs font-extrabold px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${isSelected ? 'bg-slate-200 text-slate-900' : 'bg-slate-100 text-slate-500'}`}>{item.yearKey}</span>
-                  <div className="flex flex-col flex-1 min-w-0 text-left">
+                  <div className="flex flex-col w-full sm:w-auto sm:flex-1 min-w-0 text-left order-last sm:order-none">
                     <strong className="text-sm font-bold text-slate-900">{item.phase}</strong>
                     <span className="text-[12.5px] text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">{item.title}</span>
                   </div>
-                  <span className={`text-[9px] font-bold tracking-wider px-2 py-1 rounded uppercase whitespace-nowrap ${item.statusClass === 'historical' ? 'text-red-600 bg-red-100' : item.statusClass === 'planning' ? 'text-amber-600 bg-amber-100' : item.statusClass === 'active' ? 'text-blue-600 bg-blue-100' : 'text-emerald-600 bg-emerald-100'}`}>{item.status}</span>
+                  <span className={`ml-auto sm:ml-0 text-[9px] font-bold tracking-wider px-2 py-1 rounded uppercase whitespace-nowrap ${item.statusClass === 'historical' ? 'text-red-600 bg-red-100' : item.statusClass === 'planning' ? 'text-amber-600 bg-amber-100' : item.statusClass === 'active' ? 'text-blue-600 bg-blue-100' : 'text-emerald-600 bg-emerald-100'}`}>{item.status}</span>
                 </div>
               </div>
             );
@@ -471,7 +471,7 @@ const Interventions = () => {
 
         {/* Right pane: Expanded detail visualization */}
         <div className="lg:sticky lg:top-[100px] w-full">
-          <div className={`bg-white border border-slate-200 rounded-[24px] p-7 md:p-8 shadow-sm flex flex-col gap-5 text-left border-l-[6px] ${activePhase.colorTheme === 'red' ? 'border-l-red-500' : activePhase.colorTheme === 'orange' ? 'border-l-orange-500' : activePhase.colorTheme === 'blue' ? 'border-l-blue-500' : activePhase.colorTheme === 'purple' ? 'border-l-purple-500' : 'border-l-emerald-500'}`}>
+          <div className={`bg-white border border-slate-200 rounded-[24px] p-5 sm:p-7 md:p-8 shadow-sm flex flex-col gap-5 text-left border-l-[6px] ${activePhase.colorTheme === 'red' ? 'border-l-red-500' : activePhase.colorTheme === 'orange' ? 'border-l-orange-500' : activePhase.colorTheme === 'blue' ? 'border-l-blue-500' : activePhase.colorTheme === 'purple' ? 'border-l-purple-500' : 'border-l-emerald-500'}`}>
             <div className="flex flex-col gap-2 items-start border-b border-slate-100 pb-4 w-full text-left">
               <div className="text-lg font-black text-slate-900 bg-slate-100 px-3.5 py-1 rounded-lg whitespace-nowrap self-start">{activePhase.yearKey}</div>
               <h3 className="text-lg font-bold text-slate-900 m-0 tracking-tight text-left">{activePhase.title}</h3>
@@ -496,21 +496,21 @@ const Interventions = () => {
       <BeforeAfterSection />
 
       {/* 5. Dual-Layer Asset Explorer */}
-      <div className="bg-white border border-[#C8D7BC]/80 rounded-[24px] p-6 md:p-8 flex flex-col gap-6 shadow-sm text-left">
+      <div className="bg-white border border-[#C8D7BC]/80 rounded-[24px] p-4 sm:p-6 md:p-8 flex flex-col gap-5 sm:gap-6 shadow-sm text-left">
         <div className="text-left">
           <h3 className="text-lg font-bold text-[#1F2A24] m-0 mb-1">K100 System Layer Assets</h3>
           <p className="text-[13.5px] text-[#6E6455] m-0 leading-relaxed">The pilot produced two layers of assets: a visible public realm on top and a hidden hydraulic system keeping the water clean.</p>
         </div>
 
-        <div className="flex gap-3 border-b-2 border-[#C8D7BC]/40 pb-0.5">
+        <div className="flex gap-1 sm:gap-3 border-b-2 border-[#C8D7BC]/40 pb-0.5 overflow-x-auto">
           <button
-            className={`text-[13.5px] font-bold px-4 py-2.5 cursor-pointer transition-colors duration-200 bg-transparent border-b-2 -mb-[2px] ${selectedAssetTab === 'publicRealm' ? 'text-[#3669A9] border-[#3669A9]' : 'text-[#6E6455] hover:text-[#1F2A24] border-transparent'}`}
+            className={`text-[13px] sm:text-[13.5px] font-bold px-3 sm:px-4 py-2.5 whitespace-nowrap cursor-pointer transition-colors duration-200 bg-transparent border-b-2 -mb-[2px] ${selectedAssetTab === 'publicRealm' ? 'text-[#3669A9] border-[#3669A9]' : 'text-[#6E6455] hover:text-[#1F2A24] border-transparent'}`}
             onClick={() => setSelectedAssetTab('publicRealm')}
           >
             Public Realm
           </button>
           <button
-            className={`text-[13.5px] font-bold px-4 py-2.5 cursor-pointer transition-colors duration-200 bg-transparent border-b-2 -mb-[2px] ${selectedAssetTab === 'hydraulicSystem' ? 'text-[#3669A9] border-[#3669A9]' : 'text-[#6E6455] hover:text-[#1F2A24] border-transparent'}`}
+            className={`text-[13px] sm:text-[13.5px] font-bold px-3 sm:px-4 py-2.5 whitespace-nowrap cursor-pointer transition-colors duration-200 bg-transparent border-b-2 -mb-[2px] ${selectedAssetTab === 'hydraulicSystem' ? 'text-[#3669A9] border-[#3669A9]' : 'text-[#6E6455] hover:text-[#1F2A24] border-transparent'}`}
             onClick={() => setSelectedAssetTab('hydraulicSystem')}
           >
             Hydraulic System

@@ -84,7 +84,7 @@ export const MAP_TOUR_STEPS = [
   // 6. Screenshot 6 — Flooding Hotspot Map & Catchment Delineation
   {
     id: "flood-hotspot-map",
-    targets: ["hotspot-popup", "hotspot-map-target"],
+    targets: ["hotspot-popup", "hotspot-map-target", "map-view"],
     placement: "right",
     title: "Do you want to explore which projects can be taken up to tackle a particular flooding hotspot?",
     body: [

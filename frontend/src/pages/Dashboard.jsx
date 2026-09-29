@@ -8,7 +8,9 @@ import CaseStudies from '@/components/CaseStudies';
 import Interventions from '@/components/Interventions';
 import DataLayersView from '@/components/DataLayersView';
 import NewProjectsView from '@/components/NewProjectsView';
-import UserManagement from '@/components/UserManagement';
+import AdminPanel from '@/components/AdminPanel';
+
+const PAGES_WITH_BACK = ['casestudy', 'interventions', 'newprojects', 'usermanagement'];
 
 const spinnerClass = 'w-10 h-10 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4';
 export const FIELD_PERMISSIONS = {
@@ -40,24 +42,6 @@ const Dashboard = () => {
     }
   }, [user, authLoading, urlActiveTab, navigate]);
 
-  // Prevent browser back button from leaving the dashboard when logged in
-  useEffect(() => {
-    if (!user) return;
-
-    // Push dummy history entry to absorb back button
-    window.history.pushState(null, '', window.location.href);
-
-    const handlePopState = () => {
-      // Keep the user on the dashboard
-      window.history.pushState(null, '', window.location.href);
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [user]);
-
   // Shocking news linking state
   const [highlightedCaseTitle, setHighlightedCaseTitle] = useState(null);
 
@@ -79,6 +63,15 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  const handleBack = () => {
+    // react-router keeps the in-app history position in history.state.idx
+    if ((window.history.state?.idx ?? 0) > 0) {
+      navigate(-1);
+    } else {
+      navigate(user ? '/dashboard' : '/home');
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -163,6 +156,22 @@ const Dashboard = () => {
 
         
 
+        {user?.role !== 'Pending' && PAGES_WITH_BACK.includes(activeTab) && (
+          <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-6 lg:px-8 pt-4 text-left">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
+              </svg>
+              <span>Back</span>
+            </button>
+          </div>
+        )}
+
         {/* 1. HOME VIEW */}
         {user?.role !== 'Pending' && activeTab === 'home' && (
           <BggIntroduction
@@ -194,9 +203,9 @@ const Dashboard = () => {
           <NewProjectsView />
         )}
 
-        {/* 8. ADMIN USER MANAGEMENT VIEW */}
+        {/* 8. ADMIN PANEL */}
         {user?.role === 'Admin' && activeTab === 'usermanagement' && (
-          <UserManagement />
+          <AdminPanel />
         )}
       </main>
     </div>

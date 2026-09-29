@@ -76,7 +76,7 @@ const LayerControlSidebar = ({
   loading,
 }) => {
   return (
-            <div className="bg-white border border-[#C8D7BC]/80 rounded-[20px] p-5 flex flex-col gap-4 shadow-sm h-auto">
+            <div className="order-3 lg:order-none min-w-0 bg-white border border-[#C8D7BC]/80 rounded-[20px] p-4 sm:p-5 flex flex-col gap-4 shadow-sm h-auto">
               {/* Header */}
               <div className="border-b border-[#C8D7BC]/40 pb-2.5 flex items-center justify-between">
                 <h5 className="text-xs font-bold text-[#1F2A24] uppercase tracking-wider m-0">
