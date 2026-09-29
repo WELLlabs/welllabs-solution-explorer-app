@@ -1,6 +1,9 @@
 const User = require('../../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const FailedLogin = require('../../models/FailedLogin');
+const { logAudit, diffFields } = require('../../utils/audit');
 
 const formatUserResponse = (user, token) => ({
   _id: user._id,
@@ -23,6 +26,19 @@ const formatUserResponse = (user, token) => ({
   isProfileComplete: user.isProfileComplete || false,
   token: token || undefined,
 });
+
+// Role assigned from what the user chose at registration (also used for invites)
+const roleForRegistration = ({ email, persona, userType }) => {
+  if (email === process.env.ADMIN_EMAIL) return 'Admin';
+  if (email.endsWith('@ifmr.ac.in')) return 'WELL Labs1';
+  if (persona === 'funder' || ['CSR Fund', 'Foundations', 'Philanthropy'].includes(userType)) return 'Funder';
+  if (userType === 'Consultant') return 'Consultant';
+  if (persona === 'govt') return 'GBA';
+  if (persona === 'citizen') return 'Citizen';
+  return 'Pending';
+};
+
+const SUSPENDED_MESSAGE = 'This account has been suspended. Contact the administrator.';
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -60,21 +76,7 @@ const register = async (req, res) => {
       });
     }
 
-    // Role mapping
-    let assignedRole = 'Pending';
-    if (email === process.env.ADMIN_EMAIL) {
-      assignedRole = 'Admin';
-    } else if (email.endsWith('@ifmr.ac.in')) {
-      assignedRole = 'WELL Labs1';
-    } else if (persona === 'funder' || userType === 'CSR Fund' || userType === 'Foundations' || userType === 'Philanthropy') {
-      assignedRole = 'Funder';
-    } else if (userType === 'Consultant') {
-      assignedRole = 'Consultant';
-    } else if (persona === 'govt') {
-      assignedRole = 'GBA';
-    } else if (persona === 'citizen') {
-      assignedRole = 'Citizen';
-    }
+    const assignedRole = roleForRegistration({ email, persona, userType });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -102,7 +104,7 @@ const register = async (req, res) => {
     });
 
     if (user) {
-      const token = generateToken(user._id, user.role);
+      const token = generateToken(user);
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -148,13 +150,18 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    if (user.status === 'suspended') {
+      return res.status(403).json({ message: SUSPENDED_MESSAGE });
+    }
+
     // Auto-update legacy Donor role to Funder
     if (user.role === 'Donor') {
       user.role = 'Funder';
-      await user.save();
     }
+    user.lastLoginAt = new Date();
+    await user.save();
 
-    const token = generateToken(user._id, user.role);
+    const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -185,12 +192,32 @@ const adminLogin = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     const passwordOk = !!(user && user.password && (await bcrypt.compare(password, user.password)));
 
-    if (!passwordOk || user.role !== 'Admin') {
-      console.warn(`⚠️  Failed admin login for "${email}" from ${req.ip}`);
+    const reason = !user
+      ? 'Unknown email'
+      : !passwordOk
+        ? 'Wrong password'
+        : user.role !== 'Admin'
+          ? 'Not an admin account'
+          : user.status === 'suspended'
+            ? 'Account suspended'
+            : null;
+
+    if (reason) {
+      console.warn(`⚠️  Failed admin login for "${email}" from ${req.ip}: ${reason}`);
+      await FailedLogin.create({
+        email: email.toLowerCase().trim(),
+        ip: req.ip,
+        userAgent: String(req.headers['user-agent'] || '').slice(0, 300),
+        reason,
+        route: 'admin',
+      }).catch((err) => console.error('Failed-login log write failed:', err.message));
       return res.status(401).json({ message: INVALID });
     }
 
-    const token = generateToken(user._id, user.role);
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -244,6 +271,9 @@ const googleAuth = async (req, res) => {
       if (user.role === 'Admin') {
         return res.status(403).json({ message: 'This account must sign in with email and password.' });
       }
+      if (user.status === 'suspended') {
+        return res.status(403).json({ message: SUSPENDED_MESSAGE });
+      }
 
       // Role / Persona verification: prevent logging in with a different role
       if (persona && user.role !== 'Admin' && user.isProfileComplete) {
@@ -264,7 +294,7 @@ const googleAuth = async (req, res) => {
         await user.save();
       }
 
-      const token = generateToken(user._id, user.role);
+      const token = generateToken(user);
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -293,7 +323,7 @@ const googleAuth = async (req, res) => {
         isProfileComplete: false,
       });
 
-      const token = generateToken(user._id, user.role);
+      const token = generateToken(user);
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -373,7 +403,7 @@ const completeProfile = async (req, res) => {
 
     user.isProfileComplete = true;
     const updatedUser = await user.save();
-    const token = generateToken(updatedUser._id, updatedUser.role);
+    const token = generateToken(updatedUser);
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -396,7 +426,7 @@ const completeProfile = async (req, res) => {
 // @route   GET /api/auth/users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({ _id: { $ne: req.user._id } }).select('-password');
+    const users = await User.find({ _id: { $ne: req.user._id } }).select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: 'Server error fetching users' });
@@ -463,6 +493,8 @@ const updateUser = async (req, res) => {
       body.email = email;
     }
 
+    const before = user.toObject();
+
     for (const field of ADMIN_EDITABLE_FIELDS) {
       if (body[field] !== undefined) {
         user[field] = typeof body[field] === 'string' ? body[field].trim() : body[field];
@@ -481,6 +513,17 @@ const updateUser = async (req, res) => {
     }
 
     const updatedUser = await user.save();
+    const after = updatedUser.toObject();
+    const changes = diffFields(before, after, ADMIN_EDITABLE_FIELDS);
+    const cinChange = diffFields(before.roleSpecificData, after.roleSpecificData, ['cinNumber', 'department', 'notes']);
+    Object.entries(cinChange).forEach(([k, v]) => { changes[`roleSpecificData.${k}`] = v; });
+    await logAudit(req, {
+      action: 'user.update',
+      targetType: 'user',
+      targetId: updatedUser._id,
+      targetLabel: updatedUser.email,
+      changes,
+    });
     console.log(`✏️  Admin ${req.user.email} updated user ${updatedUser.email}`);
     res.json({ ...formatUserResponse(updatedUser), createdAt: updatedUser.createdAt });
   } catch (error) {
@@ -505,11 +548,80 @@ const deleteUser = async (req, res) => {
     }
 
     await user.deleteOne();
+    await logAudit(req, {
+      action: 'user.delete',
+      targetType: 'user',
+      targetId: user._id,
+      targetLabel: user.email,
+      changes: { name: user.name, email: user.email, role: user.role },
+    });
     console.log(`🗑️  Admin ${req.user.email} deleted user ${user.email}`);
     res.json({ message: 'User deleted', _id: user._id });
   } catch (error) {
     console.error('Delete user error:', error);
     res.status(500).json({ message: 'Server error deleting user' });
+  }
+};
+
+const hashToken = (token) => crypto.createHash('sha256').update(String(token)).digest('hex');
+
+const findUserByPasswordToken = (token) =>
+  User.findOne({
+    passwordTokenHash: hashToken(token),
+    passwordTokenExpires: { $gt: new Date() },
+  }).select('+passwordTokenHash +passwordTokenPurpose +passwordTokenExpires');
+
+// @desc    Check a password reset / invite link before showing the form
+// @route   GET /api/auth/password-token/:token
+const getPasswordTokenInfo = async (req, res) => {
+  try {
+    const user = await findUserByPasswordToken(req.params.token);
+    if (!user) {
+      return res.status(400).json({ message: 'This link is invalid or has expired. Ask the administrator for a new one.' });
+    }
+    res.json({
+      purpose: user.passwordTokenPurpose,
+      email: user.email,
+      name: user.name,
+      persona: user.persona,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error checking link' });
+  }
+};
+
+// @desc    Set a new password using a reset / invite link
+// @route   POST /api/auth/set-password
+const setPasswordWithToken = async (req, res) => {
+  try {
+    const { token, password } = req.body || {};
+    if (typeof password !== 'string' || password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+    const user = await findUserByPasswordToken(token);
+    if (!user) {
+      return res.status(400).json({ message: 'This link is invalid or has expired. Ask the administrator for a new one.' });
+    }
+
+    const purpose = user.passwordTokenPurpose;
+    user.password = await bcrypt.hash(password, 10);
+    user.authProvider = 'local';
+    user.passwordTokenHash = null;
+    user.passwordTokenPurpose = null;
+    user.passwordTokenExpires = null;
+    // Sign out every existing session after a password change
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    if (user.status === 'invited') {
+      user.status = 'active';
+      user.isProfileComplete = true;
+    }
+    await user.save();
+
+    console.log(`🔑 Password set via ${purpose} link for ${user.email}`);
+    res.json({ message: 'Password saved. You can now sign in.', persona: user.persona });
+  } catch (error) {
+    console.error('Set password error:', error);
+    res.status(500).json({ message: 'Server error saving password' });
   }
 };
 
@@ -541,12 +653,16 @@ const logout = async (req, res) => {
   res.json({ message: 'Logged out successfully' });
 };
 
-const generateToken = (id, role) => {
+const generateToken = (user) => {
   const secret = process.env.JWT_SECRET || 'fallback_secret_key_change_me_later';
-  return jwt.sign({ id, role }, secret, { expiresIn: '30d' });
+  return jwt.sign({ id: user._id, role: user.role, tv: user.tokenVersion || 0 }, secret, { expiresIn: '30d' });
 };
 
 module.exports = {
+  roleForRegistration,
+  hashToken,
+  getPasswordTokenInfo,
+  setPasswordWithToken,
   register,
   login,
   adminLogin,

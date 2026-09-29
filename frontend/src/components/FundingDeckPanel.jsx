@@ -50,7 +50,7 @@ const FundingDeckPanel = ({
       {isRightDeckOpen && (
         <div
           data-tour="funding-panel"
-          className="bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col h-[calc(100vh-80px)] min-h-[580px] sticky top-3 overflow-hidden animate-[fadeIn_0.3s_ease-out]"
+          className="order-2 lg:order-none lg:col-span-2 xl:col-span-1 bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col h-[80vh] min-h-[480px] max-h-[760px] xl:max-h-none xl:h-[calc(100vh-80px)] xl:min-h-[580px] xl:sticky xl:top-3 overflow-hidden animate-[fadeIn_0.3s_ease-out]"
         >
           {/* Compact Panel Header for Clicked Project */}
           <div className="shrink-0 p-3.5 border-b border-slate-100 bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col gap-2.5">
@@ -255,7 +255,7 @@ const FundingDeckPanel = ({
       {!isRightDeckOpen && (
         <button
           onClick={() => setIsRightDeckOpen(true)}
-          className="fixed bottom-6 right-6 z-[500] bg-[#C8743C] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-lg hover:shadow-xl hover:bg-[#b8602c] transition-all flex items-center gap-2 cursor-pointer border border-white/40 animate-[bounceIn_0.3s_ease-out]"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[500] bg-[#C8743C] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-lg hover:shadow-xl hover:bg-[#b8602c] transition-all flex items-center gap-2 cursor-pointer border border-white/40 animate-[bounceIn_0.3s_ease-out]"
         >
           <span>🌊 View {proj.name} Assets</span>
           <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px]">

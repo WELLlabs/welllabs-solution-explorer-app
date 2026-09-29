@@ -5,7 +5,7 @@ const ItemDetailsPane = ({ selectedItem, setSelectedItem }) => {
   if (!selectedItem) return null;
 
   return (
-                <div className="min-h-[280px] xl:flex-1 xl:h-0 overflow-y-auto bg-white border border-[#C8D7BC]/80 rounded-[20px] p-6 shadow-sm custom-scrollbar animate-[fadeIn_0.25s_ease-out]">
+                <div className="min-h-[280px] xl:flex-1 xl:h-0 overflow-y-auto bg-white border border-[#C8D7BC]/80 rounded-[20px] p-4 sm:p-6 shadow-sm custom-scrollbar animate-[fadeIn_0.25s_ease-out]">
                   <div className="flex flex-col gap-5">
                     {selectedItem.isCorporation ? (
                       <>
@@ -20,7 +20,7 @@ const ItemDetailsPane = ({ selectedItem, setSelectedItem }) => {
                             >
                               🏛️ GBA CORPORATION
                             </span>
-                            <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-[200px] text-left">
+                            <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-0 sm:min-w-[200px] text-left break-words">
                               {selectedItem.name}
                             </h3>
                           </div>
@@ -91,7 +91,7 @@ const ItemDetailsPane = ({ selectedItem, setSelectedItem }) => {
                                 ? "🚨 HIGH VULNERABILITY HOTSPOT"
                                 : "⚠️ MODERATE VULNERABILITY HOTSPOT"}
                             </span>
-                            <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-[200px] text-left">
+                            <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-0 sm:min-w-[200px] text-left break-words">
                               {selectedItem.name}
                             </h3>
                           </div>
@@ -176,7 +176,7 @@ const ItemDetailsPane = ({ selectedItem, setSelectedItem }) => {
                               {selectedItem.categoryInfo?.icon}{" "}
                               {String(selectedItem.type || "SITE").toUpperCase()}
                             </span>
-                            <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-[200px] text-left">
+                            <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-0 sm:min-w-[200px] text-left break-words">
                               {selectedItem.name}
                             </h3>
                           </div>
@@ -540,7 +540,7 @@ const ItemDetailsPane = ({ selectedItem, setSelectedItem }) => {
                           <span className="text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-md bg-purple-500/10 text-purple-500">
                             GROUND WELL
                           </span>
-                          <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-[200px] text-left">
+                          <h3 className="text-base font-bold text-slate-800 m-0 grow min-w-0 sm:min-w-[200px] text-left break-words">
                             {selectedItem.wellName}
                           </h3>
                           <div className="flex items-center gap-2">

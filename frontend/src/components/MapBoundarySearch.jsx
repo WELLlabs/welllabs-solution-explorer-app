@@ -16,7 +16,7 @@ const MapBoundarySearch = ({
   return (
                   <div
                     ref={searchDropdownContainerRef}
-                    className="relative max-w-lg w-full sm:w-auto"
+                    className="relative flex-1 min-w-0 sm:flex-none max-w-lg"
                   >
                     <form
                       onSubmit={handleLocationSearch}
@@ -53,7 +53,7 @@ const MapBoundarySearch = ({
                           setIsSearchDropdownOpen(true);
                         }}
                         onFocus={() => setIsSearchDropdownOpen(true)}
-                        className="w-full sm:w-72 py-1.5 px-2 text-xs outline-none bg-transparent text-slate-900 placeholder:text-slate-400 font-medium"
+                        className="w-full sm:w-56 lg:w-72 py-1.5 px-2 text-base sm:text-xs outline-none bg-transparent text-slate-900 placeholder:text-slate-400 font-medium"
                       />
 
                       {locationSearchQuery && (
@@ -91,7 +91,7 @@ const MapBoundarySearch = ({
 
                     {/* Dropdown Menu */}
                     {isSearchDropdownOpen && (
-                      <div className="absolute right-0 top-full mt-1.5 w-full sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-[1050] overflow-hidden animate-[fadeIn_0.15s_ease-out]">
+                      <div className="absolute right-0 top-full mt-1.5 w-[calc(100vw-48px)] max-w-sm sm:w-96 sm:max-w-none bg-white border border-slate-200 rounded-2xl shadow-xl z-[1050] overflow-hidden animate-[fadeIn_0.15s_ease-out]">
                         {/* Category Filter Tabs */}
                         <div className="p-2 bg-slate-50 border-b border-slate-100 flex items-center gap-1 overflow-x-auto text-[11px]">
                           <button

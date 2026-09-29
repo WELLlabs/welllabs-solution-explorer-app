@@ -196,9 +196,13 @@ function TourOverlay() {
         }
 
         if (el) {
+          // Tall targets are aligned to the top so the bubble has room below them on small screens
+          const isTall = el.getBoundingClientRect().height > window.innerHeight * 0.45;
+          // Keep the target clear of the sticky app header
+          el.style.scrollMarginTop = "84px";
           el.scrollIntoView({
             behavior: "smooth",
-            block: "center",
+            block: isTall ? "start" : "center",
             inline: "nearest",
           });
           return true;
@@ -387,8 +391,12 @@ function TourBubble({
     };
   }
 
+  const bubbleWidth = getBubbleWidth();
+  const compact = window.innerWidth < 640;
+
   // Compute bubble coordinates based on target rect and viewport
-  const position = getBubblePosition(targetBox, placement, bubbleHeight);
+  const { side, ...position } = getBubblePosition(targetBox, placement, bubbleHeight, bubbleWidth);
+  const isVertical = side === "top" || side === "bottom";
 
   // Target center for dynamic tail positioning
   const targetCenterY = targetBox ? targetBox.centerY : window.innerHeight * 0.45;
@@ -396,6 +404,8 @@ function TourBubble({
     36,
     Math.min(bubbleHeight - 48, targetCenterY - position.top - 18)
   );
+  const targetCenterX = targetBox ? targetBox.centerX : window.innerWidth / 2;
+  const tailLeftOffset = Math.max(24, Math.min(bubbleWidth - 48, targetCenterX - position.left - 14));
 
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === totalSteps - 1;
@@ -406,8 +416,7 @@ function TourBubble({
       className="absolute pointer-events-auto transition-all duration-300 ease-out animate-[bubbleFadeIn_0.25s_ease-out]"
       style={{
         ...position,
-        width: "500px",
-        maxWidth: "calc(100vw - 36px)",
+        width: `${bubbleWidth}px`,
         zIndex: 10000,
       }}
     >
@@ -424,7 +433,7 @@ function TourBubble({
 
       {/* Bubble Container */}
       <div
-        className="relative text-white rounded-[32px] p-7 sm:p-8 shadow-2xl text-left"
+        className="relative text-white rounded-3xl sm:rounded-[32px] p-5 sm:p-7 lg:p-8 shadow-2xl text-left"
         style={{
           backgroundColor: "#16345e",
           boxShadow:
@@ -432,7 +441,9 @@ function TourBubble({
         }}
       >
         {/* Dynamic Beak / Tail — renders a beak for each target when multiple targets are highlighted */}
-        {allRects && allRects.length > 1 ? (
+        {isVertical ? (
+          targetBox && <Tail placement={side} leftOffset={tailLeftOffset} />
+        ) : allRects && allRects.length > 1 ? (
           allRects.map((r, idx) => {
             const multiTailTop = Math.max(
               28,
@@ -441,13 +452,13 @@ function TourBubble({
             return (
               <Tail
                 key={idx}
-                placement={placement}
+                placement={side}
                 topOffset={multiTailTop}
               />
             );
           })
         ) : (
-          <Tail placement={placement} topOffset={tailTopOffset} />
+          targetBox && <Tail placement={side} topOffset={tailTopOffset} />
         )}
 
         {/* Top-Right Sky Blue Close Button "X" */}
@@ -455,10 +466,10 @@ function TourBubble({
           type="button"
           onClick={onSkip}
           aria-label="Close tour"
-          className="absolute top-5 right-5 w-9 h-9 rounded-lg flex items-center justify-center font-bold text-white transition-all cursor-pointer border-none shadow-md hover:brightness-110 active:scale-95"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center font-bold text-white transition-all cursor-pointer border-none shadow-md hover:brightness-110 active:scale-95"
           style={{
             backgroundColor: "#5cb3f9",
-            fontSize: "20px",
+            fontSize: compact ? "17px" : "20px",
             lineHeight: 1,
           }}
         >
@@ -467,9 +478,9 @@ function TourBubble({
 
         {/* Bubble Title */}
         <h3
-          className="text-white font-normal leading-snug tracking-tight mb-4 pr-10"
+          className="text-white font-normal leading-snug tracking-tight mb-3 sm:mb-4 pr-10"
           style={{
-            fontSize: "23px",
+            fontSize: compact ? "18px" : "23px",
             fontFamily:
               'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           }}
@@ -478,15 +489,15 @@ function TourBubble({
         </h3>
 
         {/* Body Paragraphs with Italic font & optional custom pointer arrows */}
-        <div className="flex flex-col gap-3 my-4">
+        <div className="flex flex-col gap-2 sm:gap-3 my-3 sm:my-4">
           {step.body?.map((item, idx) => {
-            const hasArrow = item.arrow === true;
+            const hasArrow = item.arrow === true && (side === "left" || side === "right");
             return (
               <div
                 key={idx}
                 className="flex items-start gap-2.5 text-[#e1eeff]"
                 style={{
-                  fontSize: "16px",
+                  fontSize: compact ? "14px" : "16px",
                   lineHeight: 1.5,
                   fontStyle: "italic",
                 }}
@@ -507,19 +518,23 @@ function TourBubble({
         </div>
 
         {/* Footer Actions: Skip Button & Next/Advance Controls */}
-        <div className="mt-6 pt-3 flex items-center justify-between border-t border-white/10">
+        <div className="mt-4 sm:mt-6 pt-3 flex items-center justify-between gap-2 border-t border-white/10">
           {/* Skip Button (Styled exactly like the screenshots) */}
           <button
             type="button"
             onClick={onSkip}
-            className="px-6 py-2 rounded-lg text-white font-semibold transition-all cursor-pointer border-none shadow-sm hover:brightness-110 active:scale-95"
+            className="px-4 sm:px-6 py-2 rounded-lg text-white font-semibold transition-all cursor-pointer border-none shadow-sm hover:brightness-110 active:scale-95"
             style={{
               backgroundColor: "#6cb3f8",
-              fontSize: "17px",
+              fontSize: compact ? "14px" : "17px",
             }}
           >
             Skip
           </button>
+
+          <span className="text-[11px] text-white/60 font-semibold">
+            {stepIndex + 1} / {totalSteps}
+          </span>
 
           {/* Navigation Controls */}
           <div className="flex items-center gap-2">
@@ -552,8 +567,25 @@ function TourBubble({
  * Speech Bubble Beak / Tail.
  * Dynamically points directly at the target element.
  */
-function Tail({ placement, topOffset }) {
+function Tail({ placement, topOffset, leftOffset }) {
   const color = "#16345e";
+
+  if (placement === "top" || placement === "bottom") {
+    // Bubble above the target points down; bubble below the target points up
+    const pointsDown = placement === "top";
+    return (
+      <div
+        className="absolute w-0 h-0 pointer-events-none"
+        style={{
+          left: leftOffset,
+          [pointsDown ? "bottom" : "top"]: -18,
+          borderLeft: "14px solid transparent",
+          borderRight: "14px solid transparent",
+          [pointsDown ? "borderTop" : "borderBottom"]: `18px solid ${color}`,
+        }}
+      />
+    );
+  }
 
   if (placement === "left") {
     // Bubble on the left, beak on the right pointing right
@@ -571,7 +603,8 @@ function Tail({ placement, topOffset }) {
     );
   }
 
-  // Default placement: "right" (Bubble on the right, beak on the left pointing left)
+  if (placement !== "right") return null;
+
   return (
     <div
       className="absolute w-0 h-0 pointer-events-none"
@@ -586,36 +619,57 @@ function Tail({ placement, topOffset }) {
   );
 }
 
+const EDGE = 12;
+const MAX_BUBBLE_WIDTH = 500;
+
+function getBubbleWidth() {
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
+  return Math.min(MAX_BUBBLE_WIDTH, vw - EDGE * 2);
+}
+
 /**
  * Calculate the positioning of the bubble relative to the target element.
+ * Prefers the requested side; falls back to below/above the target when the
+ * side doesn't have room (phones and tablets), and docks to the bottom edge
+ * as a last resort. Returns the side actually used so the tail can follow it.
  */
-function getBubblePosition(rect, placement, bubbleHeight = 320) {
+function getBubblePosition(rect, placement, bubbleHeight = 320, bubbleWidth = getBubbleWidth()) {
   const gap = 26;
   const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
   const vh = typeof window !== "undefined" ? window.innerHeight : 900;
-  const bubbleWidth = 500;
+  const clampTop = (t) => Math.max(EDGE, Math.min(vh - bubbleHeight - EDGE, t));
+  const clampLeft = (l) => Math.max(EDGE, Math.min(vw - bubbleWidth - EDGE, l));
 
-  // Fallback if target rect is not currently found
   if (!rect) {
-    return {
-      top: Math.max(60, (vh - bubbleHeight) / 2),
-      left: Math.max(20, (vw - bubbleWidth) / 2),
-    };
+    return { side: "none", top: clampTop((vh - bubbleHeight) / 2), left: clampLeft((vw - bubbleWidth) / 2) };
   }
 
-  if (placement === "left") {
-    const left = Math.max(20, rect.left - bubbleWidth - gap);
-    const top = Math.max(20, Math.min(vh - bubbleHeight - 20, rect.centerY - bubbleHeight * 0.4));
-    return { top, left };
+  const fitsLeft = rect.left - gap - bubbleWidth >= EDGE;
+  const fitsRight = rect.right + gap + bubbleWidth <= vw - EDGE;
+
+  if (placement === "left" && fitsLeft) {
+    return { side: "left", top: clampTop(rect.centerY - bubbleHeight * 0.4), left: rect.left - bubbleWidth - gap };
+  }
+  if (placement !== "left" && fitsRight) {
+    return { side: "right", top: clampTop(rect.centerY - bubbleHeight * 0.35), left: rect.right + gap };
+  }
+  if (placement !== "left" && fitsLeft) {
+    return { side: "left", top: clampTop(rect.centerY - bubbleHeight * 0.4), left: rect.left - bubbleWidth - gap };
+  }
+  if (placement === "left" && fitsRight) {
+    return { side: "right", top: clampTop(rect.centerY - bubbleHeight * 0.35), left: rect.right + gap };
   }
 
-  // placement === "right" (default)
-  let left = rect.right + gap;
-  // If placing to the right overflows the screen, shift left
-  if (left + bubbleWidth > vw - 20) {
-    left = Math.max(20, vw - bubbleWidth - 20);
-  }
+  const vGap = 22;
+  const visibleTop = Math.max(0, rect.top);
+  const visibleBottom = Math.min(vh, rect.bottom);
+  const left = clampLeft(rect.centerX - bubbleWidth / 2);
 
-  const top = Math.max(20, Math.min(vh - bubbleHeight - 20, rect.centerY - bubbleHeight * 0.35));
-  return { top, left };
+  if (vh - visibleBottom - vGap - EDGE >= bubbleHeight) {
+    return { side: "bottom", top: visibleBottom + vGap, left };
+  }
+  if (visibleTop - vGap - EDGE >= bubbleHeight) {
+    return { side: "top", top: visibleTop - vGap - bubbleHeight, left };
+  }
+  return { side: "none", top: vh - bubbleHeight - EDGE, left };
 }

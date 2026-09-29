@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import L from "leaflet";
 import gbaCorporationsGeo from "@/data/gba_corporations.json";
-import floodPointsGeo from "@/data/flood_points.json";
 import borewellDelineationGeo from "@/data/borewell_road_delineation.json";
 import { getCorporationForPoint, isPointInGeometry } from "@/utils/geoUtils";
 
@@ -48,6 +47,7 @@ export const useBoundaryLayers = ({
   setLoadingFloodingHotspots,
   setSelectedItem,
   appliedFundFilters,
+  floodHotspotFeatures,
 }) => {
   useEffect(() => {
     const map = mapRef.current;
@@ -877,7 +877,7 @@ export const useBoundaryLayers = ({
         }
 
         // 2. Render Flood Hotspot Points
-        const featuresToRender = (floodPointsGeo.features || []).filter((feat) => {
+        const featuresToRender = (floodHotspotFeatures || []).filter((feat) => {
           const props = feat.properties || {};
           const lat = props.lat;
           const lng = props.lng;
@@ -1068,6 +1068,7 @@ export const useBoundaryLayers = ({
     browseByHotspots,
     selectedHotspotRegions,
     appliedFundFilters,
+    floodHotspotFeatures,
   ]);
 };
 

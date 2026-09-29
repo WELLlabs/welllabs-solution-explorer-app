@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import api from "@/utils/api";
@@ -19,7 +19,6 @@ import fallbackSites from "@/data/fallbackSites.json";
 import v1WellsCsv from "@/data/v1_wells_with_wards.csv?raw";
 import v1ProjectsCsv from "@/data/v1_projects_with_wards.csv?raw";
 import { getProjectImage } from "@/data/projectImages";
-import floodPointsGeo from "@/data/flood_points.json";
 import gbaCorporationsGeo from "@/data/gba_corporations.json";
 
 // Modularized components and helpers
@@ -46,6 +45,7 @@ import FundingDeckPanel from "./FundingDeckPanel";
 import FunderModal from "./FunderModal";
 import FundAProjectModal from "./FundAProjectModal";
 import useBoundaryLayers from "@/hooks/useBoundaryLayers";
+import useFloodHotspots from "@/hooks/useFloodHotspots";
 
 // Re-export for external consumers / backwards compatibility
 export { SITE_TYPOLOGY_OPTIONS, INTERVENTION_TYPOLOGY_OPTIONS } from "@/utils/constants";
@@ -59,16 +59,45 @@ const DataLayersView = () => {
   const siteMarkersRef = useRef({});
   const navigate = useNavigate();
 
-  const [activeDetailView, setActiveDetailView] = useState(null); // { type: 'site' | 'intervention', id: string }
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // The open detail page lives in the URL (?detail=site&id=… / ?detail=intervention)
+  // so the browser back button returns to the map.
+  const detailType = searchParams.get("detail");
+  const detailId = searchParams.get("id");
+  const activeDetailView = useMemo(() => {
+    if (detailType === "site") return { type: "site", id: detailId };
+    if (detailType === "intervention") return { type: "intervention", id: null };
+    return null;
+  }, [detailType, detailId]);
+
+  const setActiveDetailView = useCallback(
+    (view) => {
+      if (!view) {
+        setSearchParams({}, { replace: true });
+        return;
+      }
+      const params = view.type === "site" ? { detail: "site", ...(view.id ? { id: view.id } : {}) } : { detail: "intervention" };
+      setSearchParams(params, { state: { fromMap: true } });
+      window.scrollTo({ top: 0 });
+    },
+    [setSearchParams]
+  );
 
   const handleBackToMap = () => {
-    setActiveDetailView(null);
-    setTimeout(() => {
-      if (mapRef.current) {
-        mapRef.current.invalidateSize();
-      }
-    }, 100);
+    if (location.state?.fromMap) {
+      navigate(-1);
+    } else {
+      setActiveDetailView(null);
+    }
   };
+
+  useEffect(() => {
+    if (activeDetailView) return;
+    const timer = setTimeout(() => mapRef.current?.invalidateSize(), 100);
+    return () => clearTimeout(timer);
+  }, [activeDetailView]);
 
   useEffect(() => {
     window.openSiteDetailInPlace = (siteId) => {
@@ -81,7 +110,7 @@ const DataLayersView = () => {
       delete window.openSiteDetailInPlace;
       delete window.openInterventionDetailInPlace;
     };
-  }, []);
+  }, [setActiveDetailView]);
 
   // Datasets
   const [projects, setProjects] = useState([]);
@@ -143,6 +172,7 @@ const DataLayersView = () => {
   const [showNewProjects, setShowNewProjects] = useState(false);
   const [showNewFloodRisk, setShowNewFloodRisk] = useState(false);
   const [showFloodingHotspots, setShowFloodingHotspots] = useState(false);
+  const floodHotspotFeatures = useFloodHotspots();
 
   // Accordion questions state for left sidebar
   const [openSections, setOpenSections] = useState({
@@ -704,7 +734,7 @@ const DataLayersView = () => {
   // Corporation counts for Flood Points
   const corpFloodCounts = useMemo(() => {
     const counts = { East: 0, West: 0, North: 0, South: 0, Central: 0 };
-    (floodPointsGeo.features || []).forEach((feat) => {
+    floodHotspotFeatures.forEach((feat) => {
       const p = feat.properties || {};
       const corp = getCorporationForPoint(p.lat, p.lng, p.zone || "");
       if (counts[corp] !== undefined) {
@@ -712,7 +742,7 @@ const DataLayersView = () => {
       }
     });
     return counts;
-  }, []);
+  }, [floodHotspotFeatures]);
 
   // Search filter
   const [searchText, setSearchText] = useState("");
@@ -943,6 +973,7 @@ const DataLayersView = () => {
     setLoadingFloodingHotspots,
     setSelectedItem,
     appliedFundFilters,
+    floodHotspotFeatures,
   });
 
   // Clear selected item if corresponding layer is unchecked
@@ -1711,7 +1742,7 @@ const DataLayersView = () => {
   const filteredHotspotsList = useMemo(() => {
     if (!browseByHotspots) return [];
     const q = hotspotSearchQuery.trim().toLowerCase();
-    const allFeatures = floodPointsGeo.features || [];
+    const allFeatures = floodHotspotFeatures;
 
     return allFeatures
       .map((feat, idx) => {
@@ -1743,7 +1774,7 @@ const DataLayersView = () => {
           (h.remarks && h.remarks.toLowerCase().includes(q))
         );
       });
-  }, [browseByHotspots, selectedHotspotRegions, hotspotSearchQuery]);
+  }, [browseByHotspots, selectedHotspotRegions, hotspotSearchQuery, floodHotspotFeatures]);
 
   const handleSelectHotspotFromList = useCallback((hotspot) => {
     if (!mapRef.current || !hotspot.lat || !hotspot.lng) return;
@@ -1826,14 +1857,17 @@ const DataLayersView = () => {
     } else if (step.id === "flood-hotspot-map") {
       setShowNewProjects(false);
       setShowFloodingHotspots(true);
+      let hotspotAttempts = 0;
       const focusHotspot = () => {
         if (!mapRef.current) return;
         mapRef.current.invalidateSize({ pan: false });
         const marker = primaryHotspotMarkerRef.current;
+        if (!marker && ++hotspotAttempts < 20) setTimeout(focusHotspot, 250);
         if (marker) {
           const latlng = marker.getLatLng();
           // Position map view slightly shifted (+0.018 lng) so marker is at center-left, leaving space for tour bubble on right
-          mapRef.current.setView([latlng.lat, latlng.lng + 0.018], 13, { animate: true });
+          const lngShift = window.innerWidth >= 1024 ? 0.018 : 0;
+          mapRef.current.setView([latlng.lat, latlng.lng + lngShift], 13, { animate: true });
           marker.openPopup();
           setTimeout(() => {
             const popupEl = document.querySelector(".leaflet-popup");
@@ -1843,14 +1877,13 @@ const DataLayersView = () => {
           }, 120);
         } else {
           // If layer still loading, center on Varthur / Mahadevapura hotspot coordinates
-          mapRef.current.setView([12.9569, 77.7359 + 0.018], 13, { animate: true });
+          const lngShift = window.innerWidth >= 1024 ? 0.018 : 0;
+          mapRef.current.setView([12.9569, 77.7359 + lngShift], 13, { animate: true });
         }
       };
 
       focusHotspot();
-      setTimeout(focusHotspot, 200);
       setTimeout(focusHotspot, 500);
-      setTimeout(focusHotspot, 900);
     } else if (step.id === "fund-projects") {
       setShowFloodingHotspots(false);
       setOpenSections((prev) => ({ ...prev, projects: true }));
@@ -1900,7 +1933,7 @@ const DataLayersView = () => {
           <div className="w-full text-left animate-[fadeIn_0.2s_ease-out_forwards]">
             <button
               onClick={handleBackToMap}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer mb-4"
+              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer mb-3 sm:mb-4"
             >
               <svg
                 width="14"
@@ -1990,8 +2023,8 @@ const DataLayersView = () => {
           <div
             className={`grid grid-cols-1 ${
               showNewProjects && activeProject && isRightDeckOpen
-                ? "xl:grid-cols-[350px_1fr_320px] 2xl:grid-cols-[360px_1fr_340px]"
-                : "xl:grid-cols-[380px_1fr]"
+                ? "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[350px_minmax(0,1fr)_320px] 2xl:grid-cols-[360px_minmax(0,1fr)_340px]"
+                : "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]"
             } gap-3.5 items-start`}
           >
             {/* Left Sidebar Control Panel - Free Dynamic Height */}
@@ -2070,16 +2103,16 @@ const DataLayersView = () => {
             />
 
             {/* Center / Right Section: Map & Details Pane */}
-            <div className="flex flex-col gap-6 h-auto">
+            <div className="order-1 lg:order-none min-w-0 flex flex-col gap-4 sm:gap-6 h-auto">
               {/* Main Leaflet Map Card with Ward / Locality Search Bar */}
               <div
                 data-tour="map-view"
                 className={`${selectedItem
-                    ? "h-[520px] sm:h-[580px] xl:h-[620px]"
-                    : "h-[calc(100vh-125px)] min-h-[660px]"
+                    ? "h-[60vh] min-h-[420px] sm:h-[580px] xl:h-[620px]"
+                    : "h-[72vh] min-h-[440px] sm:min-h-[560px] lg:h-[calc(100vh-125px)] lg:min-h-[620px] xl:min-h-[660px]"
                   } shrink-0 bg-white border border-[#C8D7BC]/80 rounded-[20px] flex flex-col overflow-hidden shadow-sm transition-all duration-300`}
               >
-                <div className="px-5 py-3 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white gap-3 relative z-[1000]">
+                <div className="shrink-0 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white gap-2 sm:gap-3 relative z-[1000]">
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider m-0">
                       Bengaluru Map View
@@ -2122,7 +2155,7 @@ const DataLayersView = () => {
                   </div>
 
                   {/* Right Header Actions: "Fund a project" button placed to the left of Search Bar */}
-                  <div className="flex items-center gap-2.5 flex-wrap">
+                  <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap w-full sm:w-auto">
                     <button
                       type="button"
                       id="fund-a-project-btn"
@@ -2166,11 +2199,10 @@ const DataLayersView = () => {
                 )}
 
                 <div
-                  className="leaflet-map-wrapper-inner"
+                  className="leaflet-map-wrapper-inner flex-1 min-h-0"
                   style={{
                     position: "relative",
                     width: "100%",
-                    height: "calc(100% - 54px)",
                   }}
                 >
                   <div

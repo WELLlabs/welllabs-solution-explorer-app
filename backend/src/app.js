@@ -12,10 +12,13 @@ app.set('trust proxy', 1);
 // Middleware
 app.use(cors(corsOptions));
 app.use(cookieParser());
-app.use(express.json());
+// Larger limit so admins can bulk import CSV / GeoJSON data layers
+app.use(express.json({ limit: '10mb' }));
 
 // Domain Routes
 app.use('/api/auth', require('./modules/auth/auth.routes'));
+app.use('/api/admin', require('./modules/admin/admin.routes'));
+app.get('/api/flood-hotspots', require('./modules/admin/admin.controller').getFloodHotspots);
 app.use('/api/analytics', require('./modules/analytics/analytics.routes'));
 app.use('/api/sites', require('./modules/sites/sites.routes'));
 
