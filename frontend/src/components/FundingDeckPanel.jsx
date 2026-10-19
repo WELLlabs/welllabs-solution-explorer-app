@@ -1,4 +1,3 @@
-import React from "react";
 import { rs } from "./NewProjectsView";
 
 const SITE_TYPE_INFO = {
@@ -81,7 +80,7 @@ const FundingDeckPanel = ({
                   {proj.name}
                 </h3>
                 <p className="text-[11px] text-slate-500 m-0 mt-0.5 truncate">
-                  {proj.loc || "City Project Location"}
+                  {proj.loc}
                 </p>
               </div>
               <div className="text-right shrink-0">
@@ -124,7 +123,7 @@ const FundingDeckPanel = ({
           {/* Scrollable Assets & Timelines for Clicked Project */}
           <div className="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-2.5 custom-scrollbar text-left">
             <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-0.5">
-              <span>Project Assets &amp; Timelines</span>
+              <span>Project Assets & Timelines</span>
               <span className="text-[10px] text-slate-400 font-mono normal-case">
                 {(proj.assets || []).length} items
               </span>

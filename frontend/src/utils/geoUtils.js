@@ -98,6 +98,34 @@ export const pointInPolygon = (lat, lng, polygonCoords) => {
   return inside;
 };
 
+const ringsOf = (geometry) => {
+  if (!geometry) return [];
+  if (geometry.type === "Polygon") return geometry.coordinates || [];
+  if (geometry.type === "MultiPolygon") return (geometry.coordinates || []).flat();
+  return [];
+};
+
+const metersToRing = (lat, lng, ring) => {
+  if (!ring || ring.length === 0) return Infinity;
+  const cos = Math.cos((lat * Math.PI) / 180);
+  const toXY = (la, ln) => ({ x: ln * cos * 111320, y: la * 110540 });
+  const point = toXY(lat, lng);
+  let best = Infinity;
+  for (let i = 0; i < ring.length; i += 1) {
+    const start = ring[i];
+    const end = ring[(i + 1) % ring.length];
+    const a = toXY(start[1], start[0]);
+    const b = toXY(end[1], end[0]);
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len2 = dx * dx + dy * dy;
+    let t = len2 === 0 ? 0 : ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    best = Math.min(best, Math.hypot(point.x - (a.x + t * dx), point.y - (a.y + t * dy)));
+  }
+  return best;
+};
+
 // Utility helper to check if a point [lat, lng] is inside a GeoJSON Geometry (Polygon or MultiPolygon)
 export const isPointInGeometry = (lat, lng, geometry) => {
   if (!geometry) return false;
@@ -108,6 +136,12 @@ export const isPointInGeometry = (lat, lng, geometry) => {
     return coordinates.some((polygon) => pointInPolygon(lat, lng, polygon[0]));
   }
   return false;
+};
+
+/** Inside the polygon, or within toleranceMeters of its boundary. */
+export const isPointInOrOnGeometry = (lat, lng, geometry, toleranceMeters = 100) => {
+  if (isPointInGeometry(lat, lng, geometry)) return true;
+  return ringsOf(geometry).some((ring) => metersToRing(lat, lng, ring) <= toleranceMeters);
 };
 
 // Helper to get corporation name ('East' | 'West' | 'North' | 'South' | 'Central') for a given lat, lng

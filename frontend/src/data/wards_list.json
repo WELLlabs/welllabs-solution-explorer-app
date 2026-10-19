@@ -1,0 +1,2216 @@
+[
+  {
+    "id": "1",
+    "name": "1 - K Narayanapura",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "1",
+    "name": "1 - Nagasandra",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "1",
+    "name": "1 - Padmanabhanagara",
+    "ac": "Padmanabanagar",
+    "corp": "South"
+  },
+  {
+    "id": "1",
+    "name": "1 - Raja Kempegowda Ward",
+    "ac": "Yelahanka",
+    "corp": "North"
+  },
+  {
+    "id": "1",
+    "name": "1 - Ramaswamy Palya",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "2",
+    "name": "2 - Akash Ward",
+    "ac": "Yelahanka",
+    "corp": "North"
+  },
+  {
+    "id": "2",
+    "name": "2 - Chokkasandra",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "2",
+    "name": "2 - Horamavu",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "2",
+    "name": "2 - Jayamahal",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "2",
+    "name": "2 - Kadirenahalli",
+    "ac": "Padmanabanagar",
+    "corp": "South"
+  },
+  {
+    "id": "3",
+    "name": "3 - Chellakere",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "3",
+    "name": "3 - Kumaraswamy Layout",
+    "ac": "Padmanabanagar",
+    "corp": "South"
+  },
+  {
+    "id": "3",
+    "name": "3 - Nelagadaranahalli",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "3",
+    "name": "3 - Vasanth Nagar",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "3",
+    "name": "3 - Yelahanka Old Town",
+    "ac": "Yelahanka",
+    "corp": "North"
+  },
+  {
+    "id": "4",
+    "name": "4 - Babusab Palya",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "4",
+    "name": "4 - Banashankari Temple Ward",
+    "ac": "Padmanabanagar",
+    "corp": "South"
+  },
+  {
+    "id": "4",
+    "name": "4 - Nyayanga Badavane",
+    "ac": "Yelahanka",
+    "corp": "North"
+  },
+  {
+    "id": "4",
+    "name": "4 - Parvathi Nagar",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "4",
+    "name": "4 - Sampangirama Nagar",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "5",
+    "name": "5 - Hoysala Nagara East",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "5",
+    "name": "5 - Kane Muneshwara Ward",
+    "ac": "Padmanabanagar",
+    "corp": "South"
+  },
+  {
+    "id": "5",
+    "name": "5 - Rajeshwarinagar",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "5",
+    "name": "5 - Shivajinagar",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "5",
+    "name": "5 - Yelahanka Satellite Town",
+    "ac": "Yelahanka",
+    "corp": "North"
+  },
+  {
+    "id": "6",
+    "name": "6 - Bharathi Nagar",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "6",
+    "name": "6 - Doddabettahalli",
+    "ac": "Yelahanka",
+    "corp": "North"
+  },
+  {
+    "id": "6",
+    "name": "6 - Gowdanapalya",
+    "ac": "Padmanabanagar",
+    "corp": "South"
+  },
+  {
+    "id": "6",
+    "name": "6 - Kalkere",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "6",
+    "name": "6 - Shivapura",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "7",
+    "name": "7 - Attur",
+    "ac": "Yelahanka",
+    "corp": "North"
+  },
+  {
+    "id": "7",
+    "name": "7 - Byrasandra",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "7",
+    "name": "7 - K Chennasandra",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "7",
+    "name": "7 - K Kamaraj Ward",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "7",
+    "name": "7 - Rajagopala Nagara",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "8",
+    "name": "8 - Halasuru",
+    "ac": "Shivajinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "8",
+    "name": "8 - Hegganahalli",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "8",
+    "name": "8 - Singapura",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "8",
+    "name": "8 - T.C Palya",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "8",
+    "name": "8 - Tilak Nagara",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "9",
+    "name": "9 - Bhattarahalli",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "9",
+    "name": "9 - Hoysala Nagara Central",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "9",
+    "name": "9 - Kuvempunagara",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "9",
+    "name": "9 - N.A.L Layout",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "9",
+    "name": "9 - Srigandhanagar",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "10",
+    "name": "10 - Abdul Kalam Nagar",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "10",
+    "name": "10 - Cox Town",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "10",
+    "name": "10 - Medahalli",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "10",
+    "name": "10 - Sunkadakatte",
+    "ac": "Dasarahalli",
+    "corp": "West"
+  },
+  {
+    "id": "10",
+    "name": "10 - Vidyaranyapura",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "11",
+    "name": "11 - Basavanapura",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "11",
+    "name": "11 - Dodda Bidarakallu",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "11",
+    "name": "11 - Doddabommasandra",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "11",
+    "name": "11 - Jayanagar East",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "11",
+    "name": "11 - Old Baiyappanahalli",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "12",
+    "name": "12 - Andrahalli",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "12",
+    "name": "12 - Chikka Devasandra",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "12",
+    "name": "12 - Kasturi Nagar",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "12",
+    "name": "12 - Pattabhirama Nagara",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "12",
+    "name": "12 - Thindlu",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "13",
+    "name": "13 - Devasandra",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "13",
+    "name": "13 - Kodigehalli",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "13",
+    "name": "13 - Krishnaiahnapalya",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "13",
+    "name": "13 - Marenahalli South",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "13",
+    "name": "13 - Nada prabhu Kempegowda Nagara",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "14",
+    "name": "14 - Herohalli",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "14",
+    "name": "14 - J.P Nagar",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "14",
+    "name": "14 - K.R Pura",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "14",
+    "name": "14 - Nagavarapalya",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "14",
+    "name": "14 - Rajiv Gandhi Nagar",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "15",
+    "name": "15 - Byadarahalli",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "15",
+    "name": "15 - Byatarayanapura",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "15",
+    "name": "15 - Indiranagar",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "15",
+    "name": "15 - Ramamurthy Nagara",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "15",
+    "name": "15 - Shakambarinagara",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "16",
+    "name": "16 - Amruthahalli",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "16",
+    "name": "16 - Kotthur",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "16",
+    "name": "16 - New Thippasandra",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "16",
+    "name": "16 - Sarakki",
+    "ac": "Jayanagar",
+    "corp": "South"
+  },
+  {
+    "id": "16",
+    "name": "16 - Ullal",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "17",
+    "name": "17 - Jakkur",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "17",
+    "name": "17 - Kaggadasapura",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "17",
+    "name": "17 - N.S Palya",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "17",
+    "name": "17 - Nagadevanahalli",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "17",
+    "name": "17 - Vijinapura",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "18",
+    "name": "18 - Dooravaninagar",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "18",
+    "name": "18 - G.M Palya",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "18",
+    "name": "18 - Kempapura",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "18",
+    "name": "18 - Kengal Hanumanthaiah West",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "18",
+    "name": "18 - Viswamanava Kuvempu Ward",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "19",
+    "name": "19 - Jeevan Bhimanagar",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "19",
+    "name": "19 - K.S. Nissar Ahmed Ward",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "19",
+    "name": "19 - Kengeri",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "19",
+    "name": "19 - New Tavarekere",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "19",
+    "name": "19 - Thanisandra",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "20",
+    "name": "20 - A Narayanapura",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "20",
+    "name": "20 - Hemmigepura",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "20",
+    "name": "20 - Kodihalli",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "20",
+    "name": "20 - Madiwala",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "20",
+    "name": "20 - Sampigehalli",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "21",
+    "name": "21 - Chikka Adugodi",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "21",
+    "name": "21 - Kogilu",
+    "ac": "Byatarayanapura",
+    "corp": "North"
+  },
+  {
+    "id": "21",
+    "name": "21 - Konena Agrahara",
+    "ac": "C.V. Raman Nagar",
+    "corp": "Central"
+  },
+  {
+    "id": "21",
+    "name": "21 - Mylasandra",
+    "ac": "Yeshwanthapura",
+    "corp": "West"
+  },
+  {
+    "id": "21",
+    "name": "21 - Uday Nagar",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "22",
+    "name": "22 - Bangarappa Nagara",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "22",
+    "name": "22 - Domluru",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "22",
+    "name": "22 - Mahadevapura",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "22",
+    "name": "22 - Nagavara",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "22",
+    "name": "22 - S.G Palya",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "23",
+    "name": "23 - Hennur",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "23",
+    "name": "23 - Jogpalya",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "23",
+    "name": "23 - Lakkasandra",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "23",
+    "name": "23 - Rajarajeshwari Nagara",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "23",
+    "name": "23 - Sangama Ward",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "24",
+    "name": "24 - A Adugodi",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "24",
+    "name": "24 - Agaram",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "24",
+    "name": "24 - HBR Layout",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "24",
+    "name": "24 - Jnana Bharathi Ward",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "24",
+    "name": "24 - Vignananagara",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "25",
+    "name": "25 - Ashokanagar",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "25",
+    "name": "25 - Govindapura",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "25",
+    "name": "25 - L.B Shastri Nagar",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "25",
+    "name": "25 - National Games Village",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "25",
+    "name": "25 - Vinayaka Layout",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "26",
+    "name": "26 - Ejipura",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "26",
+    "name": "26 - Jagadish Nagar",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "26",
+    "name": "26 - Mallathahalli",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "26",
+    "name": "26 - Samadhana Nagar",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "26",
+    "name": "26 - Vannarpet",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "27",
+    "name": "27 - Ambedkarnagar",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "27",
+    "name": "27 - K.G.Halli",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "27",
+    "name": "27 - Sri Lakshmi Devi Ward",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "27",
+    "name": "27 - Srigandada Kaval",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "27",
+    "name": "27 - Vibhootipura",
+    "ac": "K.R. Pura",
+    "corp": "East"
+  },
+  {
+    "id": "28",
+    "name": "28 - Byrathi",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "28",
+    "name": "28 - Kormangala East",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "28",
+    "name": "28 - Kottegepalya",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "28",
+    "name": "28 - Neelasandra",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "28",
+    "name": "28 - Venkateshpuram",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "29",
+    "name": "29 - Austin Town",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "29",
+    "name": "29 - Chowdeshwari Nagar",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "29",
+    "name": "29 - Hoodi",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "29",
+    "name": "29 - Kormangala West",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "29",
+    "name": "29 - Lingarajpura",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "30",
+    "name": "30 - Belathur",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "30",
+    "name": "30 - Jakkasandra",
+    "ac": "B.T.M Layout",
+    "corp": "South"
+  },
+  {
+    "id": "30",
+    "name": "30 - Kacharakanahalli",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "30",
+    "name": "30 - Kempegowda Layout",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "30",
+    "name": "30 - Vinayakanagar",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "31",
+    "name": "31 - Freedom Fighter Ward",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "31",
+    "name": "31 - Kadugodi",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "31",
+    "name": "31 - Kalyanagar",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "31",
+    "name": "31 - Kasavanahalli",
+    "ac": "Mahadevapura",
+    "corp": "South"
+  },
+  {
+    "id": "31",
+    "name": "31 - Shanthinagar",
+    "ac": "Shanthinagar",
+    "corp": "Central"
+  },
+  {
+    "id": "32",
+    "name": "32 - Banaswadi",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "32",
+    "name": "32 - Channasandra",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "32",
+    "name": "32 - Kudlu",
+    "ac": "Anekal",
+    "corp": "South"
+  },
+  {
+    "id": "32",
+    "name": "32 - Laggere",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "32",
+    "name": "32 - SilverJubilee Park Ward",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "33",
+    "name": "33 - Dharmaraya Swamy Temple Ward",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "33",
+    "name": "33 - HRBR Layout",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "33",
+    "name": "33 - Lakshmi Devi Nagar",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "33",
+    "name": "33 - Naganathapura",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "33",
+    "name": "33 - S.M Krishna Ward",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "34",
+    "name": "34 - Chikkathoguru",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "34",
+    "name": "34 - D.V Gundappa Ward",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "34",
+    "name": "34 - Kaveri Nagara",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "34",
+    "name": "34 - Peenya",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "34",
+    "name": "34 - Subbayanapalya",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "35",
+    "name": "35 - Garudachar Palya",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "35",
+    "name": "35 - Goraguntepalya",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "West"
+  },
+  {
+    "id": "35",
+    "name": "35 - Hombegowda Nagara",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "35",
+    "name": "35 - Kammanahalli",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "35",
+    "name": "35 - Vishwapriya Nagara",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "36",
+    "name": "36 - Beguru",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "36",
+    "name": "36 - Bharath Aikya Ward",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "36",
+    "name": "36 - Maruthi Seva Nagara",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "36",
+    "name": "36 - Nalwadi Krishnaraja Wadiyar Ward",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "36",
+    "name": "36 - Someshwara Nagara",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "37",
+    "name": "37 - BHEL Ward",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "37",
+    "name": "37 - Dr. Puneeth Rajkumar Ward",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "37",
+    "name": "37 - Jeevanahalli",
+    "ac": "Sarvagnanagar",
+    "corp": "North"
+  },
+  {
+    "id": "37",
+    "name": "37 - Kundalahalli",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "37",
+    "name": "37 - Yelenahalli",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "38",
+    "name": "38 - Doddakammanahalli",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "38",
+    "name": "38 - Kanakanapalya",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "38",
+    "name": "38 - Nandini Layout",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "38",
+    "name": "38 - Shampura",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "38",
+    "name": "38 - Whitefield",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "39",
+    "name": "39 - Gottigere",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "39",
+    "name": "39 - Hagaduru",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "39",
+    "name": "39 - Jai Maruthi Nagar",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "39",
+    "name": "39 - Kaval Byrasandra",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "39",
+    "name": "39 - Venkat Reddy Nagara",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "40",
+    "name": "40 - Anjanapura",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "40",
+    "name": "40 - Ashoka Pillar",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "40",
+    "name": "40 - Mahalakshmipuram",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "40",
+    "name": "40 - Shakthi Nagar",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "40",
+    "name": "40 - Varthur",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "41",
+    "name": "41 - Kothanur",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "41",
+    "name": "41 - Munnenkolalu",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "41",
+    "name": "41 - Nagapura",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "41",
+    "name": "41 - Periyar Nagar",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "41",
+    "name": "41 - V.V Puram",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "42",
+    "name": "42 - Aruna Asif Ali Ward",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "42",
+    "name": "42 - Priyadarshini Ward",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "42",
+    "name": "42 - Raja Mayura Varma Ward",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "42",
+    "name": "42 - RBI Layout",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "42",
+    "name": "42 - Sunkenahalli",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "43",
+    "name": "43 - Bheereshwara Nagar",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "43",
+    "name": "43 - Devaraj Urs Ward",
+    "ac": "Chickpet",
+    "corp": "Central"
+  },
+  {
+    "id": "43",
+    "name": "43 - Dodda Nekkundi",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "43",
+    "name": "43 - Kethamaranahalli",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "43",
+    "name": "43 - Varalakshmi Nagar",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "44",
+    "name": "44 - Ashwath Nagar",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "44",
+    "name": "44 - Chamarajpet",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "44",
+    "name": "44 - Doddanna Nagar",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "44",
+    "name": "44 - Harinagar",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "44",
+    "name": "44 - Shankar Mutt",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "45",
+    "name": "45 - K.R Market",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "45",
+    "name": "45 - Konanakunte",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "45",
+    "name": "45 - Kushal Nagar",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "45",
+    "name": "45 - Marathahalli",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "45",
+    "name": "45 - Shakthi Ganapathi Nagara",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "46",
+    "name": "46 - Cheluvadi Palya",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "46",
+    "name": "46 - Kamalanagara",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "46",
+    "name": "46 - Sagayapuram",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "46",
+    "name": "46 - Yamalur",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "46",
+    "name": "46 - Yelachenahalli",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "47",
+    "name": "47 - Bellanduru",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "47",
+    "name": "47 - Chandranagara",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "47",
+    "name": "47 - IPD Salappa Ward",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "47",
+    "name": "47 - Pulakeshi Nagar",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "47",
+    "name": "47 - Vrishabhavathi Nagar",
+    "ac": "Mahalakshmi Layout",
+    "corp": "West"
+  },
+  {
+    "id": "48",
+    "name": "48 - Azad Nagar",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "48",
+    "name": "48 - Mathikere",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "48",
+    "name": "48 - Panathur",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "48",
+    "name": "48 - S.K Garden",
+    "ac": "Pulakeshinagar",
+    "corp": "North"
+  },
+  {
+    "id": "48",
+    "name": "48 - Vasanthapura",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "49",
+    "name": "49 - Aramane Nagara",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "49",
+    "name": "49 - Jaya Chamarajendra Nagara",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "49",
+    "name": "49 - Kasturbha Nagar",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "49",
+    "name": "49 - Shivanasamudra Ward",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "49",
+    "name": "49 - Uttarahalli",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "50",
+    "name": "50 - Dinnur",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "50",
+    "name": "50 - Gunjur",
+    "ac": "Mahadevapura",
+    "corp": "East"
+  },
+  {
+    "id": "50",
+    "name": "50 - JJR Nagara",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "50",
+    "name": "50 - Sadashiva Nagara",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "50",
+    "name": "50 - Sarvabhouma Nagar",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "51",
+    "name": "51 - Manorayanapalya",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "51",
+    "name": "51 - Old Guddadahalli",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "51",
+    "name": "51 - Rajamahal",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "51",
+    "name": "51 - Subramanyapura",
+    "ac": "Bangalore South",
+    "corp": "South"
+  },
+  {
+    "id": "52",
+    "name": "52 - Kodandarampura",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "52",
+    "name": "52 - Padarayanapura",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "52",
+    "name": "52 - Talagattapura",
+    "ac": "Yeshwanthapura",
+    "corp": "South"
+  },
+  {
+    "id": "52",
+    "name": "52 - Vishwanatha Nagenahalli",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "53",
+    "name": "53 - Jaraganahalli",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "53",
+    "name": "53 - Malleshwaram",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "53",
+    "name": "53 - R.T Nagar",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "53",
+    "name": "53 - Rayapuram",
+    "ac": "Chamrajapet",
+    "corp": "Central"
+  },
+  {
+    "id": "54",
+    "name": "54 - Binnypete",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "54",
+    "name": "54 - Gangenahalli",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "54",
+    "name": "54 - Kengal Hanumanthaiah South",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "54",
+    "name": "54 - Subedarpalya",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "55",
+    "name": "55 - Bhuvaneshwari Nagar",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "55",
+    "name": "55 - Ganganagar",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "55",
+    "name": "55 - Puttenahalli",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "55",
+    "name": "55 - Subramanyanagara",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "56",
+    "name": "56 - Doresanipalya",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "56",
+    "name": "56 - Gayathri Nagara",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "56",
+    "name": "56 - Gopalpura",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "56",
+    "name": "56 - Hebbal",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "57",
+    "name": "57 - Bhoopasandra",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "57",
+    "name": "57 - Cottonpete",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "57",
+    "name": "57 - Hulimavu",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "57",
+    "name": "57 - Kuvempu Ward",
+    "ac": "Malleshwaram",
+    "corp": "West"
+  },
+  {
+    "id": "58",
+    "name": "58 - Arakere",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "58",
+    "name": "58 - Chickpete",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "58",
+    "name": "58 - Dayanand Nagara",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "58",
+    "name": "58 - Nagashettyhalli",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "59",
+    "name": "59 - Bandi Reddy Circle Ward",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "59",
+    "name": "59 - Geddalahalli",
+    "ac": "Hebbal",
+    "corp": "North"
+  },
+  {
+    "id": "59",
+    "name": "59 - Nehru Nagar",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "59",
+    "name": "59 - Vijaya Bank Layout",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "60",
+    "name": "60 - Bilekahalli",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "60",
+    "name": "60 - Jalahalli",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "North"
+  },
+  {
+    "id": "60",
+    "name": "60 - Prakash Nagara",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "60",
+    "name": "60 - Seshadripuram",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "61",
+    "name": "61 - Da.Ra. Bendre Ward",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "61",
+    "name": "61 - Dattatreya Ward",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "61",
+    "name": "61 - HMT Ward",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "North"
+  },
+  {
+    "id": "61",
+    "name": "61 - Kodi Chikkanahalli",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "62",
+    "name": "62 - Brundavana Nagara",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "North"
+  },
+  {
+    "id": "62",
+    "name": "62 - Devarachikkanahalli",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "62",
+    "name": "62 - Rama Mandira",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "62",
+    "name": "62 - Swatantra Palya Ward",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "63",
+    "name": "63 - Bommanahalli",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "63",
+    "name": "63 - J.P PARK",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "North"
+  },
+  {
+    "id": "63",
+    "name": "63 - Okalipuram",
+    "ac": "Gandhinagara",
+    "corp": "Central"
+  },
+  {
+    "id": "63",
+    "name": "63 - Rajajinagara",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "64",
+    "name": "64 - Hongasandra",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "64",
+    "name": "64 - Shivanagara",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "64",
+    "name": "64 - Yeshwanthpura",
+    "ac": "Rajarajeshwarinagar",
+    "corp": "North"
+  },
+  {
+    "id": "65",
+    "name": "65 - Abbigere",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "65",
+    "name": "65 - Garvebavi Palya",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "65",
+    "name": "65 - Manjunath Nagara",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "66",
+    "name": "66 - Kammagondanahalli",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "66",
+    "name": "66 - Sane Guruvana Halli",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "66",
+    "name": "66 - Singasandra",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "67",
+    "name": "67 - Bandepalya",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "67",
+    "name": "67 - Basaveshwara Nagara",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "67",
+    "name": "67 - Shettihalli",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "68",
+    "name": "68 - Kamakshipalya",
+    "ac": "Rajajinagar",
+    "corp": "West"
+  },
+  {
+    "id": "68",
+    "name": "68 - Mallasandra",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "68",
+    "name": "68 - Mangammana Palya",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "69",
+    "name": "69 - Agrahara Dasarahalli",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "69",
+    "name": "69 - Bagalagunte",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "69",
+    "name": "69 - Hosapalya",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "70",
+    "name": "70 - Dr Rajkumar Ward",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "70",
+    "name": "70 - Iblur",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "70",
+    "name": "70 - Manjunatha Nagar",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "71",
+    "name": "71 - Agara",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "71",
+    "name": "71 - Nele Maheshwaramma Temple Ward",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "71",
+    "name": "71 - Thimmenahalli",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "72",
+    "name": "72 - Dasarahalli",
+    "ac": "Dasarahalli",
+    "corp": "North"
+  },
+  {
+    "id": "72",
+    "name": "72 - HSR Layout",
+    "ac": "Bommanahalli",
+    "corp": "South"
+  },
+  {
+    "id": "72",
+    "name": "72 - Kaveripura",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "73",
+    "name": "73 - Dr. Vishnuvardhan Ward",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "74",
+    "name": "74 - Pattegar Palya",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "75",
+    "name": "75 - Marenahalli West",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "76",
+    "name": "76 - Moodalapalya",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "77",
+    "name": "77 - Maruthi Mandira Ward",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "78",
+    "name": "78 - Anubhava Nagara",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "79",
+    "name": "79 - Nagarbhavi",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "80",
+    "name": "80 - Chandra Layout",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "81",
+    "name": "81 - Nayanda Halli",
+    "ac": "Govindraj Nagar",
+    "corp": "West"
+  },
+  {
+    "id": "82",
+    "name": "82 - Attigupe",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "83",
+    "name": "83 - Hampi Nagar",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "84",
+    "name": "84 - Hosahalli",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "85",
+    "name": "85 - Adi Chunchanagiri Ward",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "86",
+    "name": "86 - Vidyaranyanagara",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "87",
+    "name": "87 - K.P Agrahara",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "88",
+    "name": "88 - Sangolli Rayanna Ward",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "89",
+    "name": "89 - Bapuji Nagara",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "90",
+    "name": "90 - Krishnadevaraya ward",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "91",
+    "name": "91 - Gali Anjaneya Temple Ward",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "92",
+    "name": "92 - Muneshwara Block",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "93",
+    "name": "93 - Avalahalli",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "94",
+    "name": "94 - Deepanjali Nagara",
+    "ac": "Vijayanagar",
+    "corp": "West"
+  },
+  {
+    "id": "95",
+    "name": "95 - Swamy Vivekananda Ward",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "96",
+    "name": "96 - Kathriguppe",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "97",
+    "name": "97 - Srinivasa Nagara",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "98",
+    "name": "98 - Ashoka Nagara",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "99",
+    "name": "99 - T.R Shamanna Nagar",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "100",
+    "name": "100 - Srinagar",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "101",
+    "name": "101 - Kempambudhi Ward",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "102",
+    "name": "102 - Hanumanthanagar",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "103",
+    "name": "103 - N.R Colony",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "104",
+    "name": "104 - Thyagarajnagar",
+    "ac": "Basavanagudi",
+    "corp": "West"
+  },
+  {
+    "id": "105",
+    "name": "105 - Yediyuru",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  },
+  {
+    "id": "106",
+    "name": "106 - Devagiri Temple Ward",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  },
+  {
+    "id": "107",
+    "name": "107 - Dharmagiri Ward",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  },
+  {
+    "id": "108",
+    "name": "108 - Ganesh Mandira Ward",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  },
+  {
+    "id": "109",
+    "name": "109 - Kamakya Layout",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  },
+  {
+    "id": "110",
+    "name": "110 - Chikkalasandra",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  },
+  {
+    "id": "111",
+    "name": "111 - Ittamadu",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  },
+  {
+    "id": "112",
+    "name": "112 - Hosakerehalli",
+    "ac": "Padmanabanagar",
+    "corp": "West"
+  }
+]

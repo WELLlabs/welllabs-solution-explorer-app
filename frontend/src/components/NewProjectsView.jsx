@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import api from '@/utils/api';
 import fallbackSites from '@/data/fallbackSites.json';
 import { getProjectImage } from '@/data/projectImages';
+import { downloadFundingPdf } from '@/utils/fundingPdf';
 
 /* ============ helpers ============ */
 export const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
@@ -281,7 +282,7 @@ const TABS = [
   ['docs', 'Docs']
 ];
 
-const NewProjectsView = ({ initialProjectId, onBack }) => {
+const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
   const location = useLocation();
 
   // ── Live data from MongoDB ──────────────────────────────────────────────
@@ -355,13 +356,18 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
   // Once data loads, set the initial selected project
   useEffect(() => {
     if (PROJECTS.length === 0) return;
-    if (initialProjectId && PROJECTS.some(p => p.id === initialProjectId)) {
+    const fromSelection = (projectIds || []).find((id) => PROJECTS.some((proj) => proj.id === id));
+    if (fromSelection) {
+      setSelectedProjectId((current) => (
+        current && (projectIds || []).includes(current) ? current : fromSelection
+      ));
+    } else if (initialProjectId && PROJECTS.some(p => p.id === initialProjectId)) {
       setSelectedProjectId(initialProjectId);
     } else if (!selectedProjectId) {
       const queryId = getQueryProjectId(PROJECTS);
       setSelectedProjectId(queryId || PROJECTS[0].id);
     }
-  }, [PROJECTS, initialProjectId]);
+  }, [PROJECTS, initialProjectId, projectIds]);
 
   // Sync state with URL parameter if it changes
   useEffect(() => {
@@ -441,7 +447,19 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
     );
   }
 
-  const p = PROJECTS.find(x => x.id === selectedProjectId) || PROJECTS[0];
+  const selectedRail = (projectIds || [])
+    .map((id) => PROJECTS.find((proj) => proj.id === id))
+    .filter(Boolean);
+  const showSelectedRail = selectedRail.length > 0;
+
+  const openSelectedProject = (id) => {
+    setSelectedProjectId(id);
+    setActiveTab('overview');
+    setSelectedPicks(new Set());
+    setCustomAmount(0);
+  };
+
+  const p = PROJECTS.find(x => x.id === selectedProjectId) || selectedRail[0] || PROJECTS[0];
   const activeSet = new Set([...p.fundedIdx, ...selectedPicks]);
   const unfunded = p.assets.map((_, i) => i).filter(i => !p.fundedIdx.has(i));
   const activeImpact = impactOf(p, activeSet);
@@ -566,6 +584,61 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
     setOpenAccordions(nextAcc);
   };
 
+  const assetTimeline = (timeline) => {
+    if (!timeline || timeline === '—') return 'Planning';
+    const text = String(timeline).trim();
+    if (/^\d+(\.\d+)?$/.test(text)) {
+      return `${text} ${parseFloat(text) === 1 ? 'month' : 'months'}`;
+    }
+    return text;
+  };
+
+  const downloadCommitment = () => {
+    const filename = `${String(p.name || 'project').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '')}-funding.pdf`;
+    if (fundingMode === 'assets') {
+      const picks = Array.from(selectedPicks).map((i) => p.assets[i]).filter(Boolean);
+      const totalCost = picks.reduce((sum, asset) => sum + (asset.cost || 0), 0);
+      downloadFundingPdf({
+        filename,
+        heading: 'Funding commitment',
+        meta: [`Project: ${p.name}`],
+        projects: [{
+          name: p.name,
+          subtotal: rs(totalCost),
+          assets: picks.map((asset) => ({
+            name: asset.n,
+            timeline: assetTimeline(asset.timeline),
+            amount: asset.cost > 0 ? rs(asset.cost) : 'TBD',
+          })),
+        }],
+        totalAmount: rs(totalCost),
+      });
+      return;
+    }
+
+    let remaining = customAmount;
+    const allocated = [];
+    unfunded.forEach((idx) => {
+      if (remaining <= 0) return;
+      const asset = p.assets[idx];
+      if (!asset) return;
+      if (remaining >= asset.cost) {
+        allocated.push({ name: asset.n, timeline: assetTimeline(asset.timeline), amount: rs(asset.cost) });
+        remaining -= asset.cost;
+      } else {
+        allocated.push({ name: asset.n, timeline: `${assetTimeline(asset.timeline)} | partial`, amount: rs(remaining) });
+        remaining = 0;
+      }
+    });
+    downloadFundingPdf({
+      filename,
+      heading: 'Funding commitment',
+      meta: [`Project: ${p.name}`, 'Custom CSR amount'],
+      projects: [{ name: p.name, assets: allocated, subtotal: rs(customAmount) }],
+      totalAmount: rs(customAmount),
+    });
+  };
+
   // Term Sheet commitment overlay renderer
   const renderCommitBody = () => {
     if (fundingMode === 'assets') {
@@ -602,6 +675,7 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
           </table>
           <div className="flex gap-3 flex-wrap justify-start mt-6">
             <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#3669A9] hover:bg-[#347745] text-white shadow-sm" onClick={() => { alert('Commitment submitted successfully! Thank you for your support.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
+            <button type="button" className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#A99E8A] text-[var(--ink)] hover:bg-[#C8D7BC]/20 bg-white" onClick={downloadCommitment}>Download PDF</button>
             <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#A99E8A] text-[var(--ink)] hover:bg-[#C8D7BC]/20 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
           </div>
         </div>
@@ -652,6 +726,7 @@ const NewProjectsView = ({ initialProjectId, onBack }) => {
           </table>
           <div className="flex gap-3 flex-wrap justify-start mt-6">
             <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#3669A9] hover:bg-[#347745] text-white shadow-sm" onClick={() => { alert('CSR Commitment registered successfully! Thank you.'); setShowCommitDialog(false); }}>Confirm Commitment</button>
+            <button type="button" className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#A99E8A] text-[var(--ink)] hover:bg-[#C8D7BC]/20 bg-white" onClick={downloadCommitment}>Download PDF</button>
             <button className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer border border-[#A99E8A] text-[var(--ink)] hover:bg-[#C8D7BC]/20 bg-transparent" onClick={() => setShowCommitDialog(false)}>Cancel</button>
           </div>
         </div>
@@ -1242,7 +1317,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
   const leadAg = AG[p.team[0]];
 
   return (
-    <div className="w-full min-h-screen bg-[var(--bg-page)] text-[#1F2A24] font-sans antialiased text-[15px] leading-relaxed pb-12">
+    <div className="w-full min-h-screen bg-[var(--bg-page)] text-[#1F2A24] font-sans antialiased text-[15px] xl:text-base 2xl:text-[17px] leading-relaxed pb-12">
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(12px); }
@@ -1268,8 +1343,8 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
         {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#C8D7BC]/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-[#F2C230]/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-7 sm:pb-9 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 lg:gap-8 relative z-10">
-          <div className="text-left max-w-2xl">
+        <div className="w-full max-w-[1400px] xl:max-w-[1680px] 2xl:max-w-[2100px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 sm:py-8 xl:py-10 pb-7 sm:pb-9 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 lg:gap-8 xl:gap-12 relative z-10">
+          <div className="text-left max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
             {onBack && (
               <button
                 onClick={onBack}
@@ -1281,13 +1356,13 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
             <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-[#C8D7BC] bg-white/10 border border-white/20 px-3 py-1 rounded-full mb-4">
               🌊 Corporate water stewardship · Bengaluru
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-extrabold text-white tracking-tight leading-tight">
               Fund flood-mitigation interventions,{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F2C230] to-[#C8D7BC]">
                 asset by asset.
               </span>
             </h1>
-            <p className="text-white/80 max-w-[60ch] mt-3 text-sm md:text-base leading-relaxed">
+            <p className="text-white/80 max-w-[60ch] xl:max-w-[72ch] mt-3 text-sm md:text-base xl:text-lg leading-relaxed">
               Each intervention is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it.
             </p>
           </div>
@@ -1299,8 +1374,8 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               { v: totalPeople.toLocaleString('en-IN'), l: 'People in scope' },
             ].map(({ v, l }) => (
               <div key={l} className="flex flex-col text-left bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 min-w-[100px]">
-                <b className="font-bold text-lg sm:text-xl md:text-2xl text-white tracking-tight">{v}</b>
-                <span className="font-mono text-[10px] tracking-wider uppercase text-[#C8D7BC] mt-1">{l}</span>
+                <b className="font-bold text-lg sm:text-xl md:text-2xl xl:text-3xl text-white tracking-tight">{v}</b>
+                <span className="font-mono text-[10px] xl:text-xs tracking-wider uppercase text-[#C8D7BC] mt-1">{l}</span>
               </div>
             ))}
           </div>
@@ -1308,17 +1383,43 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
       </section>
 
       {/* Main app content - full width single project details */}
-      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-7 pb-10 sm:pb-14">
-        <div className="w-full">
+      <main className="w-full max-w-[1400px] xl:max-w-[1680px] 2xl:max-w-[2100px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-7 xl:py-8 pb-10 sm:pb-14">
+        <div className={showSelectedRail ? "grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[360px_minmax(0,1fr)] gap-4 xl:gap-6 items-start" : "w-full"}>
+          {showSelectedRail && (
+            <aside className="bg-white rounded-3xl border border-[#C8D7BC]/80 shadow-sm p-3 xl:p-4 lg:sticky lg:top-4">
+              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#347745] px-2 pt-1 pb-2">
+                Selected projects
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {selectedRail.map((proj) => {
+                  const active = proj.id === p.id;
+                  return (
+                    <button
+                      key={proj.id}
+                      type="button"
+                      onClick={() => openSelectedProject(proj.id)}
+                      className={`text-left rounded-xl border px-3 py-2.5 cursor-pointer ${
+                        active
+                          ? "bg-[#dfebd5]/70 border-[#347745]"
+                          : "bg-white border-[#C8D7BC] hover:border-[#347745]"
+                      }`}
+                    >
+                      <span className="block text-sm xl:text-base font-bold text-[#1F2A24] leading-snug">{proj.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </aside>
+          )}
           {/* Main details panel */}
-          <section className="bg-white rounded-3xl border border-[#C8D7BC]/80 shadow-sm overflow-hidden text-left flex flex-col w-full">
+          <section className="bg-white rounded-3xl border border-[#C8D7BC]/80 shadow-sm overflow-hidden text-left flex flex-col w-full min-w-0">
 
             {/* Panel header */}
-            <div className="px-4 sm:px-7 pt-5 sm:pt-7 pb-0 bg-white">
+            <div className="px-4 sm:px-7 xl:px-8 pt-5 sm:pt-7 xl:pt-8 pb-0 bg-white">
               <div className="flex justify-between items-start flex-wrap gap-4 mb-5">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#1F2A24] m-0 tracking-tight">{p.name}</h2>
-                  <div className="text-sm text-[#6E6455] font-medium mt-1 flex items-start sm:items-center gap-1.5">
+                  <h2 className="text-xl sm:text-2xl xl:text-3xl font-bold text-[#1F2A24] m-0 tracking-tight">{p.name}</h2>
+                  <div className="text-sm xl:text-base text-[#6E6455] font-medium mt-1 flex items-start sm:items-center gap-1.5">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#6E6455] shrink-0">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                       <circle cx="12" cy="10" r="3"/>
@@ -1341,11 +1442,11 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               </div>
 
               {/* Tab nav */}
-              <nav className="flex gap-1 overflow-x-auto overflow-y-hidden pb-0">
+              <nav className="flex gap-1 xl:gap-2 overflow-x-auto overflow-y-hidden pb-0">
                 {TABS.map(([k, label]) => (
                   <button
                     key={k}
-                    className={`text-[13px] font-semibold px-3 sm:px-4 py-2.5 whitespace-nowrap rounded-t-xl border-b-2 -mb-[1px] cursor-pointer transition-all duration-150 bg-transparent ${
+                    className={`text-[13px] xl:text-sm font-semibold px-3 sm:px-4 xl:px-5 py-2.5 whitespace-nowrap rounded-t-xl border-b-2 -mb-[1px] cursor-pointer transition-all duration-150 bg-transparent ${
                       activeTab === k
                         ? 'text-[#347745] border-b-[#347745] font-bold'
                         : 'text-[#6E6455] border-transparent hover:text-[#1F2A24]'
@@ -1363,7 +1464,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
             </div>
 
             {/* Panel content */}
-            <div className="p-4 sm:p-7 text-left">
+            <div className="p-4 sm:p-7 xl:p-8 2xl:p-10 text-left">
               {renderActivePanel()}
             </div>
           </section>

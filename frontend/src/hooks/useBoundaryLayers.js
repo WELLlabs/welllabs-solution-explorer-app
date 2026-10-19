@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import L from "leaflet";
 import gbaCorporationsGeo from "@/data/gba_corporations.json";
-import borewellDelineationGeo from "@/data/borewell_road_delineation.json";
 import { getCorporationForPoint, isPointInGeometry } from "@/utils/geoUtils";
 
 export const useBoundaryLayers = ({
@@ -17,7 +16,6 @@ export const useBoundaryLayers = ({
   greenspacesLayerRef,
   floodHazardLayerRef,
   floodingHotspotsLayerRef,
-  primaryHotspotMarkerRef,
   hotspotMarkersMapRef,
   wellsRef,
   projectsRef,
@@ -821,7 +819,7 @@ export const useBoundaryLayers = ({
       }
     }
 
-    // Layer 9: Flooding Hotspots (Points + Delineated Catchment Boundary)
+    // Layer 9: Flooding Hotspot points. The catchment polygon is drawn later, only for a clicked hotspot.
     if (showFloodingHotspots || browseByHotspots) {
       if (floodingHotspotsLayerRef.current) {
         map.removeLayer(floodingHotspotsLayerRef.current);
@@ -832,59 +830,25 @@ export const useBoundaryLayers = ({
       const pointsGroup = L.layerGroup();
 
       try {
-        // 1. Render Delineated Catchment Boundary Polygon (Borewell Road is in East Corporation)
-        if (borewellDelineationGeo) {
-          const shouldRenderDelineation =
-            !appliedFundFilters?.selectedCorps ||
-            appliedFundFilters.selectedCorps.includes("East");
-
-          if (shouldRenderDelineation) {
-            const boundaryLayer = L.geoJSON(borewellDelineationGeo, {
-              pane: "catchmentsPane",
-              style: {
-                color: "#c2410c",
-                weight: 3.0,
-                opacity: 0.95,
-                dashArray: "6, 4",
-                fillColor: "#f97316",
-                fillOpacity: 0.24,
-              },
-              onEachFeature: (feat, layer) => {
-                const props = feat.properties || {};
-                layer.bindPopup(`
-                  <div style="font-family: system-ui, -apple-system, sans-serif; text-align: left; min-width: 230px; max-width: 290px; padding: 4px;">
-                    <span style="font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 6px; border-radius: 4px; background: #fef3c7; color: #92400e; text-transform: uppercase;">
-                      DELINEATED CATCHMENT BOUNDARY
-                    </span>
-                    <h4 style="margin: 4px 0 2px 0; font-size: 13.5px; font-weight: 750; color: #0f172a;">
-                      ${props.name || "Borewell Road Catchment Boundary"}
-                    </h4>
-                    <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">
-                      🏢 Zone: <strong>${props.zone || "Mahadevapura / Whitefield"}</strong>
-                    </p>
-                    <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">
-                      📐 Type: <strong>${props.type || "Delineated Flood Micro-Basin"}</strong>
-                    </p>
-                    <p style="margin: 6px 0 0 0; font-size: 10.5px; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; line-height: 1.4;">
-                      ${props.description || "Hydrologically delineated micro-catchment boundary for the Borewell Road flooding hotspot."}
-                    </p>
-                  </div>
-                `);
-              },
-            });
-            boundaryLayer.addTo(pointsGroup);
-          }
-        }
-
-        // 2. Render Flood Hotspot Points
+        // Render Flood Hotspot Points
         const featuresToRender = (floodHotspotFeatures || []).filter((feat) => {
           const props = feat.properties || {};
           const lat = props.lat;
           const lng = props.lng;
           if (!lat || !lng || isNaN(lat) || isNaN(lng)) return false;
 
-          // If questionnaire filter is active, only show hotspots within selected corporations
-          if (appliedFundFilters?.selectedCorps && appliedFundFilters.selectedCorps.length > 0) {
+          // If a specific ward was selected in questionnaire, only show hotspots inside that ward
+          if (appliedFundFilters?.selectedArea?.type === "ward") {
+            const targetWard = appliedFundFilters.selectedArea;
+            const targetFeature = targetWard.feature;
+            if (targetFeature?.geometry) {
+              return isPointInGeometry(lat, lng, targetFeature.geometry);
+            }
+            return true;
+          }
+
+          // If questionnaire filter is active with corporations, only show hotspots within selected corporations
+          if (appliedFundFilters?.selectedCorps && appliedFundFilters.selectedCorps.length > 0 && appliedFundFilters.selectedCorps.length < 5) {
             const corp = getCorporationForPoint(lat, lng, props.zone || "");
             return appliedFundFilters.selectedCorps.includes(corp);
           }
@@ -901,9 +865,7 @@ export const useBoundaryLayers = ({
           return false;
         });
 
-        // Clear previous references
         hotspotMarkersMapRef.current = {};
-        primaryHotspotMarkerRef.current = null;
 
         featuresToRender.forEach((feat) => {
           const props = feat.properties || {};
@@ -963,13 +925,6 @@ export const useBoundaryLayers = ({
             });
           });
 
-          marker.on("add", () => {
-            const el = marker.getElement();
-            if (el && isHigh && !document.querySelector('[data-tour="hotspot-map-target"]')) {
-              el.setAttribute("data-tour", "hotspot-map-target");
-            }
-          });
-
           const popupHtml = `
             <div style="display: flex; flex-direction: column; text-align: left; padding: 4px; font-family: system-ui, -apple-system, sans-serif; min-width: 220px; max-width: 280px;">
               <span style="font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 6px; border-radius: 4px; align-self: flex-start; margin-bottom: 6px; text-transform: uppercase; background-color: ${badgeBg}; color: ${badgeColor};">
@@ -1015,16 +970,6 @@ export const useBoundaryLayers = ({
           marker.bindPopup(popupHtml);
           marker.addTo(pointsGroup);
 
-          // Record hotspot markers & designate primary high vulnerability hotspot
-          if (isHigh) {
-            if (
-              !primaryHotspotMarkerRef.current ||
-              props.location === "Varthur" ||
-              props.zone === "MAHADEVAPURA"
-            ) {
-              primaryHotspotMarkerRef.current = marker;
-            }
-          }
           if (props.id) {
             hotspotMarkersMapRef.current[props.id] = marker;
           }
@@ -1032,10 +977,6 @@ export const useBoundaryLayers = ({
             hotspotMarkersMapRef.current[props.location] = marker;
           }
         });
-
-        if (!primaryHotspotMarkerRef.current && Object.values(hotspotMarkersMapRef.current).length > 0) {
-          primaryHotspotMarkerRef.current = Object.values(hotspotMarkersMapRef.current)[0];
-        }
 
         pointsGroup.addTo(map);
         floodingHotspotsLayerRef.current = pointsGroup;

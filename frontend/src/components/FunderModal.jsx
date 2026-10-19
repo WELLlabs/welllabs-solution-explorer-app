@@ -94,11 +94,11 @@ const FunderModal = ({
                         <div className="flex flex-col gap-3">
                           <div>
                             <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Organization / Corporate Name *
+                              Organization
                             </label>
                             <input
                               type="text"
-                              placeholder="e.g. Infosys Foundation, Wipro Cares, Tata Trusts"
+                              placeholder="e.g. Infosys Foundation"
                               value={funderFormData.orgName}
                               onChange={(e) =>
                                 setFunderFormData({
@@ -110,52 +110,22 @@ const FunderModal = ({
                             />
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs font-bold text-slate-700 block mb-1">
-                                CSR Sector Focus
-                              </label>
-                              <select
-                                value={funderFormData.csrSector}
-                                onChange={(e) =>
-                                  setFunderFormData({
-                                    ...funderFormData,
-                                    csrSector: e.target.value,
-                                  })
-                                }
-                                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all cursor-pointer"
-                              >
-                                <option value="Water Security & Flood Mitigation">
-                                  Water Security &amp; Flood Mitigation
-                                </option>
-                                <option value="Climate Resilience & Urban Ecology">
-                                  Climate Resilience &amp; Urban Ecology
-                                </option>
-                                <option value="Schedule VII - Environmental Sustainability">
-                                  Schedule VII - Sustainability
-                                </option>
-                                <option value="Community Infrastructure">
-                                  Community Infrastructure
-                                </option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="text-xs font-bold text-slate-700 block mb-1">
-                                Contact Email *
-                              </label>
-                              <input
-                                type="email"
-                                placeholder="csr-lead@company.com"
-                                value={funderFormData.email}
-                                onChange={(e) =>
-                                  setFunderFormData({
-                                    ...funderFormData,
-                                    email: e.target.value,
-                                  })
-                                }
-                                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
-                              />
-                            </div>
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Email
+                            </label>
+                            <input
+                              type="email"
+                              placeholder="name@organization.com"
+                              value={funderFormData.email}
+                              onChange={(e) =>
+                                setFunderFormData({
+                                  ...funderFormData,
+                                  email: e.target.value,
+                                })
+                              }
+                              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+                            />
                           </div>
                         </div>
 
