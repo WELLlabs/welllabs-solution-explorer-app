@@ -53,7 +53,7 @@ const SetPassword = () => {
     }
   };
 
-  const isInvite = info?.purpose === 'invite';
+  const isInvite = info?.purpose === 'invite' || info?.purpose === 'admin-setup';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-page px-4">

@@ -265,7 +265,7 @@ const sendAdminResetEmail = async ({ to, link, accountEmail, accountName, pageOr
   });
   const data = await response.json().catch(() => ({}));
   const success = data.success === true || data.success === 'true';
-  const message = String(data.message || '');
+  const message = String(data.message || (response.ok ? '' : `The email service answered with HTTP ${response.status}.`));
   const needsActivation = /activat/i.test(message);
   console.log('[admin-reset] formsubmit response', {
     status: response.status,
@@ -276,7 +276,7 @@ const sendAdminResetEmail = async ({ to, link, accountEmail, accountName, pageOr
   return {
     ok: response.ok && (success || needsActivation),
     needsActivation,
-    message: message || 'The reset email could not be sent.',
+    message: message || 'the email service gave no reason.',
   };
 };
 
@@ -286,26 +286,43 @@ const forgotAdminPassword = async (req, res) => {
   try {
     const admins = await User.find({ role: 'Admin' }).sort({ updatedAt: -1 });
     const preferredEmail = String(process.env.ADMIN_EMAIL || '').toLowerCase().trim();
-    const admin = admins.find((user) => user.email === ADMIN_RESET_EMAIL)
+    let admin = admins.find((user) => user.email === ADMIN_RESET_EMAIL)
       || admins.find((user) => preferredEmail && user.email === preferredEmail)
       || admins[0];
 
+    // With no Admin in the database, the link lets the WELL Labs inbox claim the
+    // admin account. The role is only granted once the link is used.
+    const purpose = admin ? 'reset' : 'admin-setup';
+    let createdPlaceholder = false;
     if (!admin) {
-      console.log('[admin-reset] no admin account found');
-      return res.status(404).json({ message: 'No admin account was found, so a reset link could not be sent.' });
+      admin = await User.findOne({ email: ADMIN_RESET_EMAIL });
+      if (!admin) {
+        admin = new User({
+          name: 'WELL Labs Admin',
+          email: ADMIN_RESET_EMAIL,
+          persona: 'admin',
+          status: 'invited',
+        });
+        createdPlaceholder = true;
+      }
+      console.log('[admin-reset] no admin account found, sending admin setup link', {
+        account: admin.email,
+        newAccount: createdPlaceholder,
+      });
     }
 
     const token = crypto.randomBytes(32).toString('hex');
     const pageOrigin = frontendOrigin(req.body?.origin || req.headers.origin);
     const link = `${pageOrigin}/set-password?token=${token}`;
     admin.passwordTokenHash = hashToken(token);
-    admin.passwordTokenPurpose = 'reset';
+    admin.passwordTokenPurpose = purpose;
     admin.passwordTokenExpires = new Date(Date.now() + ADMIN_RESET_HOURS * 60 * 60 * 1000);
     await admin.save();
 
     console.log('[admin-reset] sending link', {
       account: admin.email,
       to: ADMIN_RESET_EMAIL,
+      purpose,
       origin: pageOrigin,
       expiresAt: admin.passwordTokenExpires,
     });
@@ -319,11 +336,17 @@ const forgotAdminPassword = async (req, res) => {
     });
 
     if (!sent.ok) {
-      admin.passwordTokenHash = null;
-      admin.passwordTokenPurpose = null;
-      admin.passwordTokenExpires = null;
-      await admin.save();
-      return res.status(502).json({ message: sent.message });
+      if (createdPlaceholder) {
+        await admin.deleteOne();
+      } else {
+        admin.passwordTokenHash = null;
+        admin.passwordTokenPurpose = null;
+        admin.passwordTokenExpires = null;
+        await admin.save();
+      }
+      // Not 502: Cloudflare replaces origin 502s with its own page (no CORS headers),
+      // which hides this message from the browser.
+      return res.status(500).json({ message: `The reset email could not be sent: ${sent.message}` });
     }
 
     await logAudit(req, {
@@ -690,12 +713,13 @@ const getPasswordTokenInfo = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: 'This link is invalid or has expired. Ask the administrator for a new one.' });
     }
+    const adminSetup = user.passwordTokenPurpose === 'admin-setup';
     res.json({
       purpose: user.passwordTokenPurpose,
       email: user.email,
       name: user.name,
-      persona: user.persona,
-      role: user.role,
+      persona: adminSetup ? 'admin' : user.persona,
+      role: adminSetup ? 'Admin' : user.role,
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error checking link' });
@@ -724,6 +748,12 @@ const setPasswordWithToken = async (req, res) => {
     // Sign out every existing session after a password change
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     if (user.status === 'invited') {
+      user.status = 'active';
+      user.isProfileComplete = true;
+    }
+    if (purpose === 'admin-setup') {
+      user.role = 'Admin';
+      user.persona = 'admin';
       user.status = 'active';
       user.isProfileComplete = true;
     }
