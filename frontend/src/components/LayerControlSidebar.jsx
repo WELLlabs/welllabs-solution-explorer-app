@@ -1,4 +1,3 @@
-import React from "react";
 import { SITE_TYPOLOGY_OPTIONS, INTERVENTION_TYPOLOGY_OPTIONS } from "@/utils/constants";
 import { getProjectColor, getWellColor } from "@/utils/projectHelpers";
 
@@ -31,37 +30,13 @@ const LayerControlSidebar = ({
   setSelectedHotspotRegions,
   hotspotSearchQuery,
   setHotspotSearchQuery,
-  showWards,
-  setShowWards,
-  showAssemblyConst2,
-  setShowAssemblyConst2,
-  showBengaluruAssembly,
-  setShowBengaluruAssembly,
-  showKarnatakaAssembly,
-  setShowKarnatakaAssembly,
-  showGbaWards,
-  setShowGbaWards,
-  showGbaCorporations,
-  setShowGbaCorporations,
-  showValleys,
-  setShowValleys,
-  showGreenspaces,
-  setShowGreenspaces,
   projects,
   wells,
-  sitesData,
   filterCounts,
   corpProjectCounts,
   corpFloodCounts,
   filteredHotspotsList,
   handleSelectHotspotFromList,
-  loadingAssemblyConst2,
-  loadingBengaluruAssembly,
-  loadingKarnatakaAssembly,
-  loadingGbaWards,
-  loadingGbaCorporations,
-  loadingValleys,
-  loadingGreenspaces,
   loadingFloodHazard,
   loadingFloodingHotspots,
   searchText,
@@ -71,7 +46,6 @@ const LayerControlSidebar = ({
   isItemSelected,
   showNewProjects,
   setShowNewProjects,
-  setIsRightDeckOpen,
   loading,
 }) => {
   return (
@@ -888,146 +862,6 @@ const LayerControlSidebar = ({
           </div>
         )}
       </div>
-
-      {/* Remaining Base and Boundary Layers Openly Below */}
-      {/* <div className="pt-2 border-t border-slate-200 flex flex-col gap-3">
-                <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider m-0">
-                  Additional Base & Boundary Layers
-                </h5>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showWells}
-                    onChange={(e) => setShowWells(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 accent-purple-600 mt-0.5"
-                  />
-                  <span>
-                    Recharge Wells (
-                    {showWells
-                      ? `${filteredItems.filter((i) => i.projName === undefined).length} active`
-                      : `${wells.length} total`}
-                    )
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showWards}
-                    onChange={(e) => setShowWards(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 accent-[#d97706] mt-0.5"
-                  />
-                  <span>
-                    Wards Summary (
-                    {
-                      Object.keys(
-                        wells.concat(projects).reduce((acc, item) => {
-                          if (
-                            item.wardName &&
-                            !item.wardName.toLowerCase().includes("unknown") &&
-                            item.wardName.trim() !== ""
-                          ) {
-                            acc[item.wardName] = true;
-                          }
-                          return acc;
-                        }, {}),
-                      ).length
-                    }{" "}
-                    Wards)
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showBengaluruAssembly}
-                    onChange={(e) => setShowBengaluruAssembly(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-[#3b82f6] mt-0.5"
-                  />
-                  <span>
-                    Bengaluru Assemblies{" "}
-                    {loadingBengaluruAssembly && (
-                      <span className="small-inline-spinner"></span>
-                    )}
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showKarnatakaAssembly}
-                    onChange={(e) => setShowKarnatakaAssembly(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-[#10b981] mt-0.5"
-                  />
-                  <span>
-                    Karnataka Assemblies{" "}
-                    {loadingKarnatakaAssembly && (
-                      <span className="small-inline-spinner"></span>
-                    )}
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showGbaWards}
-                    onChange={(e) => setShowGbaWards(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 accent-[#f43f5e] mt-0.5"
-                  />
-                  <span>
-                    GBA Wards{" "}
-                    {loadingGbaWards && (
-                      <span className="small-inline-spinner"></span>
-                    )}
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showGbaCorporations}
-                    onChange={(e) => setShowGbaCorporations(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 accent-[#ec4899] mt-0.5"
-                  />
-                  <span>
-                    GBA Corporations{" "}
-                    {loadingGbaCorporations && (
-                      <span className="small-inline-spinner"></span>
-                    )}
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showValleys}
-                    onChange={(e) => setShowValleys(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 accent-[#06b6d4] mt-0.5"
-                  />
-                  <span>
-                    Valleys{" "}
-                    {loadingValleys && (
-                      <span className="small-inline-spinner"></span>
-                    )}
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 text-[13px] font-semibold text-slate-600 cursor-pointer select-none relative text-left">
-                  <input
-                    type="checkbox"
-                    checked={showGreenspaces}
-                    onChange={(e) => setShowGreenspaces(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500 accent-[#15803d] mt-0.5"
-                  />
-                  <span>
-                    Greenspaces{" "}
-                    {loadingGreenspaces && (
-                      <span className="small-inline-spinner"></span>
-                    )}
-                  </span>
-                </label>
-              </div> */}
 
       {/* Search Assets inside Selected Layers */}
       <div className="flex flex-col gap-2.5 pt-3 border-slate-200">

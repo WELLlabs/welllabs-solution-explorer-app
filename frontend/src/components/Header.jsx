@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const logoClass =
   'h-6 min-[380px]:h-7 sm:h-9 md:h-10 lg:h-12 w-auto max-w-[44px] min-[380px]:max-w-[56px] sm:max-w-[90px] md:max-w-[120px] lg:max-w-[150px] object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-transform duration-200 hover:scale-[1.03]';
@@ -9,12 +9,6 @@ const pillButtonClass =
 
 const Header = ({ user, onLogout }) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const hideSignIn =
-    location.pathname === '/home' ||
-    location.pathname === '/' ||
-    location.pathname === '/casestudy' ||
-    location.pathname === '/casestudies';
 
   const handleLogoutClick = async () => {
     try {
@@ -90,15 +84,6 @@ const Header = ({ user, onLogout }) => {
                 <span className="hidden sm:inline">Sign Out</span>
               </button>
             </>
-          ) : !hideSignIn ? (
-            <button
-              onClick={() => navigate('/login')}
-              className={`${pillButtonClass} px-4 sm:px-[18px] py-2 text-[12.5px] sm:text-[13px]`}
-              title="Sign In"
-              aria-label="Sign In"
-            >
-              <span>Sign In</span>
-            </button>
           ) : null}
         </div>
       </div>

@@ -21,6 +21,7 @@ app.use('/api/admin', require('./modules/admin/admin.routes'));
 app.get('/api/flood-hotspots', require('./modules/admin/admin.controller').getFloodHotspots);
 app.use('/api/analytics', require('./modules/analytics/analytics.routes'));
 app.use('/api/sites', require('./modules/sites/sites.routes'));
+app.use('/api/design-calculator', require('./modules/designCalculator/designCalculator.routes'));
 
 // Basic Route
 app.get('/', (req, res) => {

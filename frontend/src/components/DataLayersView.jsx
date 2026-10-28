@@ -39,9 +39,8 @@ import {
 import LayerControlSidebar from "./LayerControlSidebar";
 import MapBoundarySearch from "./MapBoundarySearch";
 import ItemDetailsPane from "./ItemDetailsPane";
-import FundingDeckPanel from "./FundingDeckPanel";
 import CatchmentProjectsPanel from "./CatchmentProjectsPanel";
-import FunderModal from "./FunderModal";
+import WatershedInfoPopup from "./WatershedInfoPopup";
 import FundAProjectModal from "./FundAProjectModal";
 import useBoundaryLayers from "@/hooks/useBoundaryLayers";
 import useFloodHotspots from "@/hooks/useFloodHotspots";
@@ -199,35 +198,15 @@ const DataLayersView = () => {
   // ── Selected Item & Funding Deck State ─────────────────────────────────
   // Selected item (project, well, corporation, or flood hotspot) for full details panel
   const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedFundPicks, setSelectedFundPicks] = useState(new Set());
   const [isRightDeckOpen, setIsRightDeckOpen] = useState(true);
   const [layersPanelOpen, setLayersPanelOpen] = useState(true);
   const [activeCatchment, setActiveCatchment] = useState(null);
+  const [dismissedWatershedId, setDismissedWatershedId] = useState(null);
   const activeCatchmentLayerRef = useRef(null);
-  const [showFunderModal, setShowFunderModal] = useState(false);
-  const [funderFormData, setFunderFormData] = useState({
-    orgName: "",
-    csrSector: "Water Security & Flood Mitigation",
-    email: "",
-    notes: "",
-  });
-  const [committedPicks, setCommittedPicks] = useState(new Set());
-  const [commitSuccess, setCommitSuccess] = useState(false);
 
   // "Fund a project" Questionnaire Modal state
   const [showFundAProjectModal, setShowFundAProjectModal] = useState(false);
   const [appliedFundFilters, setAppliedFundFilters] = useState(null);
-
-  // Lock background scrolling when funder popup is open
-  useEffect(() => {
-    if (showFunderModal) {
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prevOverflow;
-      };
-    }
-  }, [showFunderModal]);
 
   // When Citywide BGG is switched on, print what the frontend actually received.
   useEffect(() => {
@@ -273,16 +252,6 @@ const DataLayersView = () => {
     return sitesData.map((s) => preprocessProject(normaliseProject(s)));
   }, [sitesData]);
 
-  // Active clicked project for the right-side funding & assets deck
-  const activeProject = useMemo(() => {
-    if (!selectedItem || !selectedItem.isSiteProject) return null;
-    return (
-      cityProjectsList.find(
-        (p) => p.id === selectedItem.site_id || p.id === selectedItem._raw?.site_id
-      ) || null
-    );
-  }, [selectedItem, cityProjectsList]);
-
   const catchmentProjects = useMemo(() => {
     const geometry = activeCatchment?.feature?.geometry;
     if (!geometry) return [];
@@ -292,75 +261,6 @@ const DataLayersView = () => {
       return isPointInGeometry(lat, lng, geometry);
     });
   }, [activeCatchment, cityProjectsList]);
-
-  // Compute total funding summary based on funder selections
-  const fundSummary = useMemo(() => {
-    let totalCost = 0;
-    let totalAssets = 0;
-    const projectIds = new Set();
-
-    cityProjectsList.forEach((p) => {
-      p.assets.forEach((a, idx) => {
-        const key = `${p.id}__${idx}`;
-        if (selectedFundPicks.has(key)) {
-          totalCost += a.cost || 0;
-          totalAssets += 1;
-          projectIds.add(p.id);
-        }
-      });
-    });
-
-    return {
-      totalCost,
-      totalAssets,
-      projectsCount: projectIds.size,
-    };
-  }, [cityProjectsList, selectedFundPicks]);
-
-  const toggleFundPick = (projId, assetIdx) => {
-    const key = `${projId}__${assetIdx}`;
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
-  const toggleProjectAllAssets = (proj) => {
-    if (!proj) return;
-    const projKeys = (proj.assets || []).map((_, i) => `${proj.id}__${i}`);
-    const allSelected = projKeys.every((k) => selectedFundPicks.has(k));
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      if (allSelected) {
-        projKeys.forEach((k) => next.delete(k));
-      } else {
-        projKeys.forEach((k) => next.add(k));
-      }
-      return next;
-    });
-  };
-
-  const selectAllAvailableAssets = (targetProj = activeProject) => {
-    if (!targetProj) return;
-    const projKeys = (targetProj.assets || []).map((_, i) => `${targetProj.id}__${i}`);
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      projKeys.forEach((k) => next.add(k));
-      return next;
-    });
-  };
-
-  const clearAllSelections = (targetProj = activeProject) => {
-    if (!targetProj) return;
-    const projKeys = (targetProj.assets || []).map((_, i) => `${targetProj.id}__${i}`);
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      projKeys.forEach((k) => next.delete(k));
-      return next;
-    });
-  };
 
   const toggleSection = (sectionKey) => {
     setOpenSections((prev) => ({
@@ -1032,7 +932,7 @@ const DataLayersView = () => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [showNewProjects, activeProject, isRightDeckOpen, activeCatchment, layersPanelOpen]);
+  }, [showNewProjects, isRightDeckOpen, activeCatchment, layersPanelOpen]);
 
   // Load and render boundaries layers dynamically via modular hook
   useBoundaryLayers({
@@ -1144,12 +1044,12 @@ const DataLayersView = () => {
     const layer = L.geoJSON(activeCatchment.feature, {
       pane: "catchmentsPane",
       style: {
-        color: "#c2410c",
-        weight: 3,
-        opacity: 0.95,
+        color: "#fb923c",
+        weight: 2.5,
+        opacity: 0.9,
         dashArray: "6, 4",
-        fillColor: "#f97316",
-        fillOpacity: 0.18,
+        fillColor: "#fdba74",
+        fillOpacity: 0.22,
       },
     });
     layer.addTo(map);
@@ -1727,7 +1627,6 @@ const DataLayersView = () => {
         `);
 
         marker.on("click", () => {
-          setIsRightDeckOpen(true);
           setSelectedItem({
             isSiteProject: true,
             site_id: site.site_id,
@@ -2081,11 +1980,11 @@ const DataLayersView = () => {
         />
 
         <div
-          className={`grid grid-cols-1 ${layersPanelOpen && isRightDeckOpen && (activeCatchment || (showNewProjects && activeProject))
+          className={`grid grid-cols-1 ${layersPanelOpen && isRightDeckOpen && activeCatchment
               ? "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_360px]"
               : layersPanelOpen
                 ? "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]"
-                : isRightDeckOpen && (activeCatchment || (showNewProjects && activeProject))
+                : isRightDeckOpen && activeCatchment
                   ? "xl:grid-cols-[minmax(0,1fr)_360px]"
                   : ""
             } gap-3.5 items-start`}
@@ -2160,7 +2059,6 @@ const DataLayersView = () => {
               isItemSelected={isItemSelected}
               showNewProjects={showNewProjects}
               setShowNewProjects={setShowNewProjects}
-              setIsRightDeckOpen={setIsRightDeckOpen}
               loading={loading}
             />
           )}
@@ -2303,7 +2201,7 @@ const DataLayersView = () => {
             )}
           </div>
 
-          {activeCatchment ? (
+          {activeCatchment && (
             <CatchmentProjectsPanel
               catchment={activeCatchment}
               hotspotName={selectedItem?.isHotspot ? selectedItem.name : ""}
@@ -2315,40 +2213,14 @@ const DataLayersView = () => {
                 setActiveDetailView({ type: "site", id: ids[0], ids })
               }
             />
-          ) : (
-            <FundingDeckPanel
-              showNewProjects={showNewProjects}
-              activeProject={activeProject}
-              isRightDeckOpen={isRightDeckOpen}
-              setIsRightDeckOpen={setIsRightDeckOpen}
-              selectAllAvailableAssets={selectAllAvailableAssets}
-              clearAllSelections={clearAllSelections}
-              selectedFundPicks={selectedFundPicks}
-              committedPicks={committedPicks}
-              toggleProjectAllAssets={toggleProjectAllAssets}
-              toggleFundPick={toggleFundPick}
-              setShowFunderModal={setShowFunderModal}
-              setActiveDetailView={setActiveDetailView}
-            />
           )}
         </div>
 
-        {/* Funder Commitment & Term Sheet Modal */}
-        <FunderModal
-          showFunderModal={showFunderModal}
-          setShowFunderModal={setShowFunderModal}
-          fundSummary={fundSummary}
-          selectedFundPicks={selectedFundPicks}
-          cityProjectsList={cityProjectsList}
-          funderFormData={funderFormData}
-          setFunderFormData={setFunderFormData}
-          committedPicks={committedPicks}
-          setCommittedPicks={setCommittedPicks}
-          commitSuccess={commitSuccess}
-          setCommitSuccess={setCommitSuccess}
-        />
-
         {/* Fund a Project Questionnaire Modal (85-90% screen) */}
+        {activeCatchment && !activeDetailView && dismissedWatershedId !== activeCatchment.id && (
+          <WatershedInfoPopup onClose={() => setDismissedWatershedId(activeCatchment.id)} />
+        )}
+
         <FundAProjectModal
           key={showFundAProjectModal ? "open" : "closed"}
           isOpen={showFundAProjectModal}
