@@ -1,0 +1,175 @@
+.design-calculator {
+  --neu: color-mix(in srgb, var(--tea-green) 78%, white);
+  --neu-dark: color-mix(in srgb, var(--tea-green) 62%, var(--ink) 22%);
+  --neu-light: #ffffff;
+  background-color: var(--neu);
+  color: var(--ink);
+}
+
+.neu-raised,
+.neu-card,
+.neu-option,
+.neu-pill,
+.neu-well,
+.neu-knob,
+.neu-orb {
+  background-color: var(--neu);
+}
+
+.neu-raised,
+.neu-card {
+  border-radius: 1.5rem;
+  box-shadow:
+    10px 10px 22px var(--neu-dark),
+    -10px -10px 22px var(--neu-light);
+}
+
+.neu-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.neu-card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.neu-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    inset 8px 8px 14px var(--neu-dark),
+    inset -8px -8px 14px var(--neu-light);
+}
+
+.neu-orb-a {
+  width: 280px;
+  height: 280px;
+  bottom: -130px;
+  left: -110px;
+}
+
+.neu-orb-b {
+  width: 170px;
+  height: 170px;
+  top: -70px;
+  right: -55px;
+  box-shadow:
+    inset 6px 6px 10px var(--neu-dark),
+    inset -6px -6px 10px var(--neu-light);
+}
+
+.neu-option,
+.neu-pill,
+.neu-well,
+.neu-knob {
+  border: none;
+}
+
+.neu-option {
+  border-radius: 1rem;
+  box-shadow:
+    5px 5px 10px var(--neu-dark),
+    -5px -5px 10px var(--neu-light);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.neu-option:hover {
+  transform: scale(0.99);
+}
+
+.neu-option.is-selected,
+.neu-well {
+  box-shadow:
+    inset 4px 4px 8px var(--neu-dark),
+    inset -4px -4px 8px var(--neu-light);
+}
+
+.neu-option.is-selected:hover {
+  transform: none;
+}
+
+.neu-knob {
+  box-shadow:
+    3px 3px 6px var(--neu-dark),
+    -3px -3px 6px var(--neu-light);
+}
+
+.neu-knob.is-on {
+  background-color: var(--turf-green);
+  box-shadow:
+    inset 2px 2px 4px color-mix(in srgb, var(--ink) 35%, var(--turf-green)),
+    inset -2px -2px 4px color-mix(in srgb, white 35%, var(--turf-green));
+}
+
+.neu-pill {
+  border-radius: 999px;
+  color: var(--turf-green);
+  box-shadow:
+    6px 6px 12px var(--neu-dark),
+    -6px -6px 12px var(--neu-light);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.neu-pill:hover:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.neu-pill:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow:
+    inset 3px 3px 6px var(--neu-dark),
+    inset -3px -3px 6px var(--neu-light);
+}
+
+.neu-pill:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.neu-well {
+  border-radius: 1.15rem;
+}
+
+.neu-option:focus-visible,
+.neu-pill:focus-visible {
+  outline: 2px solid var(--turf-green);
+  outline-offset: 3px;
+}
+
+.design-calculator .leaflet-container {
+  background: var(--neu);
+  font-family: inherit;
+}
+
+.design-calculator .leaflet-bar {
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    5px 5px 10px var(--neu-dark),
+    -5px -5px 10px var(--neu-light);
+}
+
+.design-calculator .leaflet-bar a {
+  width: 34px;
+  height: 34px;
+  line-height: 34px;
+  background-color: var(--neu);
+  color: var(--turf-green);
+  border: none;
+}
+
+.design-calculator .leaflet-bar a:hover {
+  background-color: var(--neu);
+  color: var(--ink);
+}
+
+.design-calculator .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--neu) 82%, transparent);
+  color: var(--ink-muted);
+}

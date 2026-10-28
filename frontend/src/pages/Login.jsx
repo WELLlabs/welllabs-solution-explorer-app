@@ -190,6 +190,7 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-x-hidden font-sans select-none bg-gradient-to-b from-[#C8D7BC]/40 via-[#f2f6ee] to-[#FFFFFF]">
+      <div aria-hidden="true" className="page-lines pointer-events-none absolute inset-0" />
       {/* ========================================================================= */}
       {/* ATMOSPHERIC BACKGROUND: TOPOGRAPHICAL CONTOURS & GIS HYDROLOGY ELEMENTS */}
       {/* ========================================================================= */}

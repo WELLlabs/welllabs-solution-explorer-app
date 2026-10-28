@@ -1,0 +1,2127 @@
+{
+  "formula": "runoffM3 = runoffCoefficient * drainageAreaM2 * rainfallMm / 1000",
+  "rainEvents": [
+    {
+      "id": "1in",
+      "label": "1 Inch Rain",
+      "rainfallMm": 25.4
+    },
+    {
+      "id": "90th",
+      "label": "90th Percentile",
+      "rainfallMm": 40.0,
+      "sheetLabel": "85th percentile storm"
+    },
+    {
+      "id": "5yr",
+      "label": "5 Year Rain Event",
+      "rainfallMm": 129.7809108
+    },
+    {
+      "id": "10yr",
+      "label": "10 Year Rain Event",
+      "rainfallMm": 148.4895717
+    }
+  ],
+  "catchments": [
+    {
+      "fid": 0,
+      "runoffCoefficient": 0.5311,
+      "drainageAreaM2": 41801.11
+    },
+    {
+      "fid": 1,
+      "runoffCoefficient": 0.5492,
+      "drainageAreaM2": 34094.7
+    },
+    {
+      "fid": 2,
+      "runoffCoefficient": 0.61,
+      "drainageAreaM2": 36417.15
+    },
+    {
+      "fid": 3,
+      "runoffCoefficient": 0.5782,
+      "drainageAreaM2": 29773.59
+    },
+    {
+      "fid": 4,
+      "runoffCoefficient": 0.5839,
+      "drainageAreaM2": 27771.44
+    },
+    {
+      "fid": 5,
+      "runoffCoefficient": 0.6756,
+      "drainageAreaM2": 30684.54
+    },
+    {
+      "fid": 6,
+      "runoffCoefficient": 0.7762,
+      "drainageAreaM2": 32442.39
+    },
+    {
+      "fid": 7,
+      "runoffCoefficient": 0.5761,
+      "drainageAreaM2": 29803.0
+    },
+    {
+      "fid": 8,
+      "runoffCoefficient": 0.6183,
+      "drainageAreaM2": 30972.08
+    },
+    {
+      "fid": 9,
+      "runoffCoefficient": 0.5824,
+      "drainageAreaM2": 30298.04
+    },
+    {
+      "fid": 10,
+      "runoffCoefficient": 0.7969,
+      "drainageAreaM2": 36742.28
+    },
+    {
+      "fid": 11,
+      "runoffCoefficient": 0.7468,
+      "drainageAreaM2": 31543.42
+    },
+    {
+      "fid": 12,
+      "runoffCoefficient": 0.6447,
+      "drainageAreaM2": 36772.79
+    },
+    {
+      "fid": 13,
+      "runoffCoefficient": 0.7389,
+      "drainageAreaM2": 24502.04
+    },
+    {
+      "fid": 14,
+      "runoffCoefficient": 0.6824,
+      "drainageAreaM2": 19175.96
+    },
+    {
+      "fid": 15,
+      "runoffCoefficient": 0.6344,
+      "drainageAreaM2": 13952.4
+    },
+    {
+      "fid": 16,
+      "runoffCoefficient": 0.6414,
+      "drainageAreaM2": 20814.38
+    },
+    {
+      "fid": 17,
+      "runoffCoefficient": 0.6063,
+      "drainageAreaM2": 17764.24
+    },
+    {
+      "fid": 18,
+      "runoffCoefficient": 0.6457,
+      "drainageAreaM2": 21590.0
+    },
+    {
+      "fid": 19,
+      "runoffCoefficient": 0.5646,
+      "drainageAreaM2": 27246.41
+    },
+    {
+      "fid": 20,
+      "runoffCoefficient": 0.7177,
+      "drainageAreaM2": 19993.4
+    },
+    {
+      "fid": 21,
+      "runoffCoefficient": 0.6479,
+      "drainageAreaM2": 22274.09
+    },
+    {
+      "fid": 22,
+      "runoffCoefficient": 0.7616,
+      "drainageAreaM2": 16597.4
+    },
+    {
+      "fid": 23,
+      "runoffCoefficient": 0.7325,
+      "drainageAreaM2": 15542.39
+    },
+    {
+      "fid": 24,
+      "runoffCoefficient": 0.7568,
+      "drainageAreaM2": 20257.39
+    },
+    {
+      "fid": 25,
+      "runoffCoefficient": 0.6677,
+      "drainageAreaM2": 17378.17
+    },
+    {
+      "fid": 26,
+      "runoffCoefficient": 0.5426,
+      "drainageAreaM2": 25777.17
+    },
+    {
+      "fid": 27,
+      "runoffCoefficient": 0.7114,
+      "drainageAreaM2": 18621.1
+    },
+    {
+      "fid": 28,
+      "runoffCoefficient": 0.7729,
+      "drainageAreaM2": 15092.97
+    },
+    {
+      "fid": 29,
+      "runoffCoefficient": 0.7681,
+      "drainageAreaM2": 14802.28
+    },
+    {
+      "fid": 30,
+      "runoffCoefficient": 0.5205,
+      "drainageAreaM2": 42402.67
+    },
+    {
+      "fid": 31,
+      "runoffCoefficient": 0.7444,
+      "drainageAreaM2": 21458.16
+    },
+    {
+      "fid": 32,
+      "runoffCoefficient": 0.73,
+      "drainageAreaM2": 20828.35
+    },
+    {
+      "fid": 33,
+      "runoffCoefficient": 0.5081,
+      "drainageAreaM2": 22408.03
+    },
+    {
+      "fid": 34,
+      "runoffCoefficient": 0.528,
+      "drainageAreaM2": 23595.69
+    },
+    {
+      "fid": 35,
+      "runoffCoefficient": 0.7907,
+      "drainageAreaM2": 14999.74
+    },
+    {
+      "fid": 36,
+      "runoffCoefficient": 0.6636,
+      "drainageAreaM2": 14437.24
+    },
+    {
+      "fid": 37,
+      "runoffCoefficient": 0.6299,
+      "drainageAreaM2": 28076.32
+    },
+    {
+      "fid": 38,
+      "runoffCoefficient": 0.7471,
+      "drainageAreaM2": 17252.78
+    },
+    {
+      "fid": 39,
+      "runoffCoefficient": 0.6947,
+      "drainageAreaM2": 15252.33
+    },
+    {
+      "fid": 40,
+      "runoffCoefficient": 0.7787,
+      "drainageAreaM2": 17738.03
+    },
+    {
+      "fid": 41,
+      "runoffCoefficient": 0.6824,
+      "drainageAreaM2": 15309.19
+    },
+    {
+      "fid": 42,
+      "runoffCoefficient": 0.6757,
+      "drainageAreaM2": 18060.7
+    },
+    {
+      "fid": 43,
+      "runoffCoefficient": 0.7064,
+      "drainageAreaM2": 20295.85
+    },
+    {
+      "fid": 44,
+      "runoffCoefficient": 0.7318,
+      "drainageAreaM2": 13650.12
+    },
+    {
+      "fid": 45,
+      "runoffCoefficient": 0.8393,
+      "drainageAreaM2": 14519.3
+    },
+    {
+      "fid": 46,
+      "runoffCoefficient": 0.6938,
+      "drainageAreaM2": 17593.97
+    },
+    {
+      "fid": 47,
+      "runoffCoefficient": 0.7723,
+      "drainageAreaM2": 17085.6
+    },
+    {
+      "fid": 48,
+      "runoffCoefficient": 0.7327,
+      "drainageAreaM2": 12018.31
+    },
+    {
+      "fid": 49,
+      "runoffCoefficient": 0.6463,
+      "drainageAreaM2": 21902.27
+    },
+    {
+      "fid": 50,
+      "runoffCoefficient": 0.7136,
+      "drainageAreaM2": 18894.01
+    },
+    {
+      "fid": 51,
+      "runoffCoefficient": 0.6806,
+      "drainageAreaM2": 18226.8
+    },
+    {
+      "fid": 52,
+      "runoffCoefficient": 0.715,
+      "drainageAreaM2": 19197.68
+    },
+    {
+      "fid": 53,
+      "runoffCoefficient": 0.5933,
+      "drainageAreaM2": 18194.96
+    },
+    {
+      "fid": 54,
+      "runoffCoefficient": 0.7117,
+      "drainageAreaM2": 19927.97
+    },
+    {
+      "fid": 55,
+      "runoffCoefficient": 0.7592,
+      "drainageAreaM2": 16161.42
+    },
+    {
+      "fid": 56,
+      "runoffCoefficient": 0.7567,
+      "drainageAreaM2": 14115.51
+    },
+    {
+      "fid": 57,
+      "runoffCoefficient": 0.8116,
+      "drainageAreaM2": 12197.99
+    },
+    {
+      "fid": 58,
+      "runoffCoefficient": 0.5946,
+      "drainageAreaM2": 17480.53
+    },
+    {
+      "fid": 59,
+      "runoffCoefficient": 0.6732,
+      "drainageAreaM2": 23468.53
+    },
+    {
+      "fid": 60,
+      "runoffCoefficient": 0.7522,
+      "drainageAreaM2": 22371.26
+    },
+    {
+      "fid": 61,
+      "runoffCoefficient": 0.6577,
+      "drainageAreaM2": 18396.09
+    },
+    {
+      "fid": 62,
+      "runoffCoefficient": 0.6853,
+      "drainageAreaM2": 16244.2
+    },
+    {
+      "fid": 63,
+      "runoffCoefficient": 0.7149,
+      "drainageAreaM2": 18663.81
+    },
+    {
+      "fid": 64,
+      "runoffCoefficient": 0.7303,
+      "drainageAreaM2": 15549.05
+    },
+    {
+      "fid": 65,
+      "runoffCoefficient": 0.719,
+      "drainageAreaM2": 16452.49
+    },
+    {
+      "fid": 66,
+      "runoffCoefficient": 0.6803,
+      "drainageAreaM2": 24592.47
+    },
+    {
+      "fid": 67,
+      "runoffCoefficient": 0.7118,
+      "drainageAreaM2": 13627.71
+    },
+    {
+      "fid": 68,
+      "runoffCoefficient": 0.5854,
+      "drainageAreaM2": 21594.41
+    },
+    {
+      "fid": 69,
+      "runoffCoefficient": 0.5974,
+      "drainageAreaM2": 18224.83
+    },
+    {
+      "fid": 70,
+      "runoffCoefficient": 0.7286,
+      "drainageAreaM2": 13313.55
+    },
+    {
+      "fid": 71,
+      "runoffCoefficient": 0.7632,
+      "drainageAreaM2": 10629.03
+    },
+    {
+      "fid": 72,
+      "runoffCoefficient": 0.7714,
+      "drainageAreaM2": 17548.29
+    },
+    {
+      "fid": 73,
+      "runoffCoefficient": 0.5393,
+      "drainageAreaM2": 24015.69
+    },
+    {
+      "fid": 74,
+      "runoffCoefficient": 0.7587,
+      "drainageAreaM2": 11371.42
+    },
+    {
+      "fid": 75,
+      "runoffCoefficient": 0.7605,
+      "drainageAreaM2": 17219.31
+    },
+    {
+      "fid": 76,
+      "runoffCoefficient": 0.395,
+      "drainageAreaM2": 29054.45
+    },
+    {
+      "fid": 77,
+      "runoffCoefficient": 0.3707,
+      "drainageAreaM2": 26098.89
+    },
+    {
+      "fid": 78,
+      "runoffCoefficient": 0.7584,
+      "drainageAreaM2": 13632.31
+    },
+    {
+      "fid": 79,
+      "runoffCoefficient": 0.7586,
+      "drainageAreaM2": 11053.95
+    },
+    {
+      "fid": 80,
+      "runoffCoefficient": 0.7531,
+      "drainageAreaM2": 16351.81
+    },
+    {
+      "fid": 81,
+      "runoffCoefficient": 0.6567,
+      "drainageAreaM2": 19346.39
+    },
+    {
+      "fid": 82,
+      "runoffCoefficient": 0.7179,
+      "drainageAreaM2": 15482.17
+    },
+    {
+      "fid": 83,
+      "runoffCoefficient": 0.7238,
+      "drainageAreaM2": 13239.14
+    },
+    {
+      "fid": 84,
+      "runoffCoefficient": 0.4838,
+      "drainageAreaM2": 34076.2
+    },
+    {
+      "fid": 85,
+      "runoffCoefficient": 0.697,
+      "drainageAreaM2": 18416.88
+    },
+    {
+      "fid": 86,
+      "runoffCoefficient": 0.6473,
+      "drainageAreaM2": 17249.61
+    },
+    {
+      "fid": 87,
+      "runoffCoefficient": 0.7729,
+      "drainageAreaM2": 14915.56
+    },
+    {
+      "fid": 88,
+      "runoffCoefficient": 0.6215,
+      "drainageAreaM2": 33963.52
+    },
+    {
+      "fid": 89,
+      "runoffCoefficient": 0.6044,
+      "drainageAreaM2": 19825.08
+    },
+    {
+      "fid": 90,
+      "runoffCoefficient": 0.6216,
+      "drainageAreaM2": 23039.59
+    },
+    {
+      "fid": 91,
+      "runoffCoefficient": 0.7064,
+      "drainageAreaM2": 19731.09
+    },
+    {
+      "fid": 92,
+      "runoffCoefficient": 0.5832,
+      "drainageAreaM2": 15171.9
+    },
+    {
+      "fid": 93,
+      "runoffCoefficient": 0.7609,
+      "drainageAreaM2": 15123.84
+    },
+    {
+      "fid": 94,
+      "runoffCoefficient": 0.5643,
+      "drainageAreaM2": 21122.28
+    },
+    {
+      "fid": 95,
+      "runoffCoefficient": 0.7568,
+      "drainageAreaM2": 17192.96
+    },
+    {
+      "fid": 96,
+      "runoffCoefficient": 0.4693,
+      "drainageAreaM2": 18725.25
+    },
+    {
+      "fid": 97,
+      "runoffCoefficient": 0.5849,
+      "drainageAreaM2": 18775.76
+    },
+    {
+      "fid": 98,
+      "runoffCoefficient": 0.5062,
+      "drainageAreaM2": 21433.85
+    },
+    {
+      "fid": 99,
+      "runoffCoefficient": 0.5683,
+      "drainageAreaM2": 21895.28
+    },
+    {
+      "fid": 100,
+      "runoffCoefficient": 0.6493,
+      "drainageAreaM2": 14045.35
+    },
+    {
+      "fid": 101,
+      "runoffCoefficient": 0.7455,
+      "drainageAreaM2": 19679.02
+    },
+    {
+      "fid": 102,
+      "runoffCoefficient": 0.7835,
+      "drainageAreaM2": 15716.4
+    },
+    {
+      "fid": 103,
+      "runoffCoefficient": 0.7188,
+      "drainageAreaM2": 16810.87
+    },
+    {
+      "fid": 104,
+      "runoffCoefficient": 0.3854,
+      "drainageAreaM2": 23830.06
+    },
+    {
+      "fid": 105,
+      "runoffCoefficient": 0.5493,
+      "drainageAreaM2": 20941.68
+    },
+    {
+      "fid": 106,
+      "runoffCoefficient": 0.731,
+      "drainageAreaM2": 22871.75
+    },
+    {
+      "fid": 107,
+      "runoffCoefficient": 0.6824,
+      "drainageAreaM2": 15152.75
+    },
+    {
+      "fid": 108,
+      "runoffCoefficient": 0.7274,
+      "drainageAreaM2": 17363.43
+    },
+    {
+      "fid": 109,
+      "runoffCoefficient": 0.7595,
+      "drainageAreaM2": 21149.25
+    },
+    {
+      "fid": 110,
+      "runoffCoefficient": 0.6896,
+      "drainageAreaM2": 19731.6
+    },
+    {
+      "fid": 111,
+      "runoffCoefficient": 0.7246,
+      "drainageAreaM2": 18795.14
+    },
+    {
+      "fid": 112,
+      "runoffCoefficient": 0.5768,
+      "drainageAreaM2": 24187.6
+    },
+    {
+      "fid": 113,
+      "runoffCoefficient": 0.658,
+      "drainageAreaM2": 21848.51
+    },
+    {
+      "fid": 114,
+      "runoffCoefficient": 0.6609,
+      "drainageAreaM2": 21718.17
+    },
+    {
+      "fid": 115,
+      "runoffCoefficient": 0.4817,
+      "drainageAreaM2": 21457.53
+    },
+    {
+      "fid": 116,
+      "runoffCoefficient": 0.5617,
+      "drainageAreaM2": 19029.07
+    },
+    {
+      "fid": 117,
+      "runoffCoefficient": 0.6487,
+      "drainageAreaM2": 28015.89
+    },
+    {
+      "fid": 118,
+      "runoffCoefficient": 0.5557,
+      "drainageAreaM2": 24443.83
+    },
+    {
+      "fid": 119,
+      "runoffCoefficient": 0.5209,
+      "drainageAreaM2": 32551.85
+    },
+    {
+      "fid": 120,
+      "runoffCoefficient": 0.5925,
+      "drainageAreaM2": 20556.15
+    },
+    {
+      "fid": 121,
+      "runoffCoefficient": 0.668,
+      "drainageAreaM2": 14731.64
+    },
+    {
+      "fid": 122,
+      "runoffCoefficient": 0.6695,
+      "drainageAreaM2": 33607.18
+    },
+    {
+      "fid": 123,
+      "runoffCoefficient": 0.6941,
+      "drainageAreaM2": 41694.97
+    },
+    {
+      "fid": 124,
+      "runoffCoefficient": 0.7094,
+      "drainageAreaM2": 28317.64
+    },
+    {
+      "fid": 125,
+      "runoffCoefficient": 0.4644,
+      "drainageAreaM2": 19901.07
+    },
+    {
+      "fid": 126,
+      "runoffCoefficient": 0.5392,
+      "drainageAreaM2": 21362.81
+    },
+    {
+      "fid": 127,
+      "runoffCoefficient": 0.6168,
+      "drainageAreaM2": 17006.99
+    },
+    {
+      "fid": 128,
+      "runoffCoefficient": 0.7012,
+      "drainageAreaM2": 17840.6
+    },
+    {
+      "fid": 129,
+      "runoffCoefficient": 0.7198,
+      "drainageAreaM2": 16412.21
+    },
+    {
+      "fid": 130,
+      "runoffCoefficient": 0.5641,
+      "drainageAreaM2": 25825.1
+    },
+    {
+      "fid": 131,
+      "runoffCoefficient": 0.7575,
+      "drainageAreaM2": 19416.53
+    },
+    {
+      "fid": 132,
+      "runoffCoefficient": 0.7118,
+      "drainageAreaM2": 14646.05
+    },
+    {
+      "fid": 133,
+      "runoffCoefficient": 0.6226,
+      "drainageAreaM2": 19700.46
+    },
+    {
+      "fid": 134,
+      "runoffCoefficient": 0.6455,
+      "drainageAreaM2": 25071.76
+    },
+    {
+      "fid": 135,
+      "runoffCoefficient": 0.7023,
+      "drainageAreaM2": 21806.58
+    },
+    {
+      "fid": 136,
+      "runoffCoefficient": 0.746,
+      "drainageAreaM2": 22919.36
+    },
+    {
+      "fid": 137,
+      "runoffCoefficient": 0.6522,
+      "drainageAreaM2": 11985.95
+    },
+    {
+      "fid": 138,
+      "runoffCoefficient": 0.7128,
+      "drainageAreaM2": 16162.74
+    },
+    {
+      "fid": 139,
+      "runoffCoefficient": 0.7655,
+      "drainageAreaM2": 16208.99
+    },
+    {
+      "fid": 140,
+      "runoffCoefficient": 0.8258,
+      "drainageAreaM2": 15219.24
+    },
+    {
+      "fid": 141,
+      "runoffCoefficient": 0.7563,
+      "drainageAreaM2": 17051.31
+    },
+    {
+      "fid": 142,
+      "runoffCoefficient": 0.609,
+      "drainageAreaM2": 18534.37
+    },
+    {
+      "fid": 143,
+      "runoffCoefficient": 0.6523,
+      "drainageAreaM2": 24296.78
+    },
+    {
+      "fid": 144,
+      "runoffCoefficient": 0.7642,
+      "drainageAreaM2": 18088.12
+    },
+    {
+      "fid": 145,
+      "runoffCoefficient": 0.7637,
+      "drainageAreaM2": 16045.03
+    },
+    {
+      "fid": 146,
+      "runoffCoefficient": 0.6597,
+      "drainageAreaM2": 27169.2
+    },
+    {
+      "fid": 147,
+      "runoffCoefficient": 0.6966,
+      "drainageAreaM2": 20784.82
+    },
+    {
+      "fid": 148,
+      "runoffCoefficient": 0.7807,
+      "drainageAreaM2": 16579.1
+    },
+    {
+      "fid": 149,
+      "runoffCoefficient": 0.6572,
+      "drainageAreaM2": 18977.44
+    },
+    {
+      "fid": 150,
+      "runoffCoefficient": 0.7666,
+      "drainageAreaM2": 19105.27
+    },
+    {
+      "fid": 151,
+      "runoffCoefficient": 0.7755,
+      "drainageAreaM2": 11228.28
+    },
+    {
+      "fid": 152,
+      "runoffCoefficient": 0.7455,
+      "drainageAreaM2": 12516.53
+    },
+    {
+      "fid": 153,
+      "runoffCoefficient": 0.7691,
+      "drainageAreaM2": 17175.98
+    },
+    {
+      "fid": 154,
+      "runoffCoefficient": 0.5791,
+      "drainageAreaM2": 20022.28
+    },
+    {
+      "fid": 155,
+      "runoffCoefficient": 0.756,
+      "drainageAreaM2": 9803.82
+    },
+    {
+      "fid": 156,
+      "runoffCoefficient": 0.778,
+      "drainageAreaM2": 12937.6
+    },
+    {
+      "fid": 157,
+      "runoffCoefficient": 0.719,
+      "drainageAreaM2": 16658.81
+    },
+    {
+      "fid": 158,
+      "runoffCoefficient": 0.5729,
+      "drainageAreaM2": 16399.99
+    },
+    {
+      "fid": 159,
+      "runoffCoefficient": 0.7306,
+      "drainageAreaM2": 11313.92
+    },
+    {
+      "fid": 160,
+      "runoffCoefficient": 0.7498,
+      "drainageAreaM2": 14603.08
+    },
+    {
+      "fid": 161,
+      "runoffCoefficient": 0.7289,
+      "drainageAreaM2": 17663.25
+    },
+    {
+      "fid": 162,
+      "runoffCoefficient": 0.7296,
+      "drainageAreaM2": 18805.25
+    },
+    {
+      "fid": 163,
+      "runoffCoefficient": 0.75,
+      "drainageAreaM2": 16038.17
+    },
+    {
+      "fid": 164,
+      "runoffCoefficient": 0.6323,
+      "drainageAreaM2": 21937.47
+    },
+    {
+      "fid": 165,
+      "runoffCoefficient": 0.7068,
+      "drainageAreaM2": 26591.12
+    },
+    {
+      "fid": 166,
+      "runoffCoefficient": 0.7469,
+      "drainageAreaM2": 14933.87
+    },
+    {
+      "fid": 167,
+      "runoffCoefficient": 0.6475,
+      "drainageAreaM2": 19379.29
+    },
+    {
+      "fid": 168,
+      "runoffCoefficient": 0.7004,
+      "drainageAreaM2": 20100.44
+    },
+    {
+      "fid": 169,
+      "runoffCoefficient": 0.5838,
+      "drainageAreaM2": 19248.54
+    },
+    {
+      "fid": 170,
+      "runoffCoefficient": 0.709,
+      "drainageAreaM2": 21652.99
+    },
+    {
+      "fid": 171,
+      "runoffCoefficient": 0.6148,
+      "drainageAreaM2": 23131.35
+    },
+    {
+      "fid": 172,
+      "runoffCoefficient": 0.6167,
+      "drainageAreaM2": 21265.68
+    },
+    {
+      "fid": 173,
+      "runoffCoefficient": 0.466,
+      "drainageAreaM2": 18300.92
+    },
+    {
+      "fid": 174,
+      "runoffCoefficient": 0.6103,
+      "drainageAreaM2": 21790.8
+    },
+    {
+      "fid": 175,
+      "runoffCoefficient": 0.7067,
+      "drainageAreaM2": 24421.82
+    },
+    {
+      "fid": 176,
+      "runoffCoefficient": 0.6794,
+      "drainageAreaM2": 18127.03
+    },
+    {
+      "fid": 177,
+      "runoffCoefficient": 0.7754,
+      "drainageAreaM2": 18862.03
+    },
+    {
+      "fid": 178,
+      "runoffCoefficient": 0.7537,
+      "drainageAreaM2": 17535.91
+    },
+    {
+      "fid": 179,
+      "runoffCoefficient": 0.7245,
+      "drainageAreaM2": 17684.81
+    },
+    {
+      "fid": 180,
+      "runoffCoefficient": 0.772,
+      "drainageAreaM2": 22644.68
+    },
+    {
+      "fid": 181,
+      "runoffCoefficient": 0.7607,
+      "drainageAreaM2": 12997.03
+    },
+    {
+      "fid": 182,
+      "runoffCoefficient": 0.7283,
+      "drainageAreaM2": 11932.47
+    },
+    {
+      "fid": 183,
+      "runoffCoefficient": 0.766,
+      "drainageAreaM2": 17086.36
+    },
+    {
+      "fid": 184,
+      "runoffCoefficient": 0.7601,
+      "drainageAreaM2": 15692.76
+    },
+    {
+      "fid": 185,
+      "runoffCoefficient": 0.6305,
+      "drainageAreaM2": 16122.22
+    },
+    {
+      "fid": 186,
+      "runoffCoefficient": 0.6965,
+      "drainageAreaM2": 20563.84
+    },
+    {
+      "fid": 187,
+      "runoffCoefficient": 0.6515,
+      "drainageAreaM2": 14775.84
+    },
+    {
+      "fid": 188,
+      "runoffCoefficient": 0.6975,
+      "drainageAreaM2": 24582.56
+    },
+    {
+      "fid": 189,
+      "runoffCoefficient": 0.6488,
+      "drainageAreaM2": 23858.48
+    },
+    {
+      "fid": 190,
+      "runoffCoefficient": 0.6491,
+      "drainageAreaM2": 21909.2
+    },
+    {
+      "fid": 191,
+      "runoffCoefficient": 0.5937,
+      "drainageAreaM2": 27051.04
+    },
+    {
+      "fid": 192,
+      "runoffCoefficient": 0.5201,
+      "drainageAreaM2": 28601.25
+    },
+    {
+      "fid": 193,
+      "runoffCoefficient": 0.665,
+      "drainageAreaM2": 15405.31
+    },
+    {
+      "fid": 194,
+      "runoffCoefficient": 0.5539,
+      "drainageAreaM2": 29153.89
+    },
+    {
+      "fid": 195,
+      "runoffCoefficient": 0.5838,
+      "drainageAreaM2": 34378.3
+    },
+    {
+      "fid": 196,
+      "runoffCoefficient": 0.595,
+      "drainageAreaM2": 34616.74
+    },
+    {
+      "fid": 197,
+      "runoffCoefficient": 0.6986,
+      "drainageAreaM2": 18402.97
+    },
+    {
+      "fid": 198,
+      "runoffCoefficient": 0.7092,
+      "drainageAreaM2": 22090.71
+    },
+    {
+      "fid": 199,
+      "runoffCoefficient": 0.546,
+      "drainageAreaM2": 26492.61
+    },
+    {
+      "fid": 200,
+      "runoffCoefficient": 0.724,
+      "drainageAreaM2": 17954.36
+    },
+    {
+      "fid": 201,
+      "runoffCoefficient": 0.5768,
+      "drainageAreaM2": 28842.53
+    },
+    {
+      "fid": 202,
+      "runoffCoefficient": 0.7034,
+      "drainageAreaM2": 18045.17
+    },
+    {
+      "fid": 203,
+      "runoffCoefficient": 0.7534,
+      "drainageAreaM2": 18635.6
+    },
+    {
+      "fid": 204,
+      "runoffCoefficient": 0.6284,
+      "drainageAreaM2": 21229.48
+    },
+    {
+      "fid": 205,
+      "runoffCoefficient": 0.7193,
+      "drainageAreaM2": 20943.11
+    },
+    {
+      "fid": 206,
+      "runoffCoefficient": 0.6998,
+      "drainageAreaM2": 20523.57
+    },
+    {
+      "fid": 207,
+      "runoffCoefficient": 0.8171,
+      "drainageAreaM2": 16633.28
+    },
+    {
+      "fid": 208,
+      "runoffCoefficient": 0.7453,
+      "drainageAreaM2": 16287.1
+    },
+    {
+      "fid": 209,
+      "runoffCoefficient": 0.67,
+      "drainageAreaM2": 12545.56
+    },
+    {
+      "fid": 210,
+      "runoffCoefficient": 0.7576,
+      "drainageAreaM2": 13890.37
+    },
+    {
+      "fid": 211,
+      "runoffCoefficient": 0.7863,
+      "drainageAreaM2": 16676.81
+    },
+    {
+      "fid": 212,
+      "runoffCoefficient": 0.707,
+      "drainageAreaM2": 21287.15
+    },
+    {
+      "fid": 213,
+      "runoffCoefficient": 0.7028,
+      "drainageAreaM2": 24912.08
+    },
+    {
+      "fid": 214,
+      "runoffCoefficient": 0.7539,
+      "drainageAreaM2": 17836.92
+    },
+    {
+      "fid": 215,
+      "runoffCoefficient": 0.8264,
+      "drainageAreaM2": 13928.84
+    },
+    {
+      "fid": 216,
+      "runoffCoefficient": 0.7214,
+      "drainageAreaM2": 17588.97
+    },
+    {
+      "fid": 217,
+      "runoffCoefficient": 0.7594,
+      "drainageAreaM2": 21605.02
+    },
+    {
+      "fid": 218,
+      "runoffCoefficient": 0.7846,
+      "drainageAreaM2": 15293.6
+    },
+    {
+      "fid": 219,
+      "runoffCoefficient": 0.5536,
+      "drainageAreaM2": 23965.12
+    },
+    {
+      "fid": 220,
+      "runoffCoefficient": 0.5958,
+      "drainageAreaM2": 22076.62
+    },
+    {
+      "fid": 221,
+      "runoffCoefficient": 0.6271,
+      "drainageAreaM2": 12130.75
+    },
+    {
+      "fid": 222,
+      "runoffCoefficient": 0.7595,
+      "drainageAreaM2": 18956.32
+    },
+    {
+      "fid": 223,
+      "runoffCoefficient": 0.7033,
+      "drainageAreaM2": 18340.32
+    },
+    {
+      "fid": 224,
+      "runoffCoefficient": 0.7107,
+      "drainageAreaM2": 17585.58
+    },
+    {
+      "fid": 225,
+      "runoffCoefficient": 0.6841,
+      "drainageAreaM2": 26698.98
+    },
+    {
+      "fid": 226,
+      "runoffCoefficient": 0.5751,
+      "drainageAreaM2": 21428.15
+    },
+    {
+      "fid": 227,
+      "runoffCoefficient": 0.7667,
+      "drainageAreaM2": 9664.7
+    },
+    {
+      "fid": 228,
+      "runoffCoefficient": 0.7317,
+      "drainageAreaM2": 19431.15
+    },
+    {
+      "fid": 229,
+      "runoffCoefficient": 0.718,
+      "drainageAreaM2": 13609.7
+    },
+    {
+      "fid": 230,
+      "runoffCoefficient": 0.7306,
+      "drainageAreaM2": 12924.89
+    },
+    {
+      "fid": 231,
+      "runoffCoefficient": 0.7931,
+      "drainageAreaM2": 8335.77
+    },
+    {
+      "fid": 232,
+      "runoffCoefficient": 0.7509,
+      "drainageAreaM2": 17400.99
+    },
+    {
+      "fid": 233,
+      "runoffCoefficient": 0.7832,
+      "drainageAreaM2": 11413.35
+    },
+    {
+      "fid": 234,
+      "runoffCoefficient": 0.6684,
+      "drainageAreaM2": 14084.6
+    },
+    {
+      "fid": 235,
+      "runoffCoefficient": 0.7034,
+      "drainageAreaM2": 12452.35
+    },
+    {
+      "fid": 236,
+      "runoffCoefficient": 0.852,
+      "drainageAreaM2": 19237.32
+    },
+    {
+      "fid": 237,
+      "runoffCoefficient": 0.7232,
+      "drainageAreaM2": 16793.02
+    },
+    {
+      "fid": 238,
+      "runoffCoefficient": 0.778,
+      "drainageAreaM2": 18671.5
+    },
+    {
+      "fid": 239,
+      "runoffCoefficient": 0.7609,
+      "drainageAreaM2": 15051.38
+    },
+    {
+      "fid": 240,
+      "runoffCoefficient": 0.5813,
+      "drainageAreaM2": 18059.89
+    },
+    {
+      "fid": 241,
+      "runoffCoefficient": 0.5242,
+      "drainageAreaM2": 30516.32
+    },
+    {
+      "fid": 242,
+      "runoffCoefficient": 0.5783,
+      "drainageAreaM2": 23160.97
+    },
+    {
+      "fid": 243,
+      "runoffCoefficient": 0.742,
+      "drainageAreaM2": 20311.22
+    },
+    {
+      "fid": 244,
+      "runoffCoefficient": 0.778,
+      "drainageAreaM2": 16267.6
+    },
+    {
+      "fid": 245,
+      "runoffCoefficient": 0.7483,
+      "drainageAreaM2": 16882.06
+    },
+    {
+      "fid": 246,
+      "runoffCoefficient": 0.4172,
+      "drainageAreaM2": 31263.98
+    },
+    {
+      "fid": 247,
+      "runoffCoefficient": 0.6137,
+      "drainageAreaM2": 28767.42
+    },
+    {
+      "fid": 248,
+      "runoffCoefficient": 0.4528,
+      "drainageAreaM2": 21230.56
+    },
+    {
+      "fid": 249,
+      "runoffCoefficient": 0.7366,
+      "drainageAreaM2": 16883.82
+    },
+    {
+      "fid": 250,
+      "runoffCoefficient": 0.3749,
+      "drainageAreaM2": 26109.89
+    },
+    {
+      "fid": 251,
+      "runoffCoefficient": 0.6447,
+      "drainageAreaM2": 18118.37
+    },
+    {
+      "fid": 252,
+      "runoffCoefficient": 0.724,
+      "drainageAreaM2": 14048.49
+    },
+    {
+      "fid": 253,
+      "runoffCoefficient": 0.5116,
+      "drainageAreaM2": 23663.24
+    },
+    {
+      "fid": 254,
+      "runoffCoefficient": 0.7366,
+      "drainageAreaM2": 17805.22
+    },
+    {
+      "fid": 255,
+      "runoffCoefficient": 0.571,
+      "drainageAreaM2": 23275.45
+    },
+    {
+      "fid": 256,
+      "runoffCoefficient": 0.7341,
+      "drainageAreaM2": 15444.75
+    },
+    {
+      "fid": 257,
+      "runoffCoefficient": 0.8178,
+      "drainageAreaM2": 12245.33
+    },
+    {
+      "fid": 258,
+      "runoffCoefficient": 0.6897,
+      "drainageAreaM2": 18146.67
+    },
+    {
+      "fid": 259,
+      "runoffCoefficient": 0.7667,
+      "drainageAreaM2": 17231.81
+    },
+    {
+      "fid": 260,
+      "runoffCoefficient": 0.6073,
+      "drainageAreaM2": 28663.64
+    },
+    {
+      "fid": 261,
+      "runoffCoefficient": 0.6764,
+      "drainageAreaM2": 20651.45
+    },
+    {
+      "fid": 262,
+      "runoffCoefficient": 0.7296,
+      "drainageAreaM2": 15156.16
+    },
+    {
+      "fid": 263,
+      "runoffCoefficient": 0.5922,
+      "drainageAreaM2": 21901.51
+    },
+    {
+      "fid": 264,
+      "runoffCoefficient": 0.5117,
+      "drainageAreaM2": 25420.1
+    },
+    {
+      "fid": 265,
+      "runoffCoefficient": 0.4688,
+      "drainageAreaM2": 20894.63
+    },
+    {
+      "fid": 266,
+      "runoffCoefficient": 0.6589,
+      "drainageAreaM2": 29296.65
+    },
+    {
+      "fid": 267,
+      "runoffCoefficient": 0.6553,
+      "drainageAreaM2": 20194.72
+    },
+    {
+      "fid": 268,
+      "runoffCoefficient": 0.4738,
+      "drainageAreaM2": 18645.05
+    },
+    {
+      "fid": 269,
+      "runoffCoefficient": 0.7635,
+      "drainageAreaM2": 17777.38
+    },
+    {
+      "fid": 270,
+      "runoffCoefficient": 0.6823,
+      "drainageAreaM2": 20034.22
+    },
+    {
+      "fid": 271,
+      "runoffCoefficient": 0.6088,
+      "drainageAreaM2": 28215.02
+    },
+    {
+      "fid": 272,
+      "runoffCoefficient": 0.5894,
+      "drainageAreaM2": 17704.47
+    },
+    {
+      "fid": 273,
+      "runoffCoefficient": 0.7259,
+      "drainageAreaM2": 23162.79
+    },
+    {
+      "fid": 274,
+      "runoffCoefficient": 0.7065,
+      "drainageAreaM2": 13601.95
+    },
+    {
+      "fid": 275,
+      "runoffCoefficient": 0.7265,
+      "drainageAreaM2": 12416.92
+    },
+    {
+      "fid": 276,
+      "runoffCoefficient": 0.7065,
+      "drainageAreaM2": 17582.71
+    },
+    {
+      "fid": 277,
+      "runoffCoefficient": 0.7762,
+      "drainageAreaM2": 15107.88
+    },
+    {
+      "fid": 278,
+      "runoffCoefficient": 0.6936,
+      "drainageAreaM2": 23368.94
+    },
+    {
+      "fid": 279,
+      "runoffCoefficient": 0.7327,
+      "drainageAreaM2": 16026.53
+    },
+    {
+      "fid": 280,
+      "runoffCoefficient": 0.775,
+      "drainageAreaM2": 19347.5
+    },
+    {
+      "fid": 281,
+      "runoffCoefficient": 0.6653,
+      "drainageAreaM2": 9491.38
+    },
+    {
+      "fid": 282,
+      "runoffCoefficient": 0.757,
+      "drainageAreaM2": 19761.35
+    },
+    {
+      "fid": 283,
+      "runoffCoefficient": 0.5343,
+      "drainageAreaM2": 19083.65
+    },
+    {
+      "fid": 284,
+      "runoffCoefficient": 0.6073,
+      "drainageAreaM2": 22346.18
+    },
+    {
+      "fid": 285,
+      "runoffCoefficient": 0.6628,
+      "drainageAreaM2": 15493.86
+    },
+    {
+      "fid": 286,
+      "runoffCoefficient": 0.5058,
+      "drainageAreaM2": 17547.38
+    },
+    {
+      "fid": 287,
+      "runoffCoefficient": 0.6516,
+      "drainageAreaM2": 19659.87
+    },
+    {
+      "fid": 288,
+      "runoffCoefficient": 0.3569,
+      "drainageAreaM2": 16812.49
+    },
+    {
+      "fid": 289,
+      "runoffCoefficient": 0.4739,
+      "drainageAreaM2": 30045.32
+    },
+    {
+      "fid": 290,
+      "runoffCoefficient": 0.6727,
+      "drainageAreaM2": 17964.44
+    },
+    {
+      "fid": 291,
+      "runoffCoefficient": 0.7482,
+      "drainageAreaM2": 14072.9
+    },
+    {
+      "fid": 292,
+      "runoffCoefficient": 0.721,
+      "drainageAreaM2": 12269.05
+    },
+    {
+      "fid": 293,
+      "runoffCoefficient": 0.646,
+      "drainageAreaM2": 18685.27
+    },
+    {
+      "fid": 294,
+      "runoffCoefficient": 0.6726,
+      "drainageAreaM2": 20747.45
+    },
+    {
+      "fid": 295,
+      "runoffCoefficient": 0.5243,
+      "drainageAreaM2": 27464.04
+    },
+    {
+      "fid": 296,
+      "runoffCoefficient": 0.5962,
+      "drainageAreaM2": 19209.36
+    },
+    {
+      "fid": 297,
+      "runoffCoefficient": 0.4565,
+      "drainageAreaM2": 29971.15
+    },
+    {
+      "fid": 298,
+      "runoffCoefficient": 0.85,
+      "drainageAreaM2": 2391.09
+    },
+    {
+      "fid": 299,
+      "runoffCoefficient": 0.5597,
+      "drainageAreaM2": 40974.41
+    },
+    {
+      "fid": 300,
+      "runoffCoefficient": 0.5547,
+      "drainageAreaM2": 20945.07
+    },
+    {
+      "fid": 301,
+      "runoffCoefficient": 0.6818,
+      "drainageAreaM2": 20673.35
+    },
+    {
+      "fid": 302,
+      "runoffCoefficient": 0.5928,
+      "drainageAreaM2": 24493.94
+    },
+    {
+      "fid": 303,
+      "runoffCoefficient": 0.7401,
+      "drainageAreaM2": 16130.6
+    },
+    {
+      "fid": 304,
+      "runoffCoefficient": 0.6774,
+      "drainageAreaM2": 20172.14
+    },
+    {
+      "fid": 305,
+      "runoffCoefficient": 0.6681,
+      "drainageAreaM2": 15865.02
+    },
+    {
+      "fid": 306,
+      "runoffCoefficient": 0.8029,
+      "drainageAreaM2": 15879.42
+    },
+    {
+      "fid": 307,
+      "runoffCoefficient": 0.4334,
+      "drainageAreaM2": 23628.83
+    },
+    {
+      "fid": 308,
+      "runoffCoefficient": 0.688,
+      "drainageAreaM2": 12560.34
+    },
+    {
+      "fid": 309,
+      "runoffCoefficient": 0.7976,
+      "drainageAreaM2": 20579.54
+    },
+    {
+      "fid": 310,
+      "runoffCoefficient": 0.7664,
+      "drainageAreaM2": 15632.54
+    },
+    {
+      "fid": 311,
+      "runoffCoefficient": 0.4276,
+      "drainageAreaM2": 27586.32
+    },
+    {
+      "fid": 312,
+      "runoffCoefficient": 0.8393,
+      "drainageAreaM2": 11440.98
+    },
+    {
+      "fid": 313,
+      "runoffCoefficient": 0.6995,
+      "drainageAreaM2": 20491.82
+    },
+    {
+      "fid": 314,
+      "runoffCoefficient": 0.616,
+      "drainageAreaM2": 18965.07
+    },
+    {
+      "fid": 315,
+      "runoffCoefficient": 0.7639,
+      "drainageAreaM2": 14588.15
+    },
+    {
+      "fid": 316,
+      "runoffCoefficient": 0.4335,
+      "drainageAreaM2": 27652.56
+    },
+    {
+      "fid": 317,
+      "runoffCoefficient": 0.6609,
+      "drainageAreaM2": 21436.9
+    },
+    {
+      "fid": 318,
+      "runoffCoefficient": 0.7069,
+      "drainageAreaM2": 22076.41
+    },
+    {
+      "fid": 319,
+      "runoffCoefficient": 0.7276,
+      "drainageAreaM2": 14986.55
+    },
+    {
+      "fid": 320,
+      "runoffCoefficient": 0.6234,
+      "drainageAreaM2": 15034.07
+    },
+    {
+      "fid": 321,
+      "runoffCoefficient": 0.5328,
+      "drainageAreaM2": 25701.65
+    },
+    {
+      "fid": 322,
+      "runoffCoefficient": 0.7091,
+      "drainageAreaM2": 19042.82
+    },
+    {
+      "fid": 323,
+      "runoffCoefficient": 0.6459,
+      "drainageAreaM2": 22626.3
+    },
+    {
+      "fid": 324,
+      "runoffCoefficient": 0.712,
+      "drainageAreaM2": 19907.49
+    },
+    {
+      "fid": 325,
+      "runoffCoefficient": 0.5945,
+      "drainageAreaM2": 21565.3
+    },
+    {
+      "fid": 326,
+      "runoffCoefficient": 0.4889,
+      "drainageAreaM2": 24380.44
+    },
+    {
+      "fid": 327,
+      "runoffCoefficient": 0.575,
+      "drainageAreaM2": 21021.24
+    },
+    {
+      "fid": 328,
+      "runoffCoefficient": 0.515,
+      "drainageAreaM2": 23775.44
+    },
+    {
+      "fid": 329,
+      "runoffCoefficient": 0.6203,
+      "drainageAreaM2": 28057.19
+    },
+    {
+      "fid": 330,
+      "runoffCoefficient": 0.6671,
+      "drainageAreaM2": 17970.81
+    },
+    {
+      "fid": 331,
+      "runoffCoefficient": 0.6113,
+      "drainageAreaM2": 26411.93
+    },
+    {
+      "fid": 332,
+      "runoffCoefficient": 0.5839,
+      "drainageAreaM2": 22266.28
+    },
+    {
+      "fid": 333,
+      "runoffCoefficient": 0.6697,
+      "drainageAreaM2": 24529.25
+    },
+    {
+      "fid": 334,
+      "runoffCoefficient": 0.6556,
+      "drainageAreaM2": 20155.97
+    },
+    {
+      "fid": 335,
+      "runoffCoefficient": 0.7624,
+      "drainageAreaM2": 19847.01
+    },
+    {
+      "fid": 336,
+      "runoffCoefficient": 0.6831,
+      "drainageAreaM2": 22153.11
+    },
+    {
+      "fid": 337,
+      "runoffCoefficient": 0.7562,
+      "drainageAreaM2": 11247.03
+    },
+    {
+      "fid": 338,
+      "runoffCoefficient": 0.5907,
+      "drainageAreaM2": 22776.9
+    },
+    {
+      "fid": 339,
+      "runoffCoefficient": 0.6786,
+      "drainageAreaM2": 15930.22
+    },
+    {
+      "fid": 340,
+      "runoffCoefficient": 0.5502,
+      "drainageAreaM2": 18477.37
+    },
+    {
+      "fid": 341,
+      "runoffCoefficient": 0.4864,
+      "drainageAreaM2": 19572.1
+    },
+    {
+      "fid": 342,
+      "runoffCoefficient": 0.5734,
+      "drainageAreaM2": 17099.05
+    },
+    {
+      "fid": 343,
+      "runoffCoefficient": 0.6725,
+      "drainageAreaM2": 23246.82
+    },
+    {
+      "fid": 344,
+      "runoffCoefficient": 0.4479,
+      "drainageAreaM2": 23997.05
+    },
+    {
+      "fid": 345,
+      "runoffCoefficient": 0.7332,
+      "drainageAreaM2": 17639.67
+    },
+    {
+      "fid": 346,
+      "runoffCoefficient": 0.7904,
+      "drainageAreaM2": 21376.86
+    },
+    {
+      "fid": 347,
+      "runoffCoefficient": 0.736,
+      "drainageAreaM2": 14839.45
+    },
+    {
+      "fid": 348,
+      "runoffCoefficient": 0.3196,
+      "drainageAreaM2": 16669.08
+    },
+    {
+      "fid": 349,
+      "runoffCoefficient": 0.7269,
+      "drainageAreaM2": 18562.9
+    },
+    {
+      "fid": 350,
+      "runoffCoefficient": 0.6909,
+      "drainageAreaM2": 31978.56
+    },
+    {
+      "fid": 351,
+      "runoffCoefficient": 0.6706,
+      "drainageAreaM2": 31821.66
+    },
+    {
+      "fid": 352,
+      "runoffCoefficient": 0.8251,
+      "drainageAreaM2": 15499.12
+    },
+    {
+      "fid": 353,
+      "runoffCoefficient": 0.6317,
+      "drainageAreaM2": 17208.97
+    },
+    {
+      "fid": 354,
+      "runoffCoefficient": 0.7201,
+      "drainageAreaM2": 15229.65
+    },
+    {
+      "fid": 355,
+      "runoffCoefficient": 0.6291,
+      "drainageAreaM2": 24817.0
+    },
+    {
+      "fid": 356,
+      "runoffCoefficient": 0.6599,
+      "drainageAreaM2": 14358.65
+    },
+    {
+      "fid": 357,
+      "runoffCoefficient": 0.5803,
+      "drainageAreaM2": 17518.81
+    },
+    {
+      "fid": 358,
+      "runoffCoefficient": 0.7255,
+      "drainageAreaM2": 18108.38
+    },
+    {
+      "fid": 359,
+      "runoffCoefficient": 0.5771,
+      "drainageAreaM2": 14352.15
+    },
+    {
+      "fid": 360,
+      "runoffCoefficient": 0.6516,
+      "drainageAreaM2": 25409.57
+    },
+    {
+      "fid": 361,
+      "runoffCoefficient": 0.7651,
+      "drainageAreaM2": 18001.06
+    },
+    {
+      "fid": 362,
+      "runoffCoefficient": 0.7728,
+      "drainageAreaM2": 11092.2
+    },
+    {
+      "fid": 363,
+      "runoffCoefficient": 0.7439,
+      "drainageAreaM2": 15670.36
+    },
+    {
+      "fid": 364,
+      "runoffCoefficient": 0.7049,
+      "drainageAreaM2": 11461.49
+    },
+    {
+      "fid": 365,
+      "runoffCoefficient": 0.652,
+      "drainageAreaM2": 17007.97
+    },
+    {
+      "fid": 366,
+      "runoffCoefficient": 0.7236,
+      "drainageAreaM2": 23316.11
+    },
+    {
+      "fid": 367,
+      "runoffCoefficient": 0.5947,
+      "drainageAreaM2": 17306.66
+    },
+    {
+      "fid": 368,
+      "runoffCoefficient": 0.4657,
+      "drainageAreaM2": 24553.26
+    },
+    {
+      "fid": 369,
+      "runoffCoefficient": 0.682,
+      "drainageAreaM2": 24313.29
+    },
+    {
+      "fid": 370,
+      "runoffCoefficient": 0.5371,
+      "drainageAreaM2": 33479.9
+    },
+    {
+      "fid": 371,
+      "runoffCoefficient": 0.7123,
+      "drainageAreaM2": 24382.99
+    },
+    {
+      "fid": 372,
+      "runoffCoefficient": 0.4194,
+      "drainageAreaM2": 20735.33
+    },
+    {
+      "fid": 373,
+      "runoffCoefficient": 0.4884,
+      "drainageAreaM2": 18759.71
+    },
+    {
+      "fid": 374,
+      "runoffCoefficient": 0.6109,
+      "drainageAreaM2": 24676.5
+    },
+    {
+      "fid": 375,
+      "runoffCoefficient": 0.7287,
+      "drainageAreaM2": 10269.42
+    }
+  ],
+  "landUseCoefficients": [
+    {
+      "landUse": "Agricultural land",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Agriculture Plantation (Woody Plantation)",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Agriculture plantation",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Air port / Air strips",
+      "runoffCoefficient": 0.85
+    },
+    {
+      "landUse": "Aquaculture / Pisciculture",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Barren rocky / Stony Waste",
+      "runoffCoefficient": 0.6
+    },
+    {
+      "landUse": "Bus Terminus",
+      "runoffCoefficient": 0.9
+    },
+    {
+      "landUse": "Canal",
+      "runoffCoefficient": 0.95
+    },
+    {
+      "landUse": "Commercial Area",
+      "runoffCoefficient": 0.9
+    },
+    {
+      "landUse": "Crop land",
+      "runoffCoefficient": 0.3
+    },
+    {
+      "landUse": "Dumping Yard",
+      "runoffCoefficient": 0.75
+    },
+    {
+      "landUse": "Educational",
+      "runoffCoefficient": 0.75
+    },
+    {
+      "landUse": "Fallow land",
+      "runoffCoefficient": 0.3
+    },
+    {
+      "landUse": "Farm Pond",
+      "runoffCoefficient": 1.0
+    },
+    {
+      "landUse": "Forest Scrub",
+      "runoffCoefficient": 0.2
+    },
+    {
+      "landUse": "Forest plantation",
+      "runoffCoefficient": 0.18
+    },
+    {
+      "landUse": "Helipad",
+      "runoffCoefficient": 0.95
+    },
+    {
+      "landUse": "Heritage/Fort",
+      "runoffCoefficient": 0.6
+    },
+    {
+      "landUse": "Horticulture plantation",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Industrial",
+      "runoffCoefficient": 0.9
+    },
+    {
+      "landUse": "Industrial Area",
+      "runoffCoefficient": 0.9
+    },
+    {
+      "landUse": "Layout",
+      "runoffCoefficient": 0.6
+    },
+    {
+      "landUse": "Metro Rail",
+      "runoffCoefficient": 0.7
+    },
+    {
+      "landUse": "Metro Railway Station",
+      "runoffCoefficient": 0.85
+    },
+    {
+      "landUse": "Natural  (Ox-bow lake, Cut-off meander, Water logged)",
+      "runoffCoefficient": 1.0
+    },
+    {
+      "landUse": "Open Well",
+      "runoffCoefficient": 1.0
+    },
+    {
+      "landUse": "Open_Forest",
+      "runoffCoefficient": 0.15
+    },
+    {
+      "landUse": "Others",
+      "runoffCoefficient": 0.34
+    },
+    {
+      "landUse": "Park / Garden",
+      "runoffCoefficient": 0.22
+    },
+    {
+      "landUse": "Plantation",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Pond",
+      "runoffCoefficient": 1.0
+    },
+    {
+      "landUse": "Quarry / Brick Kilns",
+      "runoffCoefficient": 0.8
+    },
+    {
+      "landUse": "Rail",
+      "runoffCoefficient": 0.45
+    },
+    {
+      "landUse": "Railway station",
+      "runoffCoefficient": 0.85
+    },
+    {
+      "landUse": "Recreational",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Religious",
+      "runoffCoefficient": 0.85
+    },
+    {
+      "landUse": "Residential_Area",
+      "runoffCoefficient": 0.75
+    },
+    {
+      "landUse": "River",
+      "runoffCoefficient": 1.0
+    },
+    {
+      "landUse": "Road",
+      "runoffCoefficient": 0.95
+    },
+    {
+      "landUse": "School / Colleges",
+      "runoffCoefficient": 0.75
+    },
+    {
+      "landUse": "Scrub land-Dense",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Scrub land-Open",
+      "runoffCoefficient": 0.25
+    },
+    {
+      "landUse": "Seweage treatment plant",
+      "runoffCoefficient": 0.9
+    },
+    {
+      "landUse": "Stadium",
+      "runoffCoefficient": 0.35
+    },
+    {
+      "landUse": "Stream",
+      "runoffCoefficient": 1.0
+    },
+    {
+      "landUse": "Tank",
+      "runoffCoefficient": 1.0
+    },
+    {
+      "landUse": "Temple / Mosque / Church / Gurudwar",
+      "runoffCoefficient": 0.85
+    },
+    {
+      "landUse": "Transportation Nodes",
+      "runoffCoefficient": 0.8
+    },
+    {
+      "landUse": "University",
+      "runoffCoefficient": 0.8
+    },
+    {
+      "landUse": "Utilities",
+      "runoffCoefficient": 0.85
+    },
+    {
+      "landUse": "Vacant Land",
+      "runoffCoefficient": 0.3
+    },
+    {
+      "landUse": "Vegetated Area",
+      "runoffCoefficient": 0.22
+    },
+    {
+      "landUse": "Water treatment plant",
+      "runoffCoefficient": 0.85
+    },
+    {
+      "landUse": "Hamlets / Dispersed house",
+      "runoffCoefficient": 0.4,
+      "note": "Assigned 0.4 by user (not in original sheet)"
+    }
+  ]
+}

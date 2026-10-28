@@ -37,6 +37,8 @@
 
   --border:          var(--khaki-beige);
   --border-light:    var(--tea-green);
+
+  --page-waves: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='none'%3E%3Cpath d='M0 240 C 480 190, 960 290, 1440 230' fill='none' stroke='%23347745' stroke-opacity='0.2' stroke-width='1.75' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 500 C 480 450, 960 550, 1440 490' fill='none' stroke='%233669A9' stroke-opacity='0.16' stroke-width='1.75' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 760 C 480 710, 960 810, 1440 750' fill='none' stroke='%23347745' stroke-opacity='0.16' stroke-width='1.75' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
 }
 
 @theme {
@@ -88,8 +90,28 @@
 @layer base {
   body {
     background-color: var(--bg-page);
+    background-image: var(--page-waves);
+    background-size: 100vw 100vh;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-attachment: fixed;
     color: var(--text-body);
   }
+}
+
+/* Opaque page fills cover the body, so they need the same three waves. Translucent fills let the body waves show through. */
+@layer utilities {
+  .bg-\[\#c9d8bd\],
+  .page-lines {
+    background-image: var(--page-waves);
+    background-size: 100vw 100vh;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-attachment: fixed;
+  }
+}
+
+@layer base {
   h1, h2, h3, h4, h5, h6 {
     color: var(--text-heading);
   }

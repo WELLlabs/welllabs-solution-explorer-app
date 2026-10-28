@@ -9,9 +9,6 @@ import NewProjectsView, {
 } from "./NewProjectsView";
 import Interventions from "@/components/Interventions";
 
-import { TourProvider } from "@/components/TourGuide";
-import { MAP_TOUR_STEPS } from "@/utils/tourSteps";
-
 // Fallback local datasets
 import localProjects from "@/data/projects.json";
 import localWells from "@/data/wells.json";
@@ -29,7 +26,8 @@ import {
   FLOOD_SPOTS_DATA,
   WATERSHEDS_POLYGONS,
 } from "@/utils/constants";
-import { parseCSV, pointInPolygon, getCorporationForPoint } from "@/utils/geoUtils";
+import { parseCSV, pointInPolygon, getCorporationForPoint, isPointInGeometry } from "@/utils/geoUtils";
+import { findCatchmentForPoint } from "@/data/delineatedCatchments";
 import {
   normalizeProject,
   normalizeWell,
@@ -41,8 +39,8 @@ import {
 import LayerControlSidebar from "./LayerControlSidebar";
 import MapBoundarySearch from "./MapBoundarySearch";
 import ItemDetailsPane from "./ItemDetailsPane";
-import FundingDeckPanel from "./FundingDeckPanel";
-import FunderModal from "./FunderModal";
+import CatchmentProjectsPanel from "./CatchmentProjectsPanel";
+import WatershedInfoPopup from "./WatershedInfoPopup";
 import FundAProjectModal from "./FundAProjectModal";
 import useBoundaryLayers from "@/hooks/useBoundaryLayers";
 import useFloodHotspots from "@/hooks/useFloodHotspots";
@@ -66,11 +64,19 @@ const DataLayersView = () => {
   // so the browser back button returns to the map.
   const detailType = searchParams.get("detail");
   const detailId = searchParams.get("id");
+  const detailIdsParam = searchParams.get("ids");
   const activeDetailView = useMemo(() => {
-    if (detailType === "site") return { type: "site", id: detailId };
-    if (detailType === "intervention") return { type: "intervention", id: null };
+    if (detailType === "site") {
+      const ids = detailIdsParam
+        ? detailIdsParam.split(",").map((id) => id.trim()).filter(Boolean)
+        : detailId
+          ? [detailId]
+          : [];
+      return { type: "site", id: detailId || ids[0] || null, ids };
+    }
+    if (detailType === "intervention") return { type: "intervention", id: null, ids: [] };
     return null;
-  }, [detailType, detailId]);
+  }, [detailType, detailId, detailIdsParam]);
 
   const setActiveDetailView = useCallback(
     (view) => {
@@ -78,7 +84,14 @@ const DataLayersView = () => {
         setSearchParams({}, { replace: true });
         return;
       }
-      const params = view.type === "site" ? { detail: "site", ...(view.id ? { id: view.id } : {}) } : { detail: "intervention" };
+      const params =
+        view.type === "site"
+          ? {
+            detail: "site",
+            ...(view.id ? { id: view.id } : {}),
+            ...(view.ids?.length ? { ids: view.ids.join(",") } : {}),
+          }
+          : { detail: "intervention" };
       setSearchParams(params, { state: { fromMap: true } });
       window.scrollTo({ top: 0 });
     },
@@ -185,32 +198,53 @@ const DataLayersView = () => {
   // ── Selected Item & Funding Deck State ─────────────────────────────────
   // Selected item (project, well, corporation, or flood hotspot) for full details panel
   const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedFundPicks, setSelectedFundPicks] = useState(new Set());
   const [isRightDeckOpen, setIsRightDeckOpen] = useState(true);
-  const [showFunderModal, setShowFunderModal] = useState(false);
-  const [funderFormData, setFunderFormData] = useState({
-    orgName: "",
-    csrSector: "Water Security & Flood Mitigation",
-    email: "",
-    notes: "",
-  });
-  const [committedPicks, setCommittedPicks] = useState(new Set());
-  const [commitSuccess, setCommitSuccess] = useState(false);
+  const [layersPanelOpen, setLayersPanelOpen] = useState(true);
+  const [activeCatchment, setActiveCatchment] = useState(null);
+  const [dismissedWatershedId, setDismissedWatershedId] = useState(null);
+  const activeCatchmentLayerRef = useRef(null);
 
   // "Fund a project" Questionnaire Modal state
   const [showFundAProjectModal, setShowFundAProjectModal] = useState(false);
   const [appliedFundFilters, setAppliedFundFilters] = useState(null);
 
-  // Lock background scrolling when funder popup is open
+  // When Citywide BGG is switched on, print what the frontend actually received.
   useEffect(() => {
-    if (showFunderModal) {
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prevOverflow;
-      };
-    }
-  }, [showFunderModal]);
+    if (!showNewProjects) return;
+
+    const fromApi = Array.isArray(sitesData) && sitesData.length > 0;
+    const projects = fromApi ? sitesData : fallbackSites;
+    const withCoordinates = projects.filter(
+      (site) => site.latitude != null && site.longitude != null,
+    );
+    const byType = projects.reduce((counts, site) => {
+      const type = site.type || "unknown";
+      counts[type] = (counts[type] || 0) + 1;
+      return counts;
+    }, {});
+
+    console.group(
+      `%c[Citywide BGG] ${projects.length} projects on the frontend`,
+      "color:#347745;font-weight:bold;font-size:14px;",
+    );
+    console.log("Source:", fromApi ? "API /sites" : "local fallback");
+    console.log("Projects received:", projects.length);
+    console.log("With coordinates:", withCoordinates.length);
+    console.log("By type:", byType);
+    console.table(
+      projects.map((site) => ({
+        id: site.site_id,
+        name: site.name,
+        type: site.type,
+        ward: site.wardName || "—",
+        latitude: site.latitude,
+        longitude: site.longitude,
+        interventions: (site.interventions || []).length,
+      })),
+    );
+    console.log("Full project data:", projects);
+    console.groupEnd();
+  }, [showNewProjects, sitesData]);
 
   // Normalize all live site projects for the funding deck
   const cityProjectsList = useMemo(() => {
@@ -218,84 +252,15 @@ const DataLayersView = () => {
     return sitesData.map((s) => preprocessProject(normaliseProject(s)));
   }, [sitesData]);
 
-  // Active clicked project for the right-side funding & assets deck
-  const activeProject = useMemo(() => {
-    if (!selectedItem || !selectedItem.isSiteProject) return null;
-    return (
-      cityProjectsList.find(
-        (p) => p.id === selectedItem.site_id || p.id === selectedItem._raw?.site_id
-      ) || null
-    );
-  }, [selectedItem, cityProjectsList]);
-
-  // Compute total funding summary based on funder selections
-  const fundSummary = useMemo(() => {
-    let totalCost = 0;
-    let totalAssets = 0;
-    const projectIds = new Set();
-
-    cityProjectsList.forEach((p) => {
-      p.assets.forEach((a, idx) => {
-        const key = `${p.id}__${idx}`;
-        if (selectedFundPicks.has(key)) {
-          totalCost += a.cost || 0;
-          totalAssets += 1;
-          projectIds.add(p.id);
-        }
-      });
+  const catchmentProjects = useMemo(() => {
+    const geometry = activeCatchment?.feature?.geometry;
+    if (!geometry) return [];
+    return cityProjectsList.filter((project) => {
+      const lat = project._raw?.latitude ?? project.latitude;
+      const lng = project._raw?.longitude ?? project.longitude;
+      return isPointInGeometry(lat, lng, geometry);
     });
-
-    return {
-      totalCost,
-      totalAssets,
-      projectsCount: projectIds.size,
-    };
-  }, [cityProjectsList, selectedFundPicks]);
-
-  const toggleFundPick = (projId, assetIdx) => {
-    const key = `${projId}__${assetIdx}`;
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
-  const toggleProjectAllAssets = (proj) => {
-    if (!proj) return;
-    const projKeys = (proj.assets || []).map((_, i) => `${proj.id}__${i}`);
-    const allSelected = projKeys.every((k) => selectedFundPicks.has(k));
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      if (allSelected) {
-        projKeys.forEach((k) => next.delete(k));
-      } else {
-        projKeys.forEach((k) => next.add(k));
-      }
-      return next;
-    });
-  };
-
-  const selectAllAvailableAssets = (targetProj = activeProject) => {
-    if (!targetProj) return;
-    const projKeys = (targetProj.assets || []).map((_, i) => `${targetProj.id}__${i}`);
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      projKeys.forEach((k) => next.add(k));
-      return next;
-    });
-  };
-
-  const clearAllSelections = (targetProj = activeProject) => {
-    if (!targetProj) return;
-    const projKeys = (targetProj.assets || []).map((_, i) => `${targetProj.id}__${i}`);
-    setSelectedFundPicks((prev) => {
-      const next = new Set(prev);
-      projKeys.forEach((k) => next.delete(k));
-      return next;
-    });
-  };
+  }, [activeCatchment, cityProjectsList]);
 
   const toggleSection = (sectionKey) => {
     setOpenSections((prev) => ({
@@ -605,26 +570,54 @@ const DataLayersView = () => {
   const [hotspotSearchQuery, setHotspotSearchQuery] = useState("");
 
   // Handler for applying filters from "Fund a project" questionnaire modal (Targets Citywide BGG projects only)
-  const handleApplyFundFilters = ({ selectedCorps, selectedTypes, solveFlooding }) => {
-    setAppliedFundFilters({ selectedCorps, selectedTypes, solveFlooding });
+  const handleApplyFundFilters = ({ selectedCorps, selectedTypes, solveFlooding, selectedArea }) => {
+    setAppliedFundFilters({ selectedCorps, selectedTypes, solveFlooding, selectedArea });
 
-    // 1. Corporation: enable browseByCorporations with selected corporations
-    setBrowseByCorporations(true);
-    const newCorpRegions = {
-      North: selectedCorps.includes("North"),
-      South: selectedCorps.includes("South"),
-      East: selectedCorps.includes("East"),
-      West: selectedCorps.includes("West"),
-      Central: selectedCorps.includes("Central"),
-    };
-    setSelectedCorpRegions(newCorpRegions);
-    setSelectedHotspotRegions(newCorpRegions);
+    const isSpecificWard = selectedArea?.type === "ward";
+
+    // 1. Corporation: DO NOT open or browse corporations if a specific ward is selected
+    if (isSpecificWard) {
+      setBrowseByCorporations(false);
+      setSelectedCorpRegions({
+        North: false,
+        South: false,
+        East: false,
+        West: false,
+        Central: false,
+      });
+      setSelectedHotspotRegions({
+        North: false,
+        South: false,
+        East: false,
+        West: false,
+        Central: false,
+      });
+      if (corpBrowseLayerRef.current && mapRef.current) {
+        mapRef.current.removeLayer(corpBrowseLayerRef.current);
+        corpBrowseLayerRef.current = null;
+      }
+    } else {
+      const isCorpFilterActive =
+        selectedArea?.type === "corporation" ||
+        (Array.isArray(selectedCorps) && selectedCorps.length > 0 && selectedCorps.length < 5);
+
+      setBrowseByCorporations(isCorpFilterActive);
+      const newCorpRegions = {
+        North: selectedCorps?.includes("North") || false,
+        South: selectedCorps?.includes("South") || false,
+        East: selectedCorps?.includes("East") || false,
+        West: selectedCorps?.includes("West") || false,
+        Central: selectedCorps?.includes("Central") || false,
+      };
+      setSelectedCorpRegions(newCorpRegions);
+      setSelectedHotspotRegions(newCorpRegions);
+    }
 
     // 2. Citywide BGG projects only — explicitly exclude Existing Interventions
     setShowProjects(false);
     setShowNewProjects(true);
 
-    // 3. Flooding problem: enable ONLY flooding hotspots (filtered to selected corporations), NOT flood risk map
+    // 3. Flooding problem: enable ONLY flooding hotspots (filtered to selected ward/corporations), NOT flood risk map
     if (solveFlooding === "yes") {
       setShowNewFloodRisk(false);
       setShowFloodingHotspots(true);
@@ -641,8 +634,22 @@ const DataLayersView = () => {
       projects: true,
     });
 
-    // 5. If single corporation selected, fly to its bounding box
-    if (selectedCorps.length === 1 && mapRef.current) {
+    // 5. If specific ward/area with boundary feature was selected, highlight it & fly to it
+    if (isSpecificWard && mapRef.current) {
+      const wardItem = (searchLayerItems || []).find((i) => {
+        if (i.category !== "ward") return false;
+        const iName = i.name.toLowerCase();
+        const sName = selectedArea.name.toLowerCase();
+        const numMatch = selectedArea.id && String(selectedArea.id) === String(i.feature?.properties?.wardId);
+        return numMatch || iName === sName || iName.includes(sName) || sName.includes(iName);
+      });
+
+      if (wardItem) {
+        handleSelectBoundaryItem(wardItem);
+      } else if (selectedArea.feature) {
+        handleSelectBoundaryItem(selectedArea);
+      }
+    } else if (selectedCorps?.length === 1 && mapRef.current) {
       const corpName = selectedCorps[0];
       const corpFeat = (gbaCorporationsGeo?.features || []).find(
         (f) => (f.properties?.name || "").toLowerCase() === corpName.toLowerCase()
@@ -699,7 +706,6 @@ const DataLayersView = () => {
   const greenspacesLayerRef = useRef(null);
   const floodHazardLayerRef = useRef(null);
   const floodingHotspotsLayerRef = useRef(null);
-  const primaryHotspotMarkerRef = useRef(null);
   const hotspotMarkersMapRef = useRef({});
 
   const [loadingAssemblyConst2, setLoadingAssemblyConst2] = useState(false);
@@ -895,7 +901,6 @@ const DataLayersView = () => {
       greenspacesLayerRef.current = null;
       floodHazardLayerRef.current = null;
       floodingHotspotsLayerRef.current = null;
-      primaryHotspotMarkerRef.current = null;
       hotspotMarkersMapRef.current = {};
     };
   }, []);
@@ -927,7 +932,7 @@ const DataLayersView = () => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [showNewProjects, activeProject, isRightDeckOpen]);
+  }, [showNewProjects, isRightDeckOpen, activeCatchment, layersPanelOpen]);
 
   // Load and render boundaries layers dynamically via modular hook
   useBoundaryLayers({
@@ -943,7 +948,6 @@ const DataLayersView = () => {
     greenspacesLayerRef,
     floodHazardLayerRef,
     floodingHotspotsLayerRef,
-    primaryHotspotMarkerRef,
     hotspotMarkersMapRef,
     wellsRef,
     projectsRef,
@@ -1011,6 +1015,54 @@ const DataLayersView = () => {
     showFloodingHotspots,
     browseByHotspots,
   ]);
+
+  useEffect(() => {
+    if (!showFloodingHotspots && !browseByHotspots) {
+      setActiveCatchment(null);
+    }
+  }, [showFloodingHotspots, browseByHotspots]);
+
+  useEffect(() => {
+    if (!selectedItem?.isHotspot) return;
+    const match = findCatchmentForPoint(selectedItem.lat, selectedItem.lng);
+    setActiveCatchment(match);
+    if (match) {
+      setShowNewProjects(true);
+      setIsRightDeckOpen(true);
+    }
+  }, [selectedItem]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (activeCatchmentLayerRef.current) {
+      map.removeLayer(activeCatchmentLayerRef.current);
+      activeCatchmentLayerRef.current = null;
+    }
+    if (!activeCatchment?.feature) return;
+
+    const layer = L.geoJSON(activeCatchment.feature, {
+      pane: "catchmentsPane",
+      style: {
+        color: "#fb923c",
+        weight: 2.5,
+        opacity: 0.9,
+        dashArray: "6, 4",
+        fillColor: "#fdba74",
+        fillOpacity: 0.22,
+      },
+    });
+    layer.addTo(map);
+    activeCatchmentLayerRef.current = layer;
+    try {
+      const bounds = layer.getBounds();
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [48, 48], maxZoom: 16 });
+      }
+    } catch (err) {
+      console.warn("Could not fit delineated catchment:", err);
+    }
+  }, [activeCatchment]);
 
   // Aggregate loaded wells and projects to build a Wards summary water profile
   const getWardsSummary = () => {
@@ -1429,18 +1481,37 @@ const DataLayersView = () => {
 
     if (showNewProjects || browseByCorporations) {
       // ── Use live data from /api/sites ─────────────────────────────────────
-      console.log(
-        "🔄 Rendering City Wide BGG projects:",
-        sitesData,
-      );
       const liveProjects = (sitesData && sitesData.length > 0 ? sitesData : fallbackSites).filter(
         (site) => site.latitude != null && site.longitude != null,
       );
 
       let visibleSites = liveProjects;
 
-      // Filter by active corporation regions
-      if (appliedFundFilters?.selectedCorps) {
+      // Filter by selected ward/place if a specific ward was selected in questionnaire
+      if (appliedFundFilters?.selectedArea?.type === "ward") {
+        const targetWard = appliedFundFilters.selectedArea;
+        const targetFeature =
+          targetWard.feature ||
+          (searchLayerItems || []).find((i) => {
+            if (i.category !== "ward") return false;
+            const iName = i.name.toLowerCase();
+            const sName = targetWard.name.toLowerCase();
+            const numMatch = targetWard.id && String(targetWard.id) === String(i.feature?.properties?.wardId);
+            return numMatch || iName === sName || iName.includes(sName) || sName.includes(iName);
+          })?.feature;
+
+        if (targetFeature?.geometry) {
+          visibleSites = visibleSites.filter((site) =>
+            isPointInGeometry(site.latitude, site.longitude, targetFeature.geometry)
+          );
+        } else {
+          visibleSites = visibleSites.filter((site) =>
+            (site.wardName && site.wardName.toLowerCase().includes(targetWard.name.toLowerCase())) ||
+            (targetWard.name && targetWard.name.toLowerCase().includes((site.wardName || "").toLowerCase()))
+          );
+        }
+      } else if (appliedFundFilters?.selectedCorps && appliedFundFilters.selectedCorps.length > 0 && appliedFundFilters.selectedCorps.length < 5) {
+        // Filter by active corporation regions
         visibleSites = visibleSites.filter((site) => {
           const corp = getCorporationForPoint(
             site.latitude,
@@ -1460,26 +1531,34 @@ const DataLayersView = () => {
         });
       }
 
-      // Filter by site typologies (Citywide BGG projects)
+      // Fund-a-project can narrow types. The Existing Interventions typology
+      // checkboxes do not apply here — campus is off in that list, which hid KTPO.
       if (appliedFundFilters?.selectedTypes) {
         visibleSites = visibleSites.filter((site) => {
           const typeKey = site.type === "stormdrain" ? "road" : site.type;
           return appliedFundFilters.selectedTypes.includes(typeKey) || appliedFundFilters.selectedTypes.includes(site.type);
         });
-      } else if (enableSiteTypologyFilter) {
-        visibleSites = visibleSites.filter((site) => {
-          const typeKey = site.type === "stormdrain" ? "road" : site.type;
-          return !!selectedSiteTypologies[typeKey] || !!selectedSiteTypologies[site.type];
-        });
       }
 
-      if (activeWatershedId) {
+      if (activeCatchment?.feature?.geometry) {
+        const geometry = activeCatchment.feature.geometry;
+        visibleSites = visibleSites.filter((site) =>
+          isPointInGeometry(site.latitude, site.longitude, geometry)
+        );
+      } else if (activeWatershedId) {
         const wsCoords = WATERSHEDS_POLYGONS[activeWatershedId]?.coords;
         if (wsCoords) {
           visibleSites = visibleSites.filter((site) =>
             pointInPolygon(site.latitude, site.longitude, wsCoords)
           );
         }
+      }
+
+      if (showNewProjects) {
+        console.log(
+          `%c[Citywide BGG] drawing ${visibleSites.length} of ${liveProjects.length} projects on the map`,
+          "color:#347745;font-weight:bold;",
+        );
       }
 
       const SITE_COLOR = {
@@ -1548,7 +1627,6 @@ const DataLayersView = () => {
         `);
 
         marker.on("click", () => {
-          setIsRightDeckOpen(true);
           setSelectedItem({
             isSiteProject: true,
             site_id: site.site_id,
@@ -1614,8 +1692,9 @@ const DataLayersView = () => {
     // Render Projects Layer
     // (Flood Hazard is rendered via GeoJSON layer with custom polygon styles and borders)
 
-    // Zoom automatically to active bounds containing visible points
-    if (boundsPoints.length > 0) {
+    // Zoom automatically to active bounds containing visible points.
+    // A clicked catchment fits itself, so this fly does not pull the map away.
+    if (boundsPoints.length > 0 && !activeCatchment) {
       const bounds = L.latLngBounds(boundsPoints);
       map.flyToBounds(bounds, {
         padding: [50, 50],
@@ -1639,6 +1718,7 @@ const DataLayersView = () => {
     selectedInterventionTypologies,
     sitesData,
     activeWatershedId,
+    activeCatchment,
     appliedFundFilters,
   ]);
 
@@ -1813,161 +1893,50 @@ const DataLayersView = () => {
     }, 400);
   }, []);
 
-  const handleTourStepChange = useCallback((stepIndex, step) => {
-    if (!step) return;
-
-    // Immediately & smoothly invalidate map size on any step transition (Next or Back)
-    if (mapRef.current) {
-      mapRef.current.invalidateSize({ pan: false });
-      setTimeout(() => mapRef.current?.invalidateSize({ pan: false }), 80);
-      setTimeout(() => mapRef.current?.invalidateSize({ pan: false }), 250);
-      setTimeout(() => mapRef.current?.invalidateSize({ pan: false }), 600);
-    }
-
-    if (step.id === "whats-happening") {
-      setOpenSections((prev) => ({ ...prev, happening: true }));
-    } else if (step.id === "project-telemetry") {
-      setOpenSections((prev) => ({ ...prev, happening: true }));
-      setShowProjects(true);
-
-      setTimeout(() => {
-        const marker =
-          projectMarkersRef.current["Challakere lake rejuvenation"] ||
-          Object.values(projectMarkersRef.current)[0];
-        if (marker && mapRef.current) {
-          mapRef.current.setView(marker.getLatLng(), 13, { animate: true });
-          marker.openPopup();
-          setTimeout(() => {
-            const popupEl = document.querySelector(".leaflet-popup");
-            if (popupEl) {
-              popupEl.setAttribute("data-tour", "project-popup");
-            }
-          }, 150);
-        }
-      }, 350);
-    } else if (step.id === "water-risks") {
-      setOpenSections((prev) => ({ ...prev, risks: true }));
-    } else if (step.id === "assess-placement") {
-      setOpenSections((prev) => ({ ...prev, happening: true, risks: true, groundwater: true }));
-      setShowProjects(true);
-      setShowNewFloodRisk(true);
-      setShowWells(true);
-    } else if (step.id === "explore-potential-projects") {
-      setOpenSections((prev) => ({ ...prev, projects: true }));
-    } else if (step.id === "flood-hotspot-map") {
-      setShowNewProjects(false);
-      setShowFloodingHotspots(true);
-      let hotspotAttempts = 0;
-      const focusHotspot = () => {
-        if (!mapRef.current) return;
-        mapRef.current.invalidateSize({ pan: false });
-        const marker = primaryHotspotMarkerRef.current;
-        if (!marker && ++hotspotAttempts < 20) setTimeout(focusHotspot, 250);
-        if (marker) {
-          const latlng = marker.getLatLng();
-          // Position map view slightly shifted (+0.018 lng) so marker is at center-left, leaving space for tour bubble on right
-          const lngShift = window.innerWidth >= 1024 ? 0.018 : 0;
-          mapRef.current.setView([latlng.lat, latlng.lng + lngShift], 13, { animate: true });
-          marker.openPopup();
-          setTimeout(() => {
-            const popupEl = document.querySelector(".leaflet-popup");
-            if (popupEl) {
-              popupEl.setAttribute("data-tour", "hotspot-popup");
-            }
-          }, 120);
-        } else {
-          // If layer still loading, center on Varthur / Mahadevapura hotspot coordinates
-          const lngShift = window.innerWidth >= 1024 ? 0.018 : 0;
-          mapRef.current.setView([12.9569, 77.7359 + lngShift], 13, { animate: true });
-        }
-      };
-
-      focusHotspot();
-      setTimeout(focusHotspot, 500);
-    } else if (step.id === "fund-projects") {
-      setShowFloodingHotspots(false);
-      setOpenSections((prev) => ({ ...prev, projects: true }));
-      setShowNewProjects(true);
-      setIsRightDeckOpen(true);
-
-      // The funding panel only opens once a City wide BGG project is clicked,
-      // so click the first project marker as soon as the layer has rendered.
-      let attempts = 0;
-      const selectFirstProject = () => {
-        const marker = Object.values(siteMarkersRef.current)[0];
-        if (marker) {
-          marker.fire("click");
-        } else if (++attempts < 15) {
-          setTimeout(selectFirstProject, 200);
-        }
-      };
-      setTimeout(selectFirstProject, 300);
-    }
-  }, []);
-
-  const handleTourComplete = useCallback(() => {
-    setShowNewFloodRisk(true);
-    setShowWells(false);
-    setShowProjects(false);
-    setShowFloodingHotspots(false);
-    setShowWards(false);
-    setShowAssemblyConst2(false);
-    setShowBengaluruAssembly(false);
-    setShowKarnatakaAssembly(false);
-    setShowGbaWards(false);
-    setShowGbaCorporations(false);
-    setShowValleys(false);
-    setShowGreenspaces(false);
-    setShowNewProjects(false);
-  }, []);
-
   return (
-    <TourProvider
-      steps={MAP_TOUR_STEPS}
-      tourKey="map-page-tour-v3"
-      onStepChange={handleTourStepChange}
-      onComplete={handleTourComplete}
-    >
-      <div className="max-w-[1650px] 2xl:max-w-[1850px] w-full mx-auto px-3 sm:px-4 lg:px-6 py-4 text-left relative">
-        {activeDetailView && (
-          <div className="w-full text-left animate-[fadeIn_0.2s_ease-out_forwards]">
-            <button
-              onClick={handleBackToMap}
-              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer mb-3 sm:mb-4"
+    <div className={`${activeDetailView ? "max-w-[1680px] xl:max-w-[1920px] 2xl:max-w-[2200px]" : "max-w-[1650px] 2xl:max-w-[1850px]"} w-full mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 text-left relative`}>
+      {activeDetailView && (
+        <div className="w-full text-left animate-[fadeIn_0.2s_ease-out_forwards]">
+          <button
+            onClick={handleBackToMap}
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer mb-3 sm:mb-4"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5" />
-                <path d="M12 19l-7-7 7-7" />
-              </svg>
-              <span>Back to Map</span>
-            </button>
-            {activeDetailView.type === "site" ? (
-              <NewProjectsView initialProjectId={activeDetailView.id} />
-            ) : (
-              <Interventions />
-            )}
-          </div>
-        )}
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back to Map</span>
+          </button>
+          {activeDetailView.type === "site" ? (
+            <NewProjectsView
+              initialProjectId={activeDetailView.id}
+              projectIds={activeDetailView.ids}
+            />
+          ) : (
+            <Interventions />
+          )}
+        </div>
+      )}
 
-        <div
-          className={
-            activeDetailView
-              ? "hidden"
-              : "flex flex-col gap-6 w-full animate-[fadeIn_0.4s_ease-out_forwards]"
-          }
-        >
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
+      <div
+        className={
+          activeDetailView
+            ? "hidden"
+            : "flex flex-col gap-6 w-full animate-[fadeIn_0.4s_ease-out_forwards]"
+        }
+      >
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           @keyframes bounceIn {
             0% { opacity: 0; transform: scale(0.3) translateY(-100%); }
             50% { opacity: 0.8; transform: scale(1.1) translateY(10%); }
@@ -2007,28 +1976,20 @@ const DataLayersView = () => {
             background: #94a3b8;
           }
         `,
-            }}
-          />
+          }}
+        />
 
-          {/* 
-        <div>
-          <p className="font-bold text-xl">Interactive Spatial Explorer</p>
-        </div>
-
-        <div className="h-[650px] bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm overflow-y-auto">
-          <Analytics />
-        </div>
-        */}
-
-          <div
-            className={`grid grid-cols-1 ${
-              showNewProjects && activeProject && isRightDeckOpen
-                ? "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[350px_minmax(0,1fr)_320px] 2xl:grid-cols-[360px_minmax(0,1fr)_340px]"
-                : "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]"
+        <div
+          className={`grid grid-cols-1 ${layersPanelOpen && isRightDeckOpen && activeCatchment
+              ? "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_360px]"
+              : layersPanelOpen
+                ? "lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]"
+                : isRightDeckOpen && activeCatchment
+                  ? "xl:grid-cols-[minmax(0,1fr)_360px]"
+                  : ""
             } gap-3.5 items-start`}
-          >
-            {/* Left Sidebar Control Panel - Free Dynamic Height */}
-            {/* Left Sidebar Control Panel */}
+        >
+          {layersPanelOpen && (
             <LayerControlSidebar
               openSections={openSections}
               toggleSection={toggleSection}
@@ -2098,176 +2059,183 @@ const DataLayersView = () => {
               isItemSelected={isItemSelected}
               showNewProjects={showNewProjects}
               setShowNewProjects={setShowNewProjects}
-              setIsRightDeckOpen={setIsRightDeckOpen}
               loading={loading}
             />
+          )}
 
-            {/* Center / Right Section: Map & Details Pane */}
-            <div className="order-1 lg:order-none min-w-0 flex flex-col gap-4 sm:gap-6 h-auto">
-              {/* Main Leaflet Map Card with Ward / Locality Search Bar */}
-              <div
-                data-tour="map-view"
-                className={`${selectedItem
-                    ? "h-[60vh] min-h-[420px] sm:h-[580px] xl:h-[620px]"
-                    : "h-[72vh] min-h-[440px] sm:min-h-[560px] lg:h-[calc(100vh-125px)] lg:min-h-[620px] xl:min-h-[660px]"
-                  } shrink-0 bg-white border border-[#C8D7BC]/80 rounded-[20px] flex flex-col overflow-hidden shadow-sm transition-all duration-300`}
-              >
-                <div className="shrink-0 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white gap-2 sm:gap-3 relative z-[1000]">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider m-0">
-                      Bengaluru Map View
-                    </h4>
-                    {selectedBoundaryItem && (
-                      <div
-                        className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs animate-[fadeIn_0.2s_ease-out]"
-                        style={{
-                          backgroundColor: selectedBoundaryItem.categoryBg,
-                          color: selectedBoundaryItem.categoryColor,
-                          border: `1px solid ${selectedBoundaryItem.categoryBorder}`,
-                        }}
-                      >
-                        <span>{selectedBoundaryItem.name}</span>
-                        <button
-                          type="button"
-                          onClick={handleClearSelectedBoundary}
-                          title="Clear border highlight"
-                          className="hover:opacity-75 font-black ml-0.5 cursor-pointer border-none bg-transparent"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )}
-                    {appliedFundFilters && (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#dfebd5]/40 text-[#1F2A24] border border-[#C8D7BC]">
-                        <span>
-                          <strong className="text-[#347745]">Citywide BGG:</strong> {appliedFundFilters.selectedCorps.join(", ")} • {appliedFundFilters.selectedTypes.map((t) => t.charAt(0).toUpperCase() + t.slice(1)).join(", ")} • Hotspots: {appliedFundFilters.solveFlooding === "yes" ? "Yes" : "No"}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleClearFundFilters}
-                          title="Reset filters"
-                          className="text-[#6E6455] hover:text-[#1F2A24] font-bold ml-1 cursor-pointer border-none bg-transparent p-0"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right Header Actions: "Fund a project" button placed to the left of Search Bar */}
-                  <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap w-full sm:w-auto">
-                    <button
-                      type="button"
-                      id="fund-a-project-btn"
-                      onClick={() => setShowFundAProjectModal(true)}
-                      className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-[#dfebd5]/30 text-[#1F2A24] hover:text-[#347745] border border-[#C8D7BC] shadow-xs transition-colors cursor-pointer shrink-0"
-                      title="Fund a project"
+          {/* Center / Right Section: Map & Details Pane */}
+          <div className="order-1 lg:order-none min-w-0 flex flex-col gap-4 sm:gap-6 h-auto">
+            {/* Main Leaflet Map Card with Ward / Locality Search Bar */}
+            <div
+              data-tour="map-view"
+              className={`${!layersPanelOpen
+                ? "h-[84vh] min-h-[560px] lg:h-[calc(100vh-96px)] lg:min-h-[700px]"
+                : selectedItem && !activeCatchment
+                  ? "h-[60vh] min-h-[420px] sm:h-[580px] xl:h-[620px]"
+                  : "h-[72vh] min-h-[440px] sm:min-h-[560px] lg:h-[calc(100vh-125px)] lg:min-h-[620px] xl:min-h-[660px]"
+                } shrink-0 bg-white border border-[#C8D7BC]/80 rounded-[20px] flex flex-col overflow-hidden shadow-sm transition-all duration-300`}
+            >
+              <div className="shrink-0 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white gap-2 sm:gap-3 relative z-[1000]">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setLayersPanelOpen((open) => !open)}
+                    aria-label={layersPanelOpen ? "Hide layers" : "Show layers"}
+                    title={layersPanelOpen ? "Hide layers" : "Show layers"}
+                    className="w-9 h-9 rounded-xl border border-[#C8D7BC] bg-white text-[#1F2A24] hover:bg-[#dfebd5]/40 flex items-center justify-center cursor-pointer shrink-0"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider m-0">
+                    Bengaluru Map View
+                  </h4>
+                  {selectedBoundaryItem && (
+                    <div
+                      className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs animate-[fadeIn_0.2s_ease-out]"
+                      style={{
+                        backgroundColor: selectedBoundaryItem.categoryBg,
+                        color: selectedBoundaryItem.categoryColor,
+                        border: `1px solid ${selectedBoundaryItem.categoryBorder}`,
+                      }}
                     >
-                      <span>Fund a project</span>
-                      {appliedFundFilters && (
-                        <span className="w-2 h-2 rounded-full bg-[#347745]" title="Filter active" />
-                      )}
-                    </button>
-
-                    {/* Enhanced Layer Search & Dropdown Box */}
-                    <MapBoundarySearch
-                      searchDropdownContainerRef={searchDropdownContainerRef}
-                      handleLocationSearch={handleLocationSearch}
-                      selectedSearchCategory={selectedSearchCategory}
-                      setSelectedSearchCategory={setSelectedSearchCategory}
-                      locationSearchQuery={locationSearchQuery}
-                      setLocationSearchQuery={setLocationSearchQuery}
-                      isSearchDropdownOpen={isSearchDropdownOpen}
-                      setIsSearchDropdownOpen={setIsSearchDropdownOpen}
-                      filteredSearchItems={filteredSearchItems}
-                      searchLayerItems={searchLayerItems}
-                      handleSelectBoundaryItem={handleSelectBoundaryItem}
-                    />
-                  </div>
+                      <span>{selectedBoundaryItem.name}</span>
+                      <button
+                        type="button"
+                        onClick={handleClearSelectedBoundary}
+                        title="Clear border highlight"
+                        className="hover:opacity-75 font-black ml-0.5 cursor-pointer border-none bg-transparent"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                  {appliedFundFilters && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#dfebd5]/40 text-[#1F2A24] border border-[#C8D7BC]">
+                      <span>
+                        <strong className="text-[#347745]">Citywide BGG:</strong>{" "}
+                        {appliedFundFilters.selectedArea?.name || appliedFundFilters.selectedCorps.join(", ")}
+                        {appliedFundFilters.selectedArea?.type === "ward" && appliedFundFilters.selectedArea?.corp
+                          ? ` (${appliedFundFilters.selectedArea.corp})`
+                          : ""}{" "}
+                        • {appliedFundFilters.selectedTypes.map((t) => t.charAt(0).toUpperCase() + t.slice(1)).join(", ")} • Hotspots: {appliedFundFilters.solveFlooding === "yes" ? "Yes" : "No"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleClearFundFilters}
+                        title="Reset filters"
+                        className="text-[#6E6455] hover:text-[#1F2A24] font-bold ml-1 cursor-pointer border-none bg-transparent p-0"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {searchError && (
-                  <div className="px-5 py-1.5 bg-amber-50 text-amber-800 text-[11px] font-medium border-b border-amber-200 flex justify-between items-center">
-                    <span>{searchError}</span>
-                    <button
-                      onClick={() => setSearchError(null)}
-                      className="text-amber-600 hover:text-amber-900 font-bold cursor-pointer"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
+                {/* Right Header Actions: "Fund a project" button placed to the left of Search Bar */}
+                <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap w-full sm:w-auto">
+                  <button
+                    type="button"
+                    id="fund-a-project-btn"
+                    onClick={() => setShowFundAProjectModal(true)}
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-[#dfebd5]/30 text-[#1F2A24] hover:text-[#347745] border border-[#C8D7BC] shadow-xs transition-colors cursor-pointer shrink-0"
+                    title="Fund a project"
+                  >
+                    <span>Fund a project</span>
+                    {appliedFundFilters && (
+                      <span className="w-2 h-2 rounded-full bg-[#347745]" title="Filter active" />
+                    )}
+                  </button>
 
-                <div
-                  className="leaflet-map-wrapper-inner flex-1 min-h-0"
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                  }}
-                >
-                  <div
-                    ref={mapContainerRef}
-                    className="leaflet-map-canvas"
-                    style={{ width: "100%", height: "100%" }}
-                  ></div>
+                  {/* Enhanced Layer Search & Dropdown Box */}
+                  <MapBoundarySearch
+                    searchDropdownContainerRef={searchDropdownContainerRef}
+                    handleLocationSearch={handleLocationSearch}
+                    selectedSearchCategory={selectedSearchCategory}
+                    setSelectedSearchCategory={setSelectedSearchCategory}
+                    locationSearchQuery={locationSearchQuery}
+                    setLocationSearchQuery={setLocationSearchQuery}
+                    isSearchDropdownOpen={isSearchDropdownOpen}
+                    setIsSearchDropdownOpen={setIsSearchDropdownOpen}
+                    filteredSearchItems={filteredSearchItems}
+                    searchLayerItems={searchLayerItems}
+                    handleSelectBoundaryItem={handleSelectBoundaryItem}
+                  />
                 </div>
               </div>
 
-              {/* Details Sidebar Pane — only displayed when a well, intervention, or point is actively selected */}
+              {searchError && (
+                <div className="px-5 py-1.5 bg-amber-50 text-amber-800 text-[11px] font-medium border-b border-amber-200 flex justify-between items-center">
+                  <span>{searchError}</span>
+                  <button
+                    onClick={() => setSearchError(null)}
+                    className="text-amber-600 hover:text-amber-900 font-bold cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              <div
+                className="leaflet-map-wrapper-inner flex-1 min-h-0"
+                style={{
+                  position: "relative",
+                  width: "100%",
+                }}
+              >
+                <div
+                  ref={mapContainerRef}
+                  className="leaflet-map-canvas"
+                  style={{ width: "100%", height: "100%" }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Details Sidebar Pane — only displayed when a well, intervention, or point is actively selected */}
+            {!activeCatchment && (
               <ItemDetailsPane
                 selectedItem={selectedItem}
                 setSelectedItem={setSelectedItem}
               />
-            </div>
-
-            {/* Right Side Section: Clicked Project Assets & Funding Deck */}
-            <FundingDeckPanel
-              showNewProjects={showNewProjects}
-              activeProject={activeProject}
-              isRightDeckOpen={isRightDeckOpen}
-              setIsRightDeckOpen={setIsRightDeckOpen}
-              selectAllAvailableAssets={selectAllAvailableAssets}
-              clearAllSelections={clearAllSelections}
-              selectedFundPicks={selectedFundPicks}
-              committedPicks={committedPicks}
-              toggleProjectAllAssets={toggleProjectAllAssets}
-              toggleFundPick={toggleFundPick}
-              setShowFunderModal={setShowFunderModal}
-              setActiveDetailView={setActiveDetailView}
-            />
+            )}
           </div>
 
-          {/* Funder Commitment & Term Sheet Modal */}
-          <FunderModal
-            showFunderModal={showFunderModal}
-            setShowFunderModal={setShowFunderModal}
-            fundSummary={fundSummary}
-            selectedFundPicks={selectedFundPicks}
-            cityProjectsList={cityProjectsList}
-            funderFormData={funderFormData}
-            setFunderFormData={setFunderFormData}
-            committedPicks={committedPicks}
-            setCommittedPicks={setCommittedPicks}
-            commitSuccess={commitSuccess}
-            setCommitSuccess={setCommitSuccess}
-          />
-
-          {/* Fund a Project Questionnaire Modal (85-90% screen) */}
-          <FundAProjectModal
-            key={showFundAProjectModal ? "open" : "closed"}
-            isOpen={showFundAProjectModal}
-            onClose={() => setShowFundAProjectModal(false)}
-            onApplyFilters={handleApplyFundFilters}
-            currentFilters={appliedFundFilters || {
-              selectedCorps: ["East"],
-              selectedTypes: ["lake"],
-              solveFlooding: "yes",
-            }}
-            corpProjectCounts={corpProjectCounts}
-          />
+          {activeCatchment && (
+            <CatchmentProjectsPanel
+              catchment={activeCatchment}
+              hotspotName={selectedItem?.isHotspot ? selectedItem.name : ""}
+              projects={catchmentProjects}
+              isOpen={isRightDeckOpen}
+              onClose={() => setIsRightDeckOpen(false)}
+              onReopen={() => setIsRightDeckOpen(true)}
+              onFundSelected={(ids) =>
+                setActiveDetailView({ type: "site", id: ids[0], ids })
+              }
+            />
+          )}
         </div>
+
+        {/* Fund a Project Questionnaire Modal (85-90% screen) */}
+        {activeCatchment && !activeDetailView && dismissedWatershedId !== activeCatchment.id && (
+          <WatershedInfoPopup onClose={() => setDismissedWatershedId(activeCatchment.id)} />
+        )}
+
+        <FundAProjectModal
+          key={showFundAProjectModal ? "open" : "closed"}
+          isOpen={showFundAProjectModal}
+          onClose={() => setShowFundAProjectModal(false)}
+          onApplyFilters={handleApplyFundFilters}
+          currentFilters={appliedFundFilters || {
+            selectedCorps: ["East"],
+            selectedTypes: ["lake"],
+            solveFlooding: "yes",
+          }}
+          corpProjectCounts={corpProjectCounts}
+          searchLayerItems={searchLayerItems}
+        />
       </div>
-    </TourProvider>
+    </div>
   );
 };
 
