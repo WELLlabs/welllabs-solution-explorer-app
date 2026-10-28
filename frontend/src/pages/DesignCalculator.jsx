@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import api, { getBaseURL } from '@/utils/api';
 import catchments from '@/data/subcatchments2km.json';
 
 const RAIN_OPTIONS = [
@@ -78,6 +79,10 @@ export default function DesignCalculator() {
           selectedShape.current = shape;
           shape.setStyle(selectedStyle);
           shape.bringToFront();
+          console.log('[design-calculator] subcatchment selected', {
+            fid: feature.properties.fid,
+            dn: feature.properties.dn,
+          });
           onSelectRef.current(feature.properties.fid);
         });
         shape.on('mouseover', () => {
@@ -111,25 +116,31 @@ export default function DesignCalculator() {
 
   useEffect(() => {
     if (selectedFid == null || !rainEvent) {
+      console.log('[design-calculator] waiting for both inputs', { selectedFid, rainEvent });
       setRunoff(null);
       setError('');
       return undefined;
     }
 
+    const path = `/design-calculator/runoff?fid=${selectedFid}&event=${rainEvent}`;
+    const url = `${getBaseURL()}${path}`;
+    console.log('[design-calculator] requesting runoff', { url, selectedFid, rainEvent });
+
     const controller = new AbortController();
     setError('');
-    fetch(`/api/design-calculator/runoff?fid=${selectedFid}&event=${rainEvent}`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error('Could not calculate runoff.');
-        return response.json();
-      })
-      .then((body) => {
-        setRunoff(body.runoffM3);
+    api.get(path, { signal: controller.signal })
+      .then(({ data }) => {
+        console.log('[design-calculator] runoff response', data);
+        setRunoff(data.runoffM3);
       })
       .catch((err) => {
-        if (err.name === 'AbortError') return;
+        if (err.code === 'ERR_CANCELED' || err.name === 'CanceledError') return;
+        console.log('[design-calculator] runoff request failed', {
+          url,
+          message: err.message,
+          status: err.response?.status,
+          body: err.response?.data,
+        });
         setRunoff(null);
         setError('Could not calculate runoff.');
       });
@@ -186,6 +197,7 @@ export default function DesignCalculator() {
                   aria-checked={selected}
                   onClick={(event) => {
                     event.stopPropagation();
+                    console.log('[design-calculator] rain event selected', { id: option.id, label: option.label });
                     setRainEvent(option.id);
                   }}
                   className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-base ${selected ? 'border-[#347745] bg-[#f3f8ef] font-semibold' : 'border-[#E4EDE0] bg-white font-medium hover:bg-[#f7faf6]'}`}
