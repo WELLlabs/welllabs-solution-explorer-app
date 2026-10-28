@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/context/AuthContext';
+import api from '@/utils/api';
 
 const AdminLogin = () => {
   const { user, loading, adminLogin } = useContext(AuthContext);
@@ -8,7 +9,9 @@ const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
 
   // Keep this page out of search engine results.
   useEffect(() => {
@@ -25,6 +28,7 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setSubmitting(true);
     const result = await adminLogin(email, password);
     setSubmitting(false);
@@ -33,6 +37,27 @@ const AdminLogin = () => {
     } else {
       setError(result.message);
       setPassword('');
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setError('');
+    setNotice('');
+    setSendingReset(true);
+    console.log('[admin-reset] requesting reset email');
+    try {
+      const { data } = await api.post('/auth/admin/forgot-password', { origin: window.location.origin });
+      console.log('[admin-reset] response', data);
+      setNotice(data.message);
+    } catch (err) {
+      console.log('[admin-reset] request failed', {
+        message: err.message,
+        status: err.response?.status,
+        body: err.response?.data,
+      });
+      setError(err.response?.data?.message || 'The reset email could not be sent.');
+    } finally {
+      setSendingReset(false);
     }
   };
 
@@ -73,6 +98,21 @@ const AdminLogin = () => {
             className={inputClass}
           />
         </label>
+
+        <div className="flex justify-end -mt-1">
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            disabled={sendingReset}
+            className="text-xs font-semibold text-muted hover:text-ocean-deep transition-colors cursor-pointer disabled:opacity-60"
+          >
+            {sendingReset ? 'Sending reset link…' : 'Forgot password?'}
+          </button>
+        </div>
+
+        {notice && (
+          <p className="text-sm text-[#347745] bg-[#f3f8ef] border border-[#C8D7BC] rounded-lg px-3 py-2">{notice}</p>
+        )}
 
         {error && (
           <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>

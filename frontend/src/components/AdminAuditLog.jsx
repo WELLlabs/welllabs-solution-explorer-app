@@ -9,6 +9,7 @@ const ACTION_LABELS = {
   'user.suspend': 'Suspended user',
   'user.activate': 'Reactivated user',
   'user.reset_link': 'Created reset link',
+  'admin.forgot_password': 'Emailed admin reset link',
   'user.invite_link': 'Created invite link',
   'user.force_logout': 'Forced logout',
   'user.invite': 'Invited user',
