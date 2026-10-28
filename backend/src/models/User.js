@@ -111,7 +111,7 @@ const userSchema = new mongoose.Schema({
   invitedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   // One-time link for password reset or invite acceptance (only the hash is stored)
   passwordTokenHash: { type: String, default: null, select: false },
-  passwordTokenPurpose: { type: String, enum: ['reset', 'invite', null], default: null, select: false },
+  passwordTokenPurpose: { type: String, enum: ['reset', 'invite', 'admin-setup', null], default: null, select: false },
   passwordTokenExpires: { type: Date, default: null, select: false },
 }, { timestamps: true });
 
