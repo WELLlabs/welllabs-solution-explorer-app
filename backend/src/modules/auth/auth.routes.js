@@ -5,6 +5,7 @@ const {
   register,
   login,
   adminLogin,
+  forgotAdminPassword,
   getPasswordTokenInfo,
   setPasswordWithToken,
   googleAuth,
@@ -39,6 +40,16 @@ const adminLoginLimiter = rateLimit({
 });
 
 router.post('/admin/login', adminLoginLimiter, adminLogin);
+
+const adminResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 3,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Too many reset emails. Please try again in 15 minutes.' },
+});
+
+router.post('/admin/forgot-password', adminResetLimiter, forgotAdminPassword);
 
 const passwordLinkLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

@@ -3,7 +3,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const FailedLogin = require('../../models/FailedLogin');
+const { allowedOrigins } = require('../../config/cors');
 const { logAudit, diffFields } = require('../../utils/audit');
+
+const ADMIN_RESET_EMAIL = 'welllabs.jaltol@ifmr.ac.in';
+const ADMIN_RESET_HOURS = 24;
 
 const formatUserResponse = (user, token) => ({
   _id: user._id,
@@ -230,6 +234,113 @@ const adminLogin = async (req, res) => {
   } catch (error) {
     console.error('Admin login error:', error);
     res.status(500).json({ message: 'Server error during admin login' });
+  }
+};
+
+const frontendOrigin = (value) => {
+  const origin = String(value || '').trim().replace(/\/$/, '');
+  if (allowedOrigins.includes(origin)) return origin;
+  if (process.env.FRONTEND_URL) return String(process.env.FRONTEND_URL).trim().replace(/\/$/, '');
+  return 'https://beta.climatesolutions.ai';
+};
+
+const sendAdminResetEmail = async ({ to, link, accountEmail, accountName, pageOrigin }) => {
+  const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Origin: pageOrigin,
+      Referer: `${pageOrigin}/`,
+    },
+    body: JSON.stringify({
+      _subject: 'WELL Labs admin password reset',
+      _template: 'table',
+      _captcha: 'false',
+      Name: accountName || 'WELL Labs Admin',
+      'Admin account': accountEmail,
+      Message: 'Open the reset link to choose a new admin password. The link expires in 24 hours and works once.',
+      'Reset link': link,
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  const success = data.success === true || data.success === 'true';
+  const message = String(data.message || '');
+  const needsActivation = /activat/i.test(message);
+  console.log('[admin-reset] formsubmit response', {
+    status: response.status,
+    success,
+    needsActivation,
+    message: message || null,
+  });
+  return {
+    ok: response.ok && (success || needsActivation),
+    needsActivation,
+    message: message || 'The reset email could not be sent.',
+  };
+};
+
+// @desc    Email an admin password reset link to the WELL Labs inbox
+// @route   POST /api/auth/admin/forgot-password
+const forgotAdminPassword = async (req, res) => {
+  try {
+    const admins = await User.find({ role: 'Admin' }).sort({ updatedAt: -1 });
+    const preferredEmail = String(process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+    const admin = admins.find((user) => user.email === ADMIN_RESET_EMAIL)
+      || admins.find((user) => preferredEmail && user.email === preferredEmail)
+      || admins[0];
+
+    if (!admin) {
+      console.log('[admin-reset] no admin account found');
+      return res.status(404).json({ message: 'No admin account was found, so a reset link could not be sent.' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const pageOrigin = frontendOrigin(req.body?.origin || req.headers.origin);
+    const link = `${pageOrigin}/set-password?token=${token}`;
+    admin.passwordTokenHash = hashToken(token);
+    admin.passwordTokenPurpose = 'reset';
+    admin.passwordTokenExpires = new Date(Date.now() + ADMIN_RESET_HOURS * 60 * 60 * 1000);
+    await admin.save();
+
+    console.log('[admin-reset] sending link', {
+      account: admin.email,
+      to: ADMIN_RESET_EMAIL,
+      origin: pageOrigin,
+      expiresAt: admin.passwordTokenExpires,
+    });
+
+    const sent = await sendAdminResetEmail({
+      to: ADMIN_RESET_EMAIL,
+      link,
+      accountEmail: admin.email,
+      accountName: admin.name,
+      pageOrigin,
+    });
+
+    if (!sent.ok) {
+      admin.passwordTokenHash = null;
+      admin.passwordTokenPurpose = null;
+      admin.passwordTokenExpires = null;
+      await admin.save();
+      return res.status(502).json({ message: sent.message });
+    }
+
+    await logAudit(req, {
+      action: 'admin.forgot_password',
+      targetType: 'user',
+      targetId: admin._id,
+      targetLabel: admin.email,
+      changes: { sentTo: ADMIN_RESET_EMAIL },
+    });
+
+    res.json({
+      message: `Reset link sent to ${ADMIN_RESET_EMAIL}. Open that inbox and use the link to choose a new password. The link expires in 24 hours.`,
+      email: ADMIN_RESET_EMAIL,
+    });
+  } catch (error) {
+    console.error('Admin forgot-password error:', error);
+    res.status(500).json({ message: 'Server error sending the reset email' });
   }
 };
 
@@ -584,6 +695,7 @@ const getPasswordTokenInfo = async (req, res) => {
       email: user.email,
       name: user.name,
       persona: user.persona,
+      role: user.role,
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error checking link' });
@@ -666,6 +778,7 @@ module.exports = {
   register,
   login,
   adminLogin,
+  forgotAdminPassword,
   googleAuth,
   completeProfile,
   getAllUsers,

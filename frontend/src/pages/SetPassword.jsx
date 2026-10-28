@@ -44,7 +44,9 @@ const SetPassword = () => {
     try {
       await api.post('/auth/set-password', { token, password });
       setDone(true);
-      setTimeout(() => navigate(`/login?role=${info?.persona || 'funder'}`, { replace: true }), 1500);
+      const adminPath = import.meta.env.VITE_ADMIN_PATH || '/welllabs-admin-portal';
+      const next = info?.role === 'Admin' ? adminPath : `/login?role=${info?.persona || 'funder'}`;
+      setTimeout(() => navigate(next, { replace: true }), 1500);
     } catch (err) {
       setError(err.response?.data?.message || 'Could not save password');
       setSubmitting(false);
