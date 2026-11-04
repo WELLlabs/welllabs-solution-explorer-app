@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useContext, useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import api from "@/utils/api";
+import { AuthContext } from "@/context/AuthContext";
 import NewProjectsView, {
   normaliseProject,
   preprocessProject,
@@ -49,6 +50,9 @@ import useFloodHotspots from "@/hooks/useFloodHotspots";
 export { SITE_TYPOLOGY_OPTIONS, INTERVENTION_TYPOLOGY_OPTIONS } from "@/utils/constants";
 export { getCorporationForPoint } from "@/utils/geoUtils";
 
+const headerActionClass =
+  "px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-[#dfebd5]/30 text-[#1F2A24] hover:text-[#347745] border border-[#C8D7BC] shadow-xs transition-colors cursor-pointer shrink-0";
+
 const DataLayersView = () => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -56,6 +60,8 @@ const DataLayersView = () => {
   const projectMarkersRef = useRef({});
   const siteMarkersRef = useRef({});
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const isConsultant = user?.role === "Consultant";
 
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -2060,6 +2066,7 @@ const DataLayersView = () => {
               showNewProjects={showNewProjects}
               setShowNewProjects={setShowNewProjects}
               loading={loading}
+              showGroundwaterSection={!isConsultant}
             />
           )}
 
@@ -2135,11 +2142,27 @@ const DataLayersView = () => {
 
                 {/* Right Header Actions: "Fund a project" button placed to the left of Search Bar */}
                 <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap w-full sm:w-auto">
+                  {isConsultant ? (
+                    [
+                      ["Upload a project", "/uploadproject"],
+                      ["Design calculator", "/designcalculator"],
+                      ["BGG guidelines", "/bggguidelines"],
+                    ].map(([label, path]) => (
+                      <button
+                        key={path}
+                        type="button"
+                        onClick={() => navigate(path)}
+                        className={headerActionClass}
+                      >
+                        {label}
+                      </button>
+                    ))
+                  ) : (
                   <button
                     type="button"
                     id="fund-a-project-btn"
                     onClick={() => setShowFundAProjectModal(true)}
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-[#dfebd5]/30 text-[#1F2A24] hover:text-[#347745] border border-[#C8D7BC] shadow-xs transition-colors cursor-pointer shrink-0"
+                    className={`flex items-center gap-2 ${headerActionClass}`}
                     title="Fund a project"
                   >
                     <span>Fund a project</span>
@@ -2147,6 +2170,7 @@ const DataLayersView = () => {
                       <span className="w-2 h-2 rounded-full bg-[#347745]" title="Filter active" />
                     )}
                   </button>
+                  )}
 
                   {/* Enhanced Layer Search & Dropdown Box */}
                   <MapBoundarySearch
@@ -2212,6 +2236,23 @@ const DataLayersView = () => {
               onFundSelected={(ids) =>
                 setActiveDetailView({ type: "site", id: ids[0], ids })
               }
+              openLabel={isConsultant ? "View details" : undefined}
+              extraActions={
+                isConsultant
+                  ? [
+                      {
+                        label: "Design calculator",
+                        onClick: () =>
+                          navigate(
+                            selectedItem?.isHotspot
+                              ? `/designcalculator?lat=${selectedItem.lat}&lng=${selectedItem.lng}`
+                              : "/designcalculator",
+                          ),
+                      },
+                      { label: "BGG guidelines", onClick: () => navigate("/bggguidelines") },
+                    ]
+                  : []
+              }
             />
           )}
         </div>
@@ -2221,6 +2262,7 @@ const DataLayersView = () => {
           <WatershedInfoPopup onClose={() => setDismissedWatershedId(activeCatchment.id)} />
         )}
 
+        {!isConsultant && (
         <FundAProjectModal
           key={showFundAProjectModal ? "open" : "closed"}
           isOpen={showFundAProjectModal}
@@ -2234,6 +2276,7 @@ const DataLayersView = () => {
           corpProjectCounts={corpProjectCounts}
           searchLayerItems={searchLayerItems}
         />
+        )}
       </div>
     </div>
   );

@@ -67,7 +67,7 @@ router.post('/google', (req, res) => {
   googleAuth(req, res);
 });
 
-router.post('/complete-profile', (req, res) => {
+router.post('/complete-profile', protect, (req, res) => {
   console.log('📋 Complete profile request received');
   completeProfile(req, res);
 });

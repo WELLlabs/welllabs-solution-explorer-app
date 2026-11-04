@@ -18,9 +18,11 @@ app.use(express.json({ limit: '10mb' }));
 // Domain Routes
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 app.use('/api/admin', require('./modules/admin/admin.routes'));
+app.use('/api/contact', require('./modules/contact/contact.routes'));
 app.get('/api/flood-hotspots', require('./modules/admin/admin.controller').getFloodHotspots);
 app.use('/api/analytics', require('./modules/analytics/analytics.routes'));
 app.use('/api/sites', require('./modules/sites/sites.routes'));
+app.use('/api/project-submissions', require('./modules/projectSubmissions/projectSubmission.routes'));
 app.use('/api/design-calculator', require('./modules/designCalculator/designCalculator.routes'));
 
 // Basic Route

@@ -17,10 +17,10 @@ import { formatDateTime, passwordLink } from '@/utils/adminHelpers';
 
 const ROLE_STYLES = {
   Admin: 'bg-purple-50 text-purple-700 border-purple-200',
-  Pending: 'bg-amber-50 text-amber-800 border-amber-200',
   'WELL Labs1': 'bg-turf-green/10 text-turf-green border-turf-green/25',
   'WELL Labs2': 'bg-turf-green/10 text-turf-green border-turf-green/25',
   Consultant: 'bg-sky-50 text-sky-700 border-sky-200',
+  NGO: 'bg-teal-50 text-teal-700 border-teal-200',
   GBA: 'bg-slate-100 text-slate-700 border-slate-200',
   Funder: 'bg-orange-50 text-orange-700 border-orange-200',
   Citizen: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -380,11 +380,14 @@ const ManageUserModal = ({ user, onClose, onChanged, onDeleted }) => {
         }
       >
         {link ? (
-          <CopyLinkBox
-            url={passwordLink(link.token)}
-            expiresAt={link.expiresAt}
-            note="Send this to the user by email or chat. Any older link stops working."
-          />
+          <>
+            <EmailStatus result={link} email={user.email} />
+            <CopyLinkBox
+              url={passwordLink(link.token)}
+              expiresAt={link.expiresAt}
+              note={link.emailed ? 'You can also copy it. Any older link stops working.' : 'Send this to the user by email or chat. Any older link stops working.'}
+            />
+          </>
         ) : (
           <button type="button" onClick={createLink} disabled={!!busy} className={secondaryBtn}>
             {busy === 'link' ? 'Generating…' : status === 'invited' ? 'Generate invite link' : 'Generate reset link'}
@@ -415,6 +418,17 @@ const ManageUserModal = ({ user, onClose, onChanged, onDeleted }) => {
     </Modal>
   );
 };
+
+const EmailStatus = ({ result, email }) =>
+  result.emailed ? (
+    <p className="mb-3 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+      Emailed the link to <strong>{email}</strong>.
+    </p>
+  ) : (
+    <p className="mb-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+      The link was not emailed{result.emailError ? `: ${result.emailError}` : '.'} Copy it below and send it yourself.
+    </p>
+  );
 
 const INVITE_PERSONAS = ['govt', 'funder', 'designer', 'citizen'];
 
@@ -455,9 +469,10 @@ const InviteUserModal = ({ onClose, onInvited }) => {
   if (result) {
     return (
       <Modal title="Invite created" onClose={onClose} footer={<button type="button" onClick={onClose} className={primaryBtn}>Done</button>}>
+        <EmailStatus result={result} email={result.user.email} />
         <p className="text-sm text-ink mb-3">
-          Send this link to <strong>{result.user.email}</strong>. They will choose a password and can then sign in as{' '}
-          {PERSONAS[result.user.persona]?.label || result.user.persona}.
+          {result.emailed ? 'The invite link is below as well.' : <>Send this link to <strong>{result.user.email}</strong>.</>} They will choose a
+          password and can then sign in as {PERSONAS[result.user.persona]?.label || result.user.persona}.
         </p>
         <CopyLinkBox url={passwordLink(result.token)} expiresAt={result.expiresAt} />
       </Modal>

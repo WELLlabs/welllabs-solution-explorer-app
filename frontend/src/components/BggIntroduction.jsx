@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LegalLinks from '@/components/LegalLinks';
+import RandomLetterSwap from '@/styles/RandomLetterSwap';
 
 // Matches Tailwind's `xl` breakpoint, where the hero switches to the absolutely positioned desktop layout
 const DESKTOP_QUERY = '(min-width: 1280px)';
@@ -344,9 +346,14 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
           <p className="text-sm sm:text-lg xl:text-[1.35vw] font-semibold leading-tight text-white/95 uppercase tracking-wide">
             Let&apos;s turn Bengaluru into a
           </p>
-          <p className="text-2xl sm:text-4xl xl:text-[2.2vw] font-black leading-tight text-white tracking-tight mt-0.5">
-            Blue Green Grey City
-          </p>
+          <div className="mt-0.5">
+            <RandomLetterSwap
+              label="Blue Green Grey City"
+              mode="pingpong"
+              color="#FFFFFF"
+              className="text-2xl sm:text-4xl xl:text-[2.2vw] font-black leading-tight text-white tracking-tight cursor-pointer"
+            />
+          </div>
         </div>
 
         {/* ---------- Question ---------- */}
@@ -431,6 +438,8 @@ const BggIntroduction = ({ onNavigateToCase, onSetActiveTab }) => {
           </div>
         </div>
       </div>
+
+      <LegalLinks />
 
       {/* ========================================================================= */}
       {/* PREVIOUS SECTIONS PRESERVED IN COMMENTS BELOW FOR FUTURE REFERENCE/USAGE */}

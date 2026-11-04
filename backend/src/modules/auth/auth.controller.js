@@ -5,6 +5,11 @@ const crypto = require('crypto');
 const FailedLogin = require('../../models/FailedLogin');
 const { allowedOrigins } = require('../../config/cors');
 const { logAudit, diffFields } = require('../../utils/audit');
+const { sendEmail } = require('../../utils/mailer');
+const { OAuth2Client } = require('google-auth-library');
+const { GOOGLE_CLIENT_ID } = require('../../config/google');
+
+const googleClient = new OAuth2Client();
 
 const ADMIN_RESET_EMAIL = 'welllabs.jaltol@ifmr.ac.in';
 const ADMIN_RESET_HOURS = 24;
@@ -31,15 +36,20 @@ const formatUserResponse = (user, token) => ({
   token: token || undefined,
 });
 
+// Role that matches the persona the user picked on the home page
+const roleForPersona = ({ persona, userType }) => {
+  if (persona === 'funder' || ['CSR Fund', 'Foundations', 'Philanthropy'].includes(userType)) return 'Funder';
+  if (userType === 'NGO') return 'NGO';
+  if (persona === 'designer' || userType === 'Consultant') return 'Consultant';
+  if (persona === 'govt') return 'GBA';
+  return 'Citizen';
+};
+
 // Role assigned from what the user chose at registration (also used for invites)
 const roleForRegistration = ({ email, persona, userType }) => {
   if (email === process.env.ADMIN_EMAIL) return 'Admin';
   if (email.endsWith('@ifmr.ac.in')) return 'WELL Labs1';
-  if (persona === 'funder' || ['CSR Fund', 'Foundations', 'Philanthropy'].includes(userType)) return 'Funder';
-  if (userType === 'Consultant') return 'Consultant';
-  if (persona === 'govt') return 'GBA';
-  if (persona === 'citizen') return 'Citizen';
-  return 'Pending';
+  return roleForPersona({ persona, userType });
 };
 
 const SUSPENDED_MESSAGE = 'This account has been suspended. Contact the administrator.';
@@ -244,41 +254,21 @@ const frontendOrigin = (value) => {
   return 'https://beta.climatesolutions.ai';
 };
 
-const sendAdminResetEmail = async ({ to, link, accountEmail, accountName, pageOrigin }) => {
-  const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Origin: pageOrigin,
-      Referer: `${pageOrigin}/`,
+const sendAdminResetEmail = ({ to, link, accountEmail, accountName }) =>
+  sendEmail({
+    to,
+    subject: 'WELL Labs admin password reset',
+    content: {
+      heading: 'Reset the admin password',
+      intro: 'Someone asked to reset the password for the Climate Solutions admin account. Open the link below to choose a new password.',
+      rows: [
+        ['Name', accountName || 'WELL Labs Admin'],
+        ['Admin account', accountEmail],
+      ],
+      button: { label: 'Choose a new password', url: link },
+      footer: `The link expires in ${ADMIN_RESET_HOURS} hours and works once. If you did not ask for this, you can ignore this email.`,
     },
-    body: JSON.stringify({
-      _subject: 'WELL Labs admin password reset',
-      _template: 'table',
-      _captcha: 'false',
-      Name: accountName || 'WELL Labs Admin',
-      'Admin account': accountEmail,
-      Message: 'Open the reset link to choose a new admin password. The link expires in 24 hours and works once.',
-      'Reset link': link,
-    }),
   });
-  const data = await response.json().catch(() => ({}));
-  const success = data.success === true || data.success === 'true';
-  const message = String(data.message || (response.ok ? '' : `The email service answered with HTTP ${response.status}.`));
-  const needsActivation = /activat/i.test(message);
-  console.log('[admin-reset] formsubmit response', {
-    status: response.status,
-    success,
-    needsActivation,
-    message: message || null,
-  });
-  return {
-    ok: response.ok && (success || needsActivation),
-    needsActivation,
-    message: message || 'the email service gave no reason.',
-  };
-};
 
 // @desc    Email an admin password reset link to the WELL Labs inbox
 // @route   POST /api/auth/admin/forgot-password
@@ -332,7 +322,6 @@ const forgotAdminPassword = async (req, res) => {
       link,
       accountEmail: admin.email,
       accountName: admin.name,
-      pageOrigin,
     });
 
     if (!sent.ok) {
@@ -371,37 +360,34 @@ const forgotAdminPassword = async (req, res) => {
 // @route   POST /api/auth/google
 const googleAuth = async (req, res) => {
   try {
-    const { email, name, avatar, googleId, credential, persona = 'citizen' } = req.body;
-
-    let googleUserEmail = email;
-    let googleUserName = name;
-    let googleUserAvatar = avatar;
-    let googleUserId = googleId;
-
-    if (credential) {
-      try {
-        const parts = credential.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
-          googleUserEmail = payload.email || googleUserEmail;
-          googleUserName = payload.name || googleUserName;
-          googleUserAvatar = payload.picture || googleUserAvatar;
-          googleUserId = payload.sub || googleUserId;
-        }
-      } catch (err) {
-        console.warn('Could not decode google credential payload:', err);
-      }
+    const { credential } = req.body || {};
+    const persona = ['govt', 'funder', 'designer', 'citizen'].includes(req.body?.persona) ? req.body.persona : 'citizen';
+    const clientId = GOOGLE_CLIENT_ID;
+    if (!credential) {
+      return res.status(400).json({ message: 'Google credential is required' });
     }
 
-    if (!googleUserEmail) {
-      return res.status(400).json({ message: 'Google email is required' });
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: clientId });
+      payload = ticket.getPayload();
+    } catch (err) {
+      console.warn('Rejected Google credential:', err.message);
+      return res.status(401).json({ message: 'Google sign-in could not be verified. Please try again.' });
     }
+    if (!payload?.email || !payload.email_verified) {
+      return res.status(401).json({ message: 'Your Google account email is not verified.' });
+    }
+
+    const googleUserEmail = payload.email;
+    const googleUserName = payload.name;
+    const googleUserAvatar = payload.picture;
+    const googleUserId = payload.sub;
 
     let user = await User.findOne({ email: googleUserEmail.toLowerCase() });
 
     if (user) {
-      // The Google credential is not signature-verified here, so it must never
-      // grant an admin session. Admins sign in only through the admin portal.
+      // Admins sign in only through the admin portal
       if (user.role === 'Admin') {
         return res.status(403).json({ message: 'This account must sign in with email and password.' });
       }
@@ -421,12 +407,14 @@ const googleAuth = async (req, res) => {
         }
       }
 
-      // Existing user
-      if (!user.googleId && googleUserId) {
+      // Existing user: Google has verified the email, so link the account
+      if (!user.googleId) {
         user.googleId = googleUserId;
         user.avatar = user.avatar || googleUserAvatar;
-        await user.save();
       }
+      if (user.status === 'invited') user.status = 'active';
+      user.lastLoginAt = new Date();
+      await user.save();
 
       const token = generateToken(user);
       res.cookie('token', token, {
@@ -452,9 +440,10 @@ const googleAuth = async (req, res) => {
         avatar: googleUserAvatar || '',
         googleId: googleUserId || '',
         authProvider: 'google',
-        role: 'Pending',
+        role: roleForPersona({ persona }),
         persona,
         isProfileComplete: false,
+        lastLoginAt: new Date(),
       });
 
       const token = generateToken(user);
@@ -483,14 +472,12 @@ const googleAuth = async (req, res) => {
 // @route   POST /api/auth/complete-profile
 const completeProfile = async (req, res) => {
   try {
-    const userId = req.user?._id || req.body._id;
-    if (!userId) {
-      return res.status(401).json({ message: 'User identifier required' });
-    }
-
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+    if (user.isProfileComplete) {
+      return res.status(400).json({ message: 'Your profile is already complete' });
     }
 
     const {
@@ -524,15 +511,8 @@ const completeProfile = async (req, res) => {
       };
     }
 
-    // Role assignment based on persona & userType
-    if (persona === 'funder' || userType === 'CSR Fund' || userType === 'Foundations' || userType === 'Philanthropy') {
-      user.role = 'Funder';
-    } else if (userType === 'Consultant') {
-      user.role = 'Consultant';
-    } else if (persona === 'govt') {
-      user.role = 'GBA';
-    } else if (persona === 'citizen') {
-      user.role = 'Citizen';
+    if (!['Admin', 'WELL Labs1', 'WELL Labs2'].includes(user.role)) {
+      user.role = roleForPersona({ persona: user.persona, userType: user.userType });
     }
 
     user.isProfileComplete = true;
@@ -801,6 +781,8 @@ const generateToken = (user) => {
 };
 
 module.exports = {
+  frontendOrigin,
+  roleForPersona,
   roleForRegistration,
   hashToken,
   getPasswordTokenInfo,

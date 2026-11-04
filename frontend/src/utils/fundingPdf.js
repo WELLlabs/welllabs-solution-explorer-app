@@ -1,84 +1,95 @@
+import { jsPDF } from "jspdf";
+
 const PAGE_W = 595;
 const PAGE_H = 842;
 const MARGIN = 40;
-const BOTTOM = 46;
-const GREEN = "0.204 0.467 0.271";
-const INK = "0.122 0.165 0.141";
-const MUTED = "0.431 0.392 0.333";
-const DRAWABLE = new Set(["raingarden", "bioswale"]);
+const BOTTOM = 40;
 
-const sanitize = (value) =>
+const C = {
+  green: [52, 119, 69],
+  ink: [31, 42, 36],
+  muted: [110, 100, 85],
+  white: [255, 255, 255],
+  rule: [199, 214, 189],
+  barBg: [242, 247, 240],
+  edge: [96, 84, 66],
+  grassTop: [168, 200, 126],
+  grassEdge: [110, 146, 80],
+  soilCut: [204, 170, 128],
+  soilSide: [176, 140, 100],
+  // Rain garden
+  rgFloor: [128, 94, 64],
+  rgSlopeFar: [140, 178, 100],
+  rgSlopeEnd: [126, 166, 90],
+  rgSlopeNear: [152, 188, 112],
+  bushDark: [52, 116, 62],
+  bush: [74, 144, 76],
+  bushLight: [122, 178, 86],
+  flower: [214, 118, 150],
+  flowerAlt: [240, 196, 80],
+  // Bioswale
+  bsFloor: [112, 156, 80],
+  bsWallFar: [134, 174, 96],
+  bsWallNear: [150, 188, 110],
+  bsStone: [166, 162, 152],
+  // Infiltration pit
+  gravelTop: [196, 194, 186],
+  gravelCut: [182, 180, 172],
+  stoneEdge: [120, 118, 110],
+  // Detention / retention basin
+  dbFloor: [118, 98, 74],
+  dbSlopeNear: [146, 182, 108],
+  dbSlopeFar: [130, 170, 96],
+  dbSlopeEnd: [120, 160, 88],
+  waterTop: [124, 176, 214],
+  waterCut: [98, 152, 198],
+  waterEdge: [70, 120, 170],
+  ripple: [196, 224, 242],
+  // Percolation well
+  concrete: [196, 194, 188],
+  concreteEdge: [128, 126, 120],
+  wellInner: [96, 102, 104],
+  topsoil: [160, 122, 84],
+  flow: [46, 110, 180],
+  // Detail table
+  rowAlt: [248, 250, 246],
+};
+
+const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]|\u{FE0F}|\u{200D}/gu;
+
+// Removes emoji and fixes spacing such as "Watershed- Borewell"
+const tidy = (value) =>
   String(value ?? "")
-    .replace(/₹/g, "Rs ")
-    .replace(/[^\x20-\x7E]/g, " ")
-    .replace(/\\/g, "\\\\")
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)");
+    .replace(EMOJI, "")
+    .replace(/(\w)-\s+/g, "$1 - ")
+    .replace(/\s*·\s*(·\s*)+/g, " · ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
-const wrap = (text, width) => {
-  const words = String(text || "").split(/\s+/).filter(Boolean);
-  const lines = [];
-  let current = "";
-  words.forEach((word) => {
-    const next = current ? `${current} ${word}` : word;
-    if (next.length > width && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = next;
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+// Writes amounts in words: 30,00,000 or "₹30 L" becomes ₹30 Lakh and
+// 2,50,00,000 or "₹2.50 Cr" becomes ₹2.5 Crore. Amounts below one lakh stay
+// in full. Text without a number (TBD) is shown as it is.
+function shortAmount(value) {
+  if (value == null || value === "") return "";
+  const trim = (n) => Number(n.toFixed(2)).toString();
+  if (typeof value === "string") {
+    const unit = value.match(/^\s*(?:₹|rs\.?)?\s*([\d,]+(?:\.\d+)?)\s*(cr|crore|crores|l|lakh|lakhs|lac)\b\.?\s*$/i);
+    if (unit) {
+      const amount = trim(Number(unit[1].replace(/,/g, "")));
+      return `₹${amount} ${/^c/i.test(unit[2]) ? "Crore" : "Lakh"}`;
     }
-  });
-  if (current) lines.push(current);
-  return lines.length ? lines : [""];
-};
-
-const n = (value) => Math.round(value * 100) / 100;
-
-const buildPdf = (pageStreams) => {
-  const objects = [];
-  const add = (body) => {
-    objects.push(body);
-    return objects.length;
-  };
-
-  const fontId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
-  const boldId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
-  const pagesId = add("<< /Type /Pages /Kids [] /Count 0 >>");
-
-  const pageIds = pageStreams.map((stream) => {
-    const contentId = add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
-    return add(
-      `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] /Contents ${contentId} 0 R /Resources << /Font << /F1 ${fontId} 0 R /F2 ${boldId} 0 R >> >> >>`
-    );
-  });
-
-  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
-  const catalogId = add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
-
-  let pdf = "%PDF-1.4\n";
-  const offsets = [0];
-  objects.forEach((body, index) => {
-    offsets.push(pdf.length);
-    pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
-  });
-  const xref = pdf.length;
-  pdf += `xref\n0 ${objects.length + 1}\n`;
-  pdf += "0000000000 65535 f \n";
-  offsets.slice(1).forEach((offset) => {
-    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
-  });
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`;
-  return pdf;
-};
-
-const textOp = (text, x, y, size, bold, color) =>
-  `BT\n${color} rg\n/${bold ? "F2" : "F1"} ${size} Tf\n1 0 0 1 ${n(x)} ${n(y)} Tm\n(${sanitize(text)}) Tj\nET`;
-
-const fillRect = (x, y, w, h, color) =>
-  `${color} rg\n${n(x)} ${n(y)} ${n(w)} ${n(h)} re\nf`;
-
-const line = (x1, y1, x2, y2, color, width = 0.6) =>
-  `${color} RG\n${width} w\n${n(x1)} ${n(y1)} m\n${n(x2)} ${n(y2)} l\nS`;
+    if (/[a-z]/i.test(value.replace(/^\s*(₹|rs\.?)\s*/i, ""))) return value;
+  }
+  const digits = String(value).replace(/[^0-9.]/g, "");
+  const num = typeof value === "number" ? value : Number(digits);
+  if (!digits && typeof value !== "number") return String(value);
+  if (!Number.isFinite(num)) return String(value);
+  if (num >= 1e7) return `₹${trim(num / 1e7)} Crore`;
+  if (num >= 1e5) return `₹${trim(num / 1e5)} Lakh`;
+  return `₹${num.toLocaleString("en-IN")}`;
+}
 
 function dimensionLabel(label, metres) {
   if (label) return label;
@@ -86,274 +97,636 @@ function dimensionLabel(label, metres) {
   return `${metres} m`;
 }
 
-export function renderFundingPdf({
+// Maps the asset type in your data to one of the drawings
+function assetKind(type) {
+  const key = String(type || "").toLowerCase().replace(/[^a-z]/g, "");
+  if (key === "raingarden") return "raingarden";
+  if (key === "bioswale") return "bioswale";
+  if (key.startsWith("infiltration")) return "infiltration";
+  if (key.includes("detention") || key.includes("retention")) return "basin";
+  if (key.startsWith("percolation")) return "well";
+  return null;
+}
+
+const KIND_INFO = {
+  raingarden: { title: "Rain garden", lMin: 0.8, lMax: 1.5, lDefault: 1.3, dMin: 0.3, dMax: 0.5, dDefault: 0.35 },
+  bioswale: { title: "Bioswale", lMin: 2.4, lMax: 3.2, lDefault: 2.8, dMin: 0.38, dMax: 0.6, dDefault: 0.45 },
+  infiltration: { title: "Infiltration pit", lMin: 0.7, lMax: 1.8, lDefault: 1, dMin: 0.6, dMax: 1.4, dDefault: 1 },
+  basin: { title: "Detention / retention basin", lMin: 0.8, lMax: 1.4, lDefault: 1, dMin: 0.2, dMax: 0.4, dDefault: 0.3 },
+  well: { title: "Percolation well", dMin: 1.6, dMax: 2.6, dDefault: 2 },
+};
+
+function seededRandom(text) {
+  let seed = 0;
+  for (const ch of String(text)) seed = (seed * 31 + ch.charCodeAt(0)) % 233280;
+  seed = seed || 7;
+  return () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+}
+
+// Converts a font file (for example /fonts/Poppins-Regular.ttf) into the
+// base64 text jsPDF needs. Use a font that includes the rupee sign.
+export async function loadFontBase64(url) {
+  const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer());
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary);
+}
+
+const FONT_BASE = `${import.meta.env?.BASE_URL ?? "/"}fonts/`;
+let defaultFonts = null;
+
+// Loads Poppins from public/fonts once. Falls back to the built-in font if it cannot be fetched.
+function loadDefaultFonts() {
+  if (!defaultFonts) {
+    defaultFonts = Promise.all([
+      loadFontBase64(`${FONT_BASE}Poppins-Regular.ttf`),
+      loadFontBase64(`${FONT_BASE}Poppins-SemiBold.ttf`),
+    ])
+      .then(([regular, bold]) => ({ regular, bold }))
+      .catch(() => {
+        defaultFonts = null;
+        return null;
+      });
+  }
+  return defaultFonts;
+}
+
+export function createFundingDoc({
   heading = "Funding commitment",
   meta = [],
   projects = [],
   totalLabel = "Total commitment",
   totalAmount = "",
+  fonts = null, // { regular: base64, bold: base64 }
 } = {}) {
-  const pages = [];
-  let page = null;
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
 
-  const addPage = (continued) => {
-    page = { ops: [], y: PAGE_H - 36 };
-    pages.push(page);
-    page.ops.push(fillRect(0, PAGE_H - 28, PAGE_W, 28, GREEN));
-    page.ops.push(textOp("CLIMATE SOLUTIONS", MARGIN, PAGE_H - 18, 9, true, "1 1 1"));
-    page.ops.push(textOp(heading, PAGE_W - MARGIN - 130, PAGE_H - 18, 9, false, "1 1 1"));
-    if (continued) {
-      page.y = PAGE_H - 46;
-      page.ops.push(textOp("Continued", MARGIN, page.y, 9, false, MUTED));
-      page.y -= 16;
-    } else {
-      page.y = PAGE_H - 52;
+  let family = "helvetica";
+  let rupee = false;
+  if (fonts?.regular) {
+    doc.addFileToVFS("Body-Regular.ttf", fonts.regular);
+    doc.addFont("Body-Regular.ttf", "Body", "normal");
+    doc.addFileToVFS("Body-Bold.ttf", fonts.bold || fonts.regular);
+    doc.addFont("Body-Bold.ttf", "Body", "bold");
+    family = "Body";
+    rupee = true;
+  }
+  const clean = (value) => {
+    const plain = String(value ?? "").replace(EMOJI, "");
+    return rupee ? plain : plain.replace(/₹\s?/g, "Rs ");
+  };
+
+  // ---------- primitives ----------
+  const setFill = (c) => doc.setFillColor(c[0], c[1], c[2]);
+  const setDraw = (c) => doc.setDrawColor(c[0], c[1], c[2]);
+  const setFont = (size, bold) => {
+    doc.setFont(family, bold ? "bold" : "normal");
+    doc.setFontSize(size);
+  };
+  const text = (value, x, yy, { size = 10, bold = false, color = C.ink, align = "left" } = {}) => {
+    setFont(size, bold);
+    doc.setTextColor(color[0], color[1], color[2]);
+    doc.text(clean(value), x, yy, { align });
+  };
+  const textWidth = (value, size, bold) => {
+    setFont(size, bold);
+    return doc.getTextWidth(clean(value));
+  };
+  const poly = (pts, fill, stroke = null, width = 0.5) => {
+    if (pts.length < 3) return;
+    const segments = [];
+    for (let i = 1; i < pts.length; i += 1) segments.push([pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]]);
+    if (fill) setFill(fill);
+    if (stroke) {
+      setDraw(stroke);
+      doc.setLineWidth(width);
+    }
+    doc.lines(segments, pts[0][0], pts[0][1], [1, 1], fill && stroke ? "FD" : fill ? "F" : "S", true);
+  };
+  const seg = (a, b, color, width = 0.5, dash = null) => {
+    setDraw(color);
+    doc.setLineWidth(width);
+    if (dash) doc.setLineDashPattern(dash, 0);
+    doc.line(a[0], a[1], b[0], b[1]);
+    if (dash) doc.setLineDashPattern([], 0);
+  };
+  const arrowHead = (tip, from, color, size = 5, half = 2.2) => {
+    const dx = tip[0] - from[0];
+    const dy = tip[1] - from[1];
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len;
+    const uy = dy / len;
+    const bx = tip[0] - ux * size;
+    const by = tip[1] - uy * size;
+    poly([tip, [bx - uy * half, by + ux * half], [bx + uy * half, by - ux * half]], color);
+  };
+  const dimensionLine = (a, b) => {
+    seg(a, b, C.ink, 0.8);
+    arrowHead(a, b, C.ink);
+    arrowHead(b, a, C.ink);
+  };
+  const chip = (value, x, yy, align = "left") => {
+    const w = textWidth(value, 8.5, true) + 12;
+    const h = 16;
+    const left = align === "right" ? x - w : align === "center" ? x - w / 2 : x;
+    setFill(C.white);
+    setDraw(C.green);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(left, yy - h / 2, w, h, 3, 3, "FD");
+    text(value, left + 6, yy + 3, { size: 8.5, bold: true });
+  };
+
+  // ---------- page flow ----------
+  let y = 0;
+  const header = () => {
+    setFill(C.green);
+    doc.rect(0, 0, PAGE_W, 28, "F");
+    text("CLIMATE SOLUTIONS", MARGIN, 18, { size: 9, bold: true, color: C.white });
+    text(heading, PAGE_W - MARGIN, 18, { size: 9, color: C.white, align: "right" });
+    y = 52;
+  };
+  const ensure = (height) => {
+    if (y + height > PAGE_H - BOTTOM) {
+      doc.addPage();
+      header();
     }
   };
-
-  const ensure = (height) => {
-    if (page.y - height < BOTTOM) addPage(true);
-  };
-
-  const write = (text, size = 10, bold = false, color = INK, indent = 0) => {
-    const x = MARGIN + indent;
-    const maxChars = Math.max(24, Math.floor((PAGE_W - x - MARGIN) / (size * 0.5)));
-    wrap(text, maxChars).forEach((lineText) => {
+  const write = (value, size = 10, bold = false, color = C.ink, indent = 0) => {
+    setFont(size, bold);
+    doc.splitTextToSize(clean(value), PAGE_W - MARGIN * 2 - indent).forEach((lineText) => {
       ensure(size + 5);
-      page.y -= size + 4;
-      page.ops.push(textOp(lineText, x, page.y, size, bold, color));
+      y += size + 4;
+      text(lineText, MARGIN + indent, y, { size, bold, color });
+    });
+  };
+  const rule = () => {
+    ensure(12);
+    y += 4;
+    seg([MARGIN, y], [PAGE_W - MARGIN, y], C.rule, 0.6);
+    y += 10;
+  };
+  const LABEL_W = 110;
+  const ROW_LINE = 13;
+  const detailLines = (value) => {
+    setFont(9.5, true);
+    return doc.splitTextToSize(clean(value), PAGE_W - MARGIN * 2 - LABEL_W - 24);
+  };
+  const detailsHeight = (rows) => rows.reduce((sum, [, value]) => sum + detailLines(value).length * ROW_LINE + 8, 0);
+  // One label and value per row, with alternating shading
+  const details = (rows) => {
+    rows.forEach(([label, value], index) => {
+      const lines = detailLines(value);
+      const h = lines.length * ROW_LINE + 8;
+      ensure(h);
+      if (index % 2 === 0) {
+        setFill(C.rowAlt);
+        doc.rect(MARGIN, y, PAGE_W - MARGIN * 2, h, "F");
+      }
+      text(label, MARGIN + 8, y + 14, { size: 9, color: C.muted });
+      lines.forEach((lineText, i) => text(lineText, MARGIN + 8 + LABEL_W, y + 14 + i * ROW_LINE, { size: 9.5, bold: true }));
+      y += h;
+      seg([MARGIN, y], [PAGE_W - MARGIN, y], C.rule, 0.4);
     });
   };
 
-  const rule = () => {
-    ensure(12);
-    page.y -= 4;
-    page.ops.push(line(MARGIN, page.y, PAGE_W - MARGIN, page.y, "0.78 0.84 0.74", 0.6));
-    page.y -= 10;
+  // ---------- isometric drawing ----------
+  // Axes: x = length (towards the back right), y = width (towards the back left), z = up.
+  // The block is cut at x = 0, so the lower-left face shows the profile across the width.
+  const c30 = Math.cos(Math.PI / 6);
+  const raw = (x, yy, z) => [(x - yy) * c30, (x + yy) * 0.5 + z];
+  const scene = (title, xs, ys, zs, { maxH = 230, padT = 8, padB = 36 } = {}) => {
+    const corners = [];
+    xs.forEach((x) => ys.forEach((yy) => zs.forEach((z) => corners.push(raw(x, yy, z)))));
+    const us = corners.map((p) => p[0]);
+    const vs = corners.map((p) => p[1]);
+    const minU = Math.min(...us);
+    const maxU = Math.max(...us);
+    const minV = Math.min(...vs);
+    const maxV = Math.max(...vs);
+    const padL = 84;
+    const padR = 40;
+    const sceneW = PAGE_W - MARGIN * 2;
+    const k = Math.min((sceneW - padL - padR) / (maxU - minU), (maxH - padT - padB) / (maxV - minV));
+    const sceneH = (maxV - minV) * k + padT + padB;
+
+    ensure(sceneH + 20);
+    y += 2;
+    write(title, 9.5, true, C.green);
+
+    const top = y + 4;
+    const spare = sceneW - padL - padR - (maxU - minU) * k;
+    const ox = MARGIN + padL + spare / 2 - minU * k;
+    const oy = top + padT + maxV * k;
+    const S = (x, yy, z) => {
+      const [u, v] = raw(x, yy, z);
+      return [ox + u * k, oy - v * k];
+    };
+    const face = (pts, fill, stroke = C.edge, width = 0.45) => poly(pts.map((p) => S(...p)), fill, stroke, width);
+    return { S, face, k, done: () => { y = top + sceneH; } };
+  };
+  const pebbles = (S, k, rand, y0, y1, z0, z1, density = 14) => {
+    const n = Math.min(400, Math.round(((y1 - y0) * (z1 - z0) * k * k) / density));
+    for (let i = 0; i < n; i += 1) {
+      const r = 1 + rand() * 1.4;
+      const yy = y0 + r / k + rand() * Math.max(0, y1 - y0 - (2 * r) / k);
+      const z = z0 + r / k + rand() * Math.max(0, z1 - z0 - (2 * r) / k);
+      const p = S(0, yy, z);
+      const g = 145 + Math.round(rand() * 75);
+      setFill([g, g - 2, g - 8]);
+      setDraw(C.stoneEdge);
+      doc.setLineWidth(0.2);
+      doc.circle(p[0], p[1], r, "FD");
+    }
+  };
+  const flowArrow = (a, b) => {
+    seg(a, b, C.flow, 0.9);
+    arrowHead(b, a, C.flow, 4, 1.8);
   };
 
-  const shape = (points, fill, stroke = INK, width = 0.6) => {
-    const body = points.map((point, index) => `${n(point[0])} ${n(point[1])} ${index === 0 ? "m" : "l"}`).join("\n");
-    page.ops.push(`${fill} rg\n${stroke} RG\n${width} w\n${body}\nh\nB`);
-  };
-
-  const disk = (cx, cy, r, fill) => {
-    page.ops.push(`${fill} rg\n${n(cx + r)} ${n(cy)} m\n${n(cx)} ${n(cy)} ${n(r)} 0 360 arc\nh\nf`);
-  };
-
-  const drawCutaway = (asset) => {
+  const drawAsset3D = (asset, kind) => {
+    const info = KIND_INFO[kind];
+    const rand = seededRandom(`${asset.name}|${kind}`);
+    const W = asset.widthM;
+    const L = asset.lengthM > 0 ? asset.lengthM : null;
+    const D = asset.depthM > 0 ? asset.depthM : null;
     const widthLabel = dimensionLabel(asset.widthLabel, asset.widthM);
     const depthLabel = dimensionLabel(asset.depthLabel, asset.depthM);
     const lengthLabel = dimensionLabel(asset.lengthLabel, asset.lengthM);
-    const sceneW = 490;
-    const sceneH = 168;
-    ensure(sceneH + 28);
-    write(asset.type === "bioswale" ? "Bioswale cutaway" : "Rain garden cutaway", 9, true, GREEN);
-    write("Marked length, width, and depth are the recorded measurements.", 8, false, MUTED);
 
-    const ox = MARGIN;
-    const oy = page.y - sceneH + 18;
-    const X = (x) => ox + x;
-    const Y = (y) => oy + y;
-    const ground = 92;
-    const skewX = 16;
-    const skewY = 14;
-    const bedLeft = 188;
-    const bedRight = 400;
-    const cut = asset.depthM > 0 ? 36 : 16;
+    const Lreal = L ?? W * info.lDefault;
+    const Ld = clamp(Lreal, W * info.lMin, W * info.lMax);
+    const Dreal = D ?? W * info.dDefault;
+    const Dd = clamp(Dreal, W * info.dMin, W * info.dMax);
 
-    shape([[X(0), Y(18)], [X(sceneW), Y(18)], [X(sceneW), Y(ground)], [X(0), Y(ground)]], "0.63 0.48 0.34", "0.45 0.33 0.22", 0.4);
-    shape(
-      [[X(0), Y(ground)], [X(skewX), Y(ground + skewY)], [X(sceneW + skewX), Y(ground + skewY)], [X(sceneW), Y(ground)]],
-      "0.78 0.66 0.48",
-      "0.45 0.33 0.22",
-      0.4
-    );
-    shape(
-      [[X(sceneW), Y(18)], [X(sceneW + skewX), Y(18 + skewY)], [X(sceneW + skewX), Y(ground + skewY)], [X(sceneW), Y(ground)]],
-      "0.50 0.37 0.26",
-      "0.45 0.33 0.22",
-      0.4
-    );
+    const m = W * 0.3; // ground beside the asset
+    const mx = kind === "bioswale" ? 0 : W * 0.3; // ground behind the asset
+    const Lb = Ld + mx;
+    const T = Dd + W * (kind === "infiltration" ? 0.18 : 0.24);
+    const sloped = kind === "raingarden" || kind === "basin";
+    const iy = kind === "raingarden" ? Math.min(Dd * 1.6, W * 0.3) : kind === "basin" ? Math.min(Dd * 1.2, W * 0.26) : kind === "bioswale" ? W * 0.28 : 0;
+    const ix = kind === "raingarden" ? Math.min(Dd * 1.6, Ld * 0.22) : kind === "basin" ? Math.min(Dd * 1.2, Ld * 0.26) : 0;
+    const bushH = kind === "raingarden" ? Dd * 0.95 : 0;
+    const wet = 0.55; // water stands in the lower part of the basin
+    const zw = -Dd * wet;
 
-    const roadEnd = 128;
-    shape(
-      [[X(8), Y(ground)], [X(8 + skewX), Y(ground + skewY)], [X(roadEnd + skewX), Y(ground + skewY)], [X(roadEnd), Y(ground)]],
-      "0.27 0.29 0.30",
-      "0.16 0.17 0.18",
-      0.3
-    );
-    for (let step = 0; step < 4; step += 1) {
-      const zx = 22 + step * 24;
-      shape(
-        [[X(zx), Y(ground + 1)], [X(zx + 5), Y(ground + 6)], [X(zx + 16), Y(ground + 6)], [X(zx + 11), Y(ground + 1)]],
-        "0.94 0.94 0.92",
-        "0.94 0.94 0.92",
-        0.2
+    const { S, face, k, done } = scene(info.title, [0, Lb], [-m, W + m], [-T, Math.max(0, -Dd + bushH)]);
+
+    // Faint ground shadow
+    face([[0, -m, -T], [Lb, -m, -T], [Lb, W + m, -T], [0, W + m, -T]], [236, 236, 230], null);
+
+    if (sloped) {
+      // Basin with gently sloped sides on all closed edges
+      const pal = kind === "basin"
+        ? { near: C.dbSlopeNear, floor: C.dbFloor, far: C.dbSlopeFar, end: C.dbSlopeEnd }
+        : { near: C.rgSlopeNear, floor: C.rgFloor, far: C.rgSlopeFar, end: C.rgSlopeEnd };
+      face([[0, 0, 0], [Ld, 0, 0], [Ld - ix, iy, -Dd], [0, iy, -Dd]], pal.near);
+      face([[0, iy, -Dd], [Ld - ix, iy, -Dd], [Ld - ix, W - iy, -Dd], [0, W - iy, -Dd]], pal.floor);
+      face([[0, W, 0], [Ld, W, 0], [Ld - ix, W - iy, -Dd], [0, W - iy, -Dd]], pal.far);
+      face([[Ld, 0, 0], [Ld, W, 0], [Ld - ix, W - iy, -Dd], [Ld - ix, iy, -Dd]], pal.end);
+    }
+    if (kind === "basin") {
+      // Inlet pipe on the far slope, with rock protection below it
+      const pipe = S(Ld * 0.55, W - iy * 0.2, -Dd * 0.2);
+      const pr = clamp(W * 0.05 * k, 4, 9);
+      for (let i = 0; i < 9; i += 1) {
+        const f = 0.25 + rand() * (wet - 0.25);
+        const p = S(Ld * 0.55 + (rand() - 0.5) * W * 0.16, W - iy * f, -Dd * f);
+        const r = 1.4 + rand() * 1.6;
+        setFill(C.bsStone);
+        setDraw(C.stoneEdge);
+        doc.setLineWidth(0.25);
+        doc.ellipse(p[0], p[1], r, r * 0.62, "FD");
+      }
+      setFill(C.concrete);
+      setDraw(C.concreteEdge);
+      doc.setLineWidth(0.5);
+      doc.ellipse(pipe[0], pipe[1], pr, pr * 0.8, "FD");
+      setFill(C.wellInner);
+      doc.ellipse(pipe[0], pipe[1], pr * 0.62, pr * 0.5, "F");
+      // Standing water
+      face([[0, iy * wet, zw], [Ld - ix * wet, iy * wet, zw], [Ld - ix * wet, W - iy * wet, zw], [0, W - iy * wet, zw]], C.waterTop, C.waterEdge, 0.5);
+      for (let i = 0; i < 5; i += 1) {
+        const x0 = (Ld - ix) * (0.15 + rand() * 0.6);
+        const y0 = iy + (W - 2 * iy) * (0.15 + rand() * 0.7);
+        seg(S(x0, y0, zw), S(x0 + Ld * 0.08, y0, zw), C.ripple, 0.8);
+      }
+      flowArrow(S(Ld * 0.55, W - iy * 0.3, -Dd * 0.3 + 6 / k), S(Ld * 0.5, W - iy * 0.75, zw + 2 / k));
+    } else if (kind === "bioswale") {
+      // Long grass-lined channel with a trapezoidal profile, running through the block
+      face([[0, 0, 0], [Lb, 0, 0], [Lb, iy, -Dd], [0, iy, -Dd]], C.bsWallNear);
+      face([[0, iy, -Dd], [Lb, iy, -Dd], [Lb, W - iy, -Dd], [0, W - iy, -Dd]], C.bsFloor);
+      face([[0, W, 0], [Lb, W, 0], [Lb, W - iy, -Dd], [0, W - iy, -Dd]], C.bsWallFar);
+      // A line of small stones along the channel bed
+      const stones = Math.round(Lb / (W * 0.12));
+      for (let i = 0; i < stones; i += 1) {
+        const p = S((i + 0.5 + (rand() - 0.5) * 0.4) * (Lb / stones), W / 2 + (rand() - 0.5) * (W - 2 * iy) * 0.5, -Dd);
+        const r = (0.7 + rand() * 0.6) * Math.max(1.2, W * 0.025 * k);
+        setFill(C.bsStone);
+        setDraw(C.stoneEdge);
+        doc.setLineWidth(0.25);
+        doc.ellipse(p[0], p[1], r, r * 0.58, "FD");
+      }
+    }
+
+    // Ground surface
+    if (kind === "bioswale") {
+      face([[0, -m, 0], [Lb, -m, 0], [Lb, 0, 0], [0, 0, 0]], C.grassTop, C.grassEdge);
+      face([[0, W, 0], [Lb, W, 0], [Lb, W + m, 0], [0, W + m, 0]], C.grassTop, C.grassEdge);
+    } else {
+      face([[0, -m, 0], [Lb, -m, 0], [Lb, W + m, 0], [0, W + m, 0], [0, W, 0], [Ld, W, 0], [Ld, 0, 0], [0, 0, 0]], C.grassTop, C.grassEdge);
+    }
+
+    if (kind === "infiltration") {
+      face([[0, 0, 0], [Ld, 0, 0], [Ld, W, 0], [0, W, 0]], C.gravelTop);
+      const n = Math.round((Ld * W) / (W * W) * 70);
+      for (let i = 0; i < n; i += 1) {
+        const p = S(Ld * (0.03 + rand() * 0.94), W * (0.03 + rand() * 0.94), 0);
+        const r = 1.1 + rand() * 1.3;
+        const g = 150 + Math.round(rand() * 70);
+        setFill([g, g - 2, g - 8]);
+        setDraw(C.stoneEdge);
+        doc.setLineWidth(0.2);
+        doc.ellipse(p[0], p[1], r, r * 0.58, "FD");
+      }
+    }
+
+    // Side face (right)
+    face([[0, -m, 0], [Lb, -m, 0], [Lb, -m, -T], [0, -m, -T]], C.soilSide);
+
+    // Planting in the rain garden, back to front
+    if (kind === "raingarden") {
+      const spots = [];
+      const cols = 4;
+      const rows = 3;
+      for (let r = 0; r < rows; r += 1) {
+        for (let cIdx = 0; cIdx < cols; cIdx += 1) {
+          const x = (Ld - ix) * ((cIdx + 0.5 + (r % 2 ? 0.25 : -0.1)) / cols);
+          const yy = Math.max(iy, Dd) + (W - iy - Math.max(iy, Dd)) * ((r + 0.5) / rows);
+          spots.push([clamp(x, (Ld - ix) * 0.08, (Ld - ix) * 0.92), yy]);
+        }
+      }
+      spots.sort((a, b) => b[0] + b[1] - (a[0] + a[1]));
+      const r0 = clamp(W * 0.075 * k, 3, 9);
+      spots.forEach(([x, yy], index) => {
+        const b = S(x, yy, -Dd);
+        const r = r0 * (0.85 + rand() * 0.3);
+        setFill(C.bushDark);
+        doc.circle(b[0] - r * 0.55, b[1] - r * 0.7, r * 0.8, "F");
+        setFill(C.bush);
+        doc.circle(b[0] + r * 0.5, b[1] - r * 0.75, r * 0.78, "F");
+        setFill(C.bushLight);
+        doc.circle(b[0], b[1] - r * 1.25, r * 0.85, "F");
+        if (index % 2 === 0) {
+          setFill(index % 4 === 0 ? C.flower : C.flowerAlt);
+          doc.circle(b[0] - r * 0.25, b[1] - r * 1.55, r * 0.2, "F");
+          doc.circle(b[0] + r * 0.35, b[1] - r * 1.35, r * 0.18, "F");
+        }
+      });
+    }
+
+    // Cut face (left), showing the profile across the width
+    if (kind === "infiltration") {
+      face([[0, -m, -T], [0, W + m, -T], [0, W + m, 0], [0, -m, 0]], C.soilCut);
+      face([[0, 0, 0], [0, W, 0], [0, W, -Dd], [0, 0, -Dd]], C.gravelCut);
+      const area = W * Dd * k * k;
+      const n = Math.min(500, Math.round(area / 14));
+      for (let i = 0; i < n; i += 1) {
+        const r = 1.2 + rand() * 1.6;
+        const yy = r / k + rand() * (W - (2 * r) / k);
+        const z = -Dd + r / k + rand() * (Dd - (2 * r) / k);
+        const p = S(0, yy, z);
+        const g = 145 + Math.round(rand() * 75);
+        setFill([g, g - 2, g - 8]);
+        setDraw(C.stoneEdge);
+        doc.setLineWidth(0.2);
+        doc.circle(p[0], p[1], r, "FD");
+      }
+    } else {
+      face(
+        [[0, -m, -T], [0, W + m, -T], [0, W + m, 0], [0, W, 0], [0, W - iy, -Dd], [0, iy, -Dd], [0, 0, 0], [0, -m, 0]],
+        C.soilCut
       );
+      if (kind === "basin") {
+        face([[0, iy * wet, zw], [0, W - iy * wet, zw], [0, W - iy, -Dd], [0, iy, -Dd]], C.waterCut, C.waterEdge, 0.5);
+      }
+      const lining = { raingarden: [C.rgFloor, C.rgSlopeNear, C.rgSlopeFar], basin: [C.dbFloor, C.dbSlopeNear, C.dbSlopeFar] }[kind] || [C.bsFloor, C.bsWallNear, C.bsWallFar];
+      seg(S(0, iy, -Dd), S(0, W - iy, -Dd), lining[0], 2.2);
+      seg(S(0, 0, 0), S(0, iy, -Dd), lining[1], 2.2);
+      seg(S(0, W, 0), S(0, W - iy, -Dd), lining[2], 2.2);
     }
-    shape(
-      [[X(roadEnd), Y(ground - 8)], [X(roadEnd), Y(ground + 6)], [X(roadEnd + 14), Y(ground + 8)], [X(roadEnd + 14), Y(ground - 6)]],
-      "0.75 0.76 0.74",
-      "0.52 0.52 0.50",
-      0.4
-    );
-    shape(
-      [[X(roadEnd + 18), Y(ground)], [X(roadEnd + 18 + skewX), Y(ground + skewY)], [X(bedLeft - 8 + skewX), Y(ground + skewY)], [X(bedLeft - 8), Y(ground)]],
-      "0.82 0.82 0.78",
-      "0.62 0.62 0.58",
-      0.3
-    );
 
-    shape(
-      [[X(bedLeft), Y(ground)], [X(bedLeft + skewX), Y(ground + skewY)], [X(bedRight + skewX), Y(ground + skewY)], [X(bedRight), Y(ground)]],
-      "0.49 0.66 0.36",
-      "0.28 0.44 0.22",
-      0.5
-    );
-    shape(
-      [[X(bedLeft + 12), Y(ground)], [X(bedLeft + 30), Y(ground - cut)], [X(bedRight - 30), Y(ground - cut)], [X(bedRight - 12), Y(ground)]],
-      "0.40 0.55 0.31",
-      "0.26 0.40 0.20",
-      0.4
-    );
-    shape(
-      [[X(bedLeft + 30), Y(ground - cut)], [X(bedRight - 30), Y(ground - cut)], [X(bedRight - 30), Y(ground - cut - 12)], [X(bedLeft + 30), Y(ground - cut - 12)]],
-      "0.70 0.70 0.66",
-      "0.52 0.52 0.48",
-      0.3
-    );
-    disk(X((bedLeft + bedRight) / 2), Y(ground - cut - 6), 4.2, "0.86 0.43 0.16");
+    // Dimensions
+    const zW = -T - 16 / k;
+    seg(S(0, 0, 0), S(0, 0, zW - 4 / k), C.muted, 0.45, [2, 2]);
+    seg(S(0, W, 0), S(0, W, zW - 4 / k), C.muted, 0.45, [2, 2]);
+    dimensionLine(S(0, 0, zW), S(0, W, zW));
+    const wMid = S(0, W / 2, zW);
+    chip(`Width ${widthLabel}`, wMid[0], wMid[1] + 13, "center");
 
-    [206, 232, 258, 284, 310, 336, 362].forEach((x, index) => {
-      disk(X(x), Y(ground + 8 + (index % 2) * 4), 3.4 + (index % 3) * 0.6, index % 2 ? "0.24 0.55 0.26" : "0.46 0.64 0.28");
+    if (D != null) {
+      const yd = W + m * 0.5;
+      seg(S(0, W - iy, -Dd), S(0, W + m * 0.72, -Dd), C.muted, 0.45, [2, 2]);
+      seg(S(0, W, 0), S(0, W + m * 0.72, 0), C.muted, 0.45, [2, 2]);
+      dimensionLine(S(0, yd, 0), S(0, yd, -Dd));
+      const edge = S(0, W + m, -Dd / 2);
+      chip(`Depth ${depthLabel}`, edge[0] - 8, edge[1], "right");
+    }
+
+    if (L != null) {
+      const yl = -m * 0.5;
+      seg(S(Ld, 0, 0), S(Ld, -m * 0.72, 0), C.muted, 0.45, [2, 2]);
+      dimensionLine(S(0, yl, 0), S(Ld, yl, 0));
+      const lMid = S(Ld / 2, -m, 0);
+      chip(`Length ${lengthLabel}`, lMid[0] + 10, lMid[1] + 12, "left");
+    }
+
+    done();
+    if (L == null) write("Length is not recorded, so it is not dimensioned.", 8, false, C.muted);
+  };
+
+  // Circular shaft lined with perforated concrete rings, wrapped in a gravel pack.
+  // The block is cut through the centre of the well.
+  const drawWell = (asset) => {
+    const info = KIND_INFO.well;
+    const rand = seededRandom(`${asset.name}|well`);
+    const W = asset.widthM;
+    const D = asset.depthM > 0 ? asset.depthM : null;
+    const Dd = clamp(D ?? W * info.dDefault, W * info.dMin, W * info.dMax);
+    const widthLabel = dimensionLabel(asset.widthLabel, asset.widthM);
+    const depthLabel = dimensionLabel(asset.depthLabel, asset.depthM);
+
+    const R = W / 2;
+    const rim = W * 0.08;
+    const pack = W * 0.2;
+    const base = W * 0.16;
+    const By = W * 2.8;
+    const Bx = W * 1.4;
+    const cy = By / 2;
+    const T = Dd + base + W * 0.3;
+
+    const { S, face, k, done } = scene(info.title, [0, Bx], [0, By], [-T, 0], { maxH: 290 });
+    const half = (r, z = 0) => {
+      const pts = [];
+      for (let i = 0; i <= 24; i += 1) {
+        const t = (Math.PI * i) / 24;
+        pts.push([r * Math.sin(t), cy + r * Math.cos(t), z]);
+      }
+      return pts;
+    };
+
+    face([[0, 0, -T], [Bx, 0, -T], [Bx, By, -T], [0, By, -T]], [236, 236, 230], null);
+    face([[0, 0, 0], [Bx, 0, 0], [Bx, By, 0], [0, By, 0]], C.grassTop, C.grassEdge);
+    face(half(R + rim + pack), C.gravelTop);
+    face(half(R + rim), C.concrete, C.concreteEdge);
+    face(half(R), C.wellInner, C.concreteEdge);
+    face([[0, 0, 0], [Bx, 0, 0], [Bx, 0, -T], [0, 0, -T]], C.soilSide);
+
+    // Cut face
+    const yOut0 = cy - R - rim - pack;
+    const yOut1 = cy + R + rim + pack;
+    face([[0, 0, -T], [0, By, -T], [0, By, 0], [0, 0, 0]], C.soilCut);
+    face([[0, 0, 0], [0, By, 0], [0, By, -W * 0.12], [0, 0, -W * 0.12]], C.topsoil, null);
+    face([[0, yOut0, -Dd], [0, yOut1, -Dd], [0, yOut1, -Dd - base], [0, yOut0, -Dd - base]], C.gravelCut);
+    pebbles(S, k, rand, yOut0, yOut1, -Dd - base, -Dd);
+    [[yOut0, cy - R - rim], [cy + R + rim, yOut1]].forEach(([a, b]) => {
+      face([[0, a, 0], [0, b, 0], [0, b, -Dd], [0, a, -Dd]], C.gravelCut);
+      pebbles(S, k, rand, a, b, -Dd, 0);
     });
-    [220, 270, 322].forEach((x) => disk(X(x), Y(ground + 16), 2.2, "0.74 0.42 0.55"));
+    face([[0, cy - R, 0], [0, cy + R, 0], [0, cy + R, -Dd], [0, cy - R, -Dd]], C.wellInner);
+    face([[0, cy - R, -Dd * 0.72], [0, cy + R, -Dd * 0.72], [0, cy + R, -Dd], [0, cy - R, -Dd]], C.waterCut, C.waterEdge, 0.5);
+    [[cy - R - rim, cy - R], [cy + R, cy + R + rim]].forEach(([a, b]) => {
+      face([[0, a, 0], [0, b, 0], [0, b, -Dd], [0, a, -Dd]], C.concrete, C.concreteEdge);
+    });
 
-    const treeX = 352;
-    page.ops.push(line(X(treeX), Y(ground + 2), X(treeX + 3), Y(ground + 30), "0.36 0.24 0.14", 1.5));
-    disk(X(treeX - 8), Y(ground + 34), 10, "0.22 0.50 0.24");
-    disk(X(treeX + 4), Y(ground + 40), 14, "0.20 0.55 0.26");
-    disk(X(treeX + 16), Y(ground + 34), 11, "0.32 0.62 0.28");
-    page.ops.push(line(X(treeX + 42), Y(ground + 2), X(treeX + 44), Y(ground + 20), "0.36 0.24 0.14", 1.1));
-    disk(X(treeX + 44), Y(ground + 26), 8, "0.26 0.52 0.24");
-
-    page.ops.push(line(X(bedLeft + 18), Y(ground + 10), X(bedRight - 24), Y(ground + 20), "0.18 0.40 0.66", 1.1));
-    page.ops.push(line(X(bedRight - 24), Y(ground + 20), X(bedRight - 34), Y(ground + 16), "0.18 0.40 0.66", 1.1));
-    page.ops.push(line(X(bedRight - 24), Y(ground + 20), X(bedRight - 30), Y(ground + 26), "0.18 0.40 0.66", 1.1));
-
-    const dimY = Y(ground + skewY + 16);
-    page.ops.push(line(X(bedLeft), Y(ground + skewY), X(bedLeft), dimY, MUTED, 0.4));
-    page.ops.push(line(X(bedRight), Y(ground + skewY), X(bedRight), dimY, MUTED, 0.4));
-    page.ops.push(line(X(bedLeft), dimY, X(bedRight), dimY, INK, 0.8));
-    const widthText = `Width ${widthLabel}`;
-    page.ops.push(textOp(widthText, X((bedLeft + bedRight) / 2) - widthText.length * 2, dimY + 3, 8, true, INK));
-
-    if (asset.depthM > 0) {
-      const depthX = X(bedRight + 6);
-      page.ops.push(line(depthX, Y(ground), depthX + 8, Y(ground), MUTED, 0.4));
-      page.ops.push(line(depthX, Y(ground - cut), depthX + 8, Y(ground - cut), MUTED, 0.4));
-      page.ops.push(line(depthX + 6, Y(ground), depthX + 6, Y(ground - cut), INK, 0.8));
-      page.ops.push(textOp(`Depth ${depthLabel}`, depthX + 10, Y(ground - cut / 2) - 2, 8, true, INK));
+    // Ring joints and perforations
+    const rings = clamp(Math.round(D ?? Dd), 3, 8);
+    for (let i = 1; i < rings; i += 1) {
+      const z = (-Dd * i) / rings;
+      seg(S(0, cy - R - rim, z), S(0, cy + R + rim, z), C.concreteEdge, 0.5);
     }
-    if (lengthLabel) {
-      page.ops.push(textOp(`Length ${lengthLabel}`, X(sceneW - 78), Y(28), 8, true, INK));
+    for (let i = 0; i < rings; i += 1) {
+      const z = (-Dd * (i + 0.5)) / rings;
+      if (i < rings / 3) continue;
+      [cy - R - rim / 2, cy + R + rim / 2].forEach((yy) => {
+        const p = S(0, yy, z);
+        setFill(C.wellInner);
+        doc.circle(p[0], p[1], clamp(rim * k * 0.28, 0.8, 1.8), "F");
+      });
     }
 
-    page.y = oy - 4;
+    // Water spreading into the soil
+    [0.55, 0.75, 0.92].forEach((f) => {
+      flowArrow(S(0, yOut0, -Dd * f), S(0, yOut0 - W * 0.34, -Dd * f));
+      flowArrow(S(0, yOut1, -Dd * f), S(0, yOut1 + W * 0.34, -Dd * f));
+    });
+    flowArrow(S(0, cy, -Dd - base), S(0, cy, -Dd - base - W * 0.22));
+
+    // Diameter
+    const zd = -T - 16 / k;
+    seg(S(0, cy - R, -Dd - base), S(0, cy - R, zd - 4 / k), C.muted, 0.45, [2, 2]);
+    seg(S(0, cy + R, -Dd - base), S(0, cy + R, zd - 4 / k), C.muted, 0.45, [2, 2]);
+    dimensionLine(S(0, cy - R, zd), S(0, cy + R, zd));
+    const dMid = S(0, cy, zd);
+    chip(`Diameter ${widthLabel}`, dMid[0], dMid[1] + 13, "center");
+
+    if (D != null) {
+      const yd = yOut1 + (By - yOut1) * 0.6;
+      seg(S(0, yOut1, -Dd), S(0, yd + (By - yOut1) * 0.2, -Dd), C.muted, 0.45, [2, 2]);
+      dimensionLine(S(0, yd, 0), S(0, yd, -Dd));
+      const edge = S(0, By, -Dd / 2);
+      chip(`Depth ${depthLabel}`, edge[0] - 8, edge[1], "right");
+    }
+
+    done();
   };
 
   const drawAssetDesign = (asset) => {
-    if (!DRAWABLE.has(asset.type)) return;
+    const kind = assetKind(asset.type);
+    if (!kind) return;
     if (!(asset.widthM > 0)) {
-      write("Cutaway omitted. Width is not recorded.", 9, false, MUTED);
+      write("Drawing omitted. Width is not recorded.", 9, false, C.muted);
       return;
     }
-    drawCutaway(asset);
+    if (kind === "well") drawWell(asset);
+    else drawAsset3D(asset, kind);
     if (!(asset.depthM > 0)) {
-      write(asset.depthLabel ? `Depth is recorded as ${asset.depthLabel}, so the cut depth is not dimensioned.` : "Depth is not recorded, so the cut depth is not dimensioned.", 8, false, MUTED);
+      write(asset.depthLabel ? `Depth is recorded as ${asset.depthLabel}, so it is not dimensioned.` : "Depth is not recorded, so it is not dimensioned.", 8, false, C.muted);
     }
-    if (asset.plants) write(`Planting recorded: ${asset.plants}`, 9, false, INK);
+    if (asset.plants) write(`Planting recorded: ${asset.plants}`, 9);
   };
 
-  addPage(false);
-  write(new Date().toLocaleDateString("en-IN"), 9, false, MUTED);
-  meta.filter(Boolean).forEach((lineText) => write(lineText, 10, false, INK));
-  page.y -= 4;
+  // ---------- document body ----------
+  header();
+  write(new Date().toLocaleDateString("en-IN"), 9, false, C.muted);
+  meta.filter(Boolean).forEach((lineText) => write(lineText, 10));
+  y += 4;
 
   projects.forEach((project) => {
     ensure(78);
     rule();
-    write(project.name || "Project", 14, true, INK);
-    if (project.location) write(project.location, 9, false, MUTED);
-    if (project.detail) write(project.detail, 9, false, INK);
-    page.y -= 4;
-    write("Funding breakdown", 10, true, GREEN);
+    write(project.name || "Project", 14, true);
+    if (project.location) write(tidy(project.location), 9, false, C.muted);
+    if (project.detail) write(project.detail, 9);
+    y += 4;
+    write("Funding breakdown", 10, true, C.green);
 
     (project.assets || []).forEach((asset) => {
-      const name = asset.name || "Asset";
-      const nameSize = 11;
-      const nameLines = wrap(name, Math.max(24, Math.floor((PAGE_W - MARGIN * 2 - 16) / (nameSize * 0.5))));
-      const lineH = nameSize + 5;
+      setFont(11, true);
+      const nameLines = doc.splitTextToSize(clean(asset.name || "Asset"), PAGE_W - MARGIN * 2 - 16);
+      const lineH = 16;
       const barH = nameLines.length * lineH + 10;
-      ensure(barH + 8);
-      page.y -= 8;
-      const barTop = page.y;
-      const barBottom = barTop - barH;
-      page.ops.push(fillRect(MARGIN, barBottom, PAGE_W - MARGIN * 2, barH, "0.95 0.97 0.94"));
-      nameLines.forEach((lineText, index) => {
-        page.ops.push(textOp(lineText, MARGIN + 8, barTop - 14 - index * lineH, nameSize, true, INK));
-      });
-      page.y = barBottom - 2;
-      const facts = [
-        asset.quantity != null ? `Quantity ${asset.quantity}` : "",
-        asset.timeline ? `Duration ${asset.timeline}` : "",
-        asset.amount ? `Amount ${asset.amount}` : "",
+      const kind = assetKind(asset.type);
+      const rows = [
+        asset.quantity != null ? ["Quantity", String(asset.quantity)] : null,
+        asset.timeline ? ["Duration", asset.timeline] : null,
+        asset.amount ? ["Amount", shortAmount(asset.amount)] : null,
+        asset.lengthLabel && kind !== "well" ? ["Length", asset.lengthLabel] : null,
+        asset.widthLabel ? [kind === "well" ? "Diameter" : "Width", asset.widthLabel] : null,
+        asset.depthLabel ? ["Depth", asset.depthLabel] : null,
+        asset.areaLabel ? ["Area", asset.areaLabel] : null,
       ].filter(Boolean);
-      if (facts.length) write(facts.join("    "), 9, false, INK);
-      const measures = [
-        asset.lengthLabel ? `Length ${asset.lengthLabel}` : "",
-        asset.widthLabel ? `Width ${asset.widthLabel}` : "",
-        asset.depthLabel ? `Depth ${asset.depthLabel}` : "",
-        asset.areaLabel ? `Area ${asset.areaLabel}` : "",
-      ].filter(Boolean);
-      if (measures.length) write(measures.join("    "), 9, false, INK);
-      else if (DRAWABLE.has(asset.type)) write("Dimensions are not recorded for this asset.", 9, false, MUTED);
-      page.y -= 4;
+      // Keep an asset's heading on the same page as its details and drawing
+      ensure(barH + 8 + detailsHeight(rows) + (kind && asset.widthM > 0 ? 260 : 0));
+      y += 8;
+      setFill(C.barBg);
+      doc.rect(MARGIN, y, PAGE_W - MARGIN * 2, barH, "F");
+      setFill(C.green);
+      doc.rect(MARGIN, y, 3, barH, "F");
+      nameLines.forEach((lineText, index) => text(lineText, MARGIN + 10, y + 16 + index * lineH, { size: 11, bold: true }));
+      y += barH;
+      details(rows);
+      if (kind && !asset.lengthLabel && !asset.widthLabel && !asset.depthLabel && !asset.areaLabel) {
+        write("Dimensions are not recorded for this asset.", 9, false, C.muted);
+      }
+      y += 6;
       drawAssetDesign(asset);
     });
 
     if (project.subtotal) {
-      page.y -= 4;
-      write(`Project total: ${project.subtotal}`, 11, true, INK);
+      y += 4;
+      write(`Project total: ${shortAmount(project.subtotal)}`, 11, true);
     }
   });
 
   ensure(40);
-  page.y -= 28;
-  page.ops.push(fillRect(MARGIN, page.y, PAGE_W - MARGIN * 2, 22, GREEN));
-  page.ops.push(textOp(`${totalLabel}: ${totalAmount}`, MARGIN + 10, page.y + 7, 11, true, "1 1 1"));
+  y += 10;
+  setFill(C.green);
+  doc.rect(MARGIN, y, PAGE_W - MARGIN * 2, 22, "F");
+  text(`${totalLabel}: ${shortAmount(totalAmount)}`, MARGIN + 10, y + 15, { size: 11, bold: true, color: C.white });
 
-  pages.forEach((item, index) => {
-    item.ops.push(line(MARGIN, 32, PAGE_W - MARGIN, 32, "0.78 0.84 0.74", 0.5));
-    item.ops.push(textOp(`Climate Solutions  ·  Page ${index + 1} of ${pages.length}`, MARGIN, 20, 8, false, MUTED));
-  });
-
-  return buildPdf(pages.map((item) => item.ops.join("\n")));
+  return doc;
 }
 
-export function downloadFundingPdf({
-  filename = "funding-commitment.pdf",
-  ...options
-}) {
-  const pdf = renderFundingPdf(options);
-  const blob = new Blob([pdf], { type: "application/pdf" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename.endsWith(".pdf") ? filename : `${filename}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+export function renderFundingPdf(options = {}) {
+  return createFundingDoc(options).output("arraybuffer");
+}
+
+export async function downloadFundingPdf({ filename = "funding-commitment.pdf", fonts, ...options } = {}) {
+  const loaded = fonts ?? (await loadDefaultFonts());
+  createFundingDoc({ ...options, fonts: loaded }).save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`);
 }

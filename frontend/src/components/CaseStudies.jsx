@@ -184,6 +184,42 @@ const CASE_STUDIES = [
   },
 ];
 
+/* ---------- Scroll reveal wrapper ---------- */
+const Reveal = ({ children, delay = 0, className = '' }) => {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect(); // animate once
+        }
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`transition-all duration-700 ease-out motion-reduce:transition-none ${
+        visible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-8 motion-reduce:opacity-100 motion-reduce:translate-y-0'
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+};
+
 const CaseStudyBeforeAfterSlider = ({ beforeAfter, cityColor }) => {
   const [position, setPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -403,6 +439,70 @@ const CaseStudyBeforeAfterSlider = ({ beforeAfter, cityColor }) => {
   );
 };
 
+/* ---------- Scroll progress bar ---------- */
+const ScrollProgress = ({ color }) => {
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      setPct(h > 0 ? (window.scrollY / h) * 100 : 0);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return (
+    <div className="fixed top-0 left-0 right-0 h-1 z-50 pointer-events-none">
+      <div
+        className="h-full transition-[width] duration-100 ease-out"
+        style={{ width: `${pct}%`, background: color, boxShadow: `0 0 10px ${color}` }}
+      />
+    </div>
+  );
+};
+
+/* ---------- Count-up numbers ---------- */
+const formatCount = (value, p) =>
+  value.replace(/\d[\d,]*\.?\d*/g, (m) => {
+    const n = parseFloat(m.replace(/,/g, ''));
+    const d = (m.split('.')[1] || '').length;
+    const v = (n * p).toFixed(d);
+    return m.includes(',')
+      ? Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })
+      : v;
+  });
+
+const CountUp = ({ value, duration = 1400 }) => {
+  const skip = /^\d{4}$/.test(value.trim()); // years like 2023 stay static
+  const ref = useRef(null);
+  const [text, setText] = useState(skip ? value : formatCount(value, 0));
+
+  useEffect(() => {
+    if (skip) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setText(value);
+      return;
+    }
+    let raf;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const start = performance.now();
+      const tick = (now) => {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        setText(t < 1 ? formatCount(value, eased) : value);
+        if (t < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, { threshold: 0.4 });
+    if (ref.current) io.observe(ref.current);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [value, duration, skip]);
+
+  return <span ref={ref} className="tabular-nums">{text}</span>;
+};
+
 const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
   const [activeId, setActiveId] = useState('singapore');
 
@@ -432,7 +532,21 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
           from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(4deg); }
+        }
+        @keyframes drift {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(24px, -16px) scale(1.12); }
+        }
+        @keyframes shimmer {
+          from { transform: translateX(-120%) skewX(-12deg); }
+          to { transform: translateX(450%) skewX(-12deg); }
+        }
       `}</style>
+
+      <ScrollProgress color={active?.color || '#0ea5e9'} />
 
       {/* Page Header */}
       <div className="border-b-1.5 border-[#A99E8A]/40 pb-5 text-left">
@@ -443,133 +557,205 @@ const CaseStudies = ({ highlightedCaseTitle, clearHighlight }) => {
       </div>
 
       {/* City Tab Switcher */}
-      <div className="grid grid-cols-3 sm:flex gap-1 border-b-2 border-slate-200" role="tablist">
-        {CASE_STUDIES.map(cs => (
-          <button
-            key={cs.id}
-            role="tab"
-            aria-selected={activeId === cs.id}
-            className={`min-w-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-transparent border-0 border-b-[3px] border-solid -mb-[2px] text-xs sm:text-sm lg:text-[15px] font-semibold transition-all duration-200 cursor-pointer rounded-t-lg ${activeId === cs.id ? 'bg-slate-50' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
-            style={activeId === cs.id ? { borderBottomColor: cs.color, color: cs.color } : {}}
-            onClick={() => setActiveId(cs.id)}
-          >
-            <span className="text-xl sm:text-lg leading-none">{cs.emoji}</span>
-            <span className="max-w-full truncate">{cs.city}</span>
-          </button>
-        ))}
+      <div
+        className="relative grid w-full sm:w-fit p-1.5 rounded-full bg-[#E5ECE0]/90 backdrop-blur-md border border-[#C8D7BC] shadow-[inset_0_1.5px_3px_rgba(31,42,36,0.07),0_2px_8px_rgba(31,42,36,0.03)]"
+        style={{ gridTemplateColumns: `repeat(${CASE_STUDIES.length}, 1fr)` }}
+        role="tablist"
+      >
+        {/* Sliding liquid glass pill */}
+        <div
+          aria-hidden
+          className="absolute top-1.5 bottom-1.5 left-1.5 rounded-full bg-gradient-to-b from-white/70 via-white/35 to-white/15 backdrop-blur-xl border border-white/60 border-t-white/95 overflow-hidden transition-transform duration-500 ease-[cubic-bezier(.34,1.45,.5,1)] motion-reduce:transition-none"
+          style={{
+            width: `calc((100% - 0.75rem) / ${CASE_STUDIES.length})`,
+            transform: `translateX(${CASE_STUDIES.findIndex(c => c.id === activeId) * 100}%)`,
+            boxShadow: `inset 0 1.5px 2px rgba(255,255,255,0.95), inset 0 -1.5px 2px rgba(31,42,36,0.05), 0 6px 20px -2px rgba(31,42,36,0.12), 0 0 20px ${CASE_STUDIES.find(c => c.id === activeId)?.color}38`,
+          }}
+        >
+          {/* Specular liquid sheen highlight */}
+          <div className="absolute inset-x-2.5 top-0.5 h-[42%] rounded-full bg-gradient-to-b from-white/80 to-transparent pointer-events-none" />
+          {/* Subtle bottom chromatic caustics reflection */}
+          <div
+            className="absolute inset-x-3 bottom-0 h-[28%] rounded-full pointer-events-none blur-[1px]"
+            style={{
+              background: `radial-gradient(ellipse at bottom, ${CASE_STUDIES.find(c => c.id === activeId)?.color}44 0%, transparent 70%)`
+            }}
+          />
+        </div>
+
+        {CASE_STUDIES.map(cs => {
+          const isSelected = activeId === cs.id;
+          return (
+            <button
+              key={cs.id}
+              role="tab"
+              aria-selected={isSelected}
+              className={`relative z-10 min-w-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2.5 sm:px-5 py-2 sm:py-2.5 bg-transparent border-0 rounded-full text-xs sm:text-sm lg:text-[15px] font-semibold transition-all duration-300 cursor-pointer ${
+                isSelected
+                  ? 'text-[#1F2A24] font-bold drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]'
+                  : 'text-[#6E6455] hover:text-[#1F2A24]'
+              }`}
+              onClick={() => setActiveId(cs.id)}
+            >
+              <span
+                className={`text-xl sm:text-lg leading-none transition-transform duration-300 ${
+                  isSelected ? 'scale-125' : 'grayscale opacity-60 hover:opacity-85'
+                }`}
+              >
+                {cs.emoji}
+              </span>
+              <span className="max-w-full truncate">{cs.city}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Active Case Study Document */}
       {active && (
-        <div className="flex flex-col gap-7 animate-[fadeInUp_0.4s_ease_both]" key={active.id}>
+        <div className="flex flex-col gap-7" key={active.id}>
 
           {/* Document Hero */}
-          <div className="border-l-5 rounded-2xl p-5 sm:p-8 flex flex-col gap-5 text-left" style={{ borderLeftColor: active.color, background: active.colorLight }}>
-            <div className="flex items-center gap-3 sm:gap-5 md:flex-row flex-col text-left md:items-center items-start">
-              <span className="text-[36px] sm:text-[48px] leading-none shrink-0">{active.emoji}</span>
-              <div>
-                <div className="text-[13px] font-bold tracking-wider uppercase mb-1" style={{ color: active.color }}>{active.programme}</div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-[#1F2A24] m-0 mb-1.5 tracking-tight">{active.city}: {active.programme}</h2>
-                <div className="text-sm text-[#6E6455] font-medium">📍 {active.project}</div>
+          <Reveal>
+            <div className="relative overflow-hidden isolate border-l-5 rounded-2xl p-5 sm:p-8 flex flex-col gap-5 text-left" style={{ borderLeftColor: active.color, background: active.colorLight }}>
+              {/* Drifting orbs */}
+              <div
+                aria-hidden
+                className="absolute -top-16 -right-10 w-64 h-64 rounded-full blur-3xl opacity-40 -z-10 animate-[drift_9s_ease-in-out_infinite] motion-reduce:animate-none"
+                style={{ background: active.color }}
+              />
+              <div
+                aria-hidden
+                className="absolute -bottom-20 left-1/3 w-56 h-56 rounded-full blur-3xl opacity-25 -z-10 animate-[drift_12s_ease-in-out_infinite_reverse] motion-reduce:animate-none"
+                style={{ background: active.color }}
+              />
+
+              <div className="flex items-center gap-3 sm:gap-5 md:flex-row flex-col text-left md:items-center items-start">
+                <span className="text-[36px] sm:text-[48px] leading-none shrink-0 animate-[float_4s_ease-in-out_infinite] motion-reduce:animate-none drop-shadow-lg">{active.emoji}</span>
+                <div>
+                  <div className="text-[13px] font-bold tracking-wider uppercase mb-1" style={{ color: active.color }}>{active.programme}</div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-[#1F2A24] m-0 mb-1.5 tracking-tight">{active.city}: {active.programme}</h2>
+                  <div className="text-sm text-[#6E6455] font-medium">📍 {active.project}</div>
+                </div>
+              </div>
+
+              <div className="flex gap-2 flex-wrap">
+                {active.tags.map((tag, i) => (
+                  <span key={i} className="px-3 py-1 rounded-[20px] text-[12.5px] font-semibold" style={{ background: active.color + '18', color: active.color }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Hero Stats Row */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-black/7 pt-5">
+                {active.heroStats.map((s, i) => (
+                  <Reveal key={i} delay={i * 100}>
+                    <div className="flex flex-col gap-1 text-left">
+                      <div className="text-xl sm:text-[26px] font-extrabold leading-tight" style={{ color: active.color }}><CountUp value={s.value} /></div>
+                      <div className="text-xs text-slate-500 font-medium leading-normal">{s.label}</div>
+                    </div>
+                  </Reveal>
+                ))}
               </div>
             </div>
-
-            <div className="flex gap-2 flex-wrap">
-              {active.tags.map((tag, i) => (
-                <span key={i} className="px-3 py-1 rounded-[20px] text-[12.5px] font-semibold" style={{ background: active.color + '18', color: active.color }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Hero Stats Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-black/7 pt-5">
-              {active.heroStats.map((s, i) => (
-                <div key={i} className="flex flex-col gap-1 text-left">
-                  <div className="text-xl sm:text-[26px] font-extrabold leading-tight" style={{ color: active.color }}>{s.value}</div>
-                  <div className="text-xs text-slate-500 font-medium leading-normal">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          </Reveal>
 
           {/* Challenge + Solution */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-6 sm:p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-amber-500">
-              <div className="text-[22px]">⚠️</div>
-              <h3 className="text-base font-bold text-[#1F2A24] m-0">{active.challenge.title}</h3>
-              <p className="text-[14.5px] text-[#1F2A24] leading-relaxed m-0">{active.challenge.text}</p>
+          <Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-6 sm:p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-amber-500 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
+                <div className="text-[22px]">⚠️</div>
+                <h3 className="text-base font-bold text-[#1F2A24] m-0">{active.challenge.title}</h3>
+                <p className="text-[14.5px] text-[#1F2A24] leading-relaxed m-0">{active.challenge.text}</p>
+              </div>
+              <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-6 sm:p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-emerald-600 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
+                <div className="text-[22px]">✅</div>
+                <h3 className="text-base font-bold text-[#1F2A24] m-0">{active.solution.title}</h3>
+                <p className="text-[14.5px] text-[#1F2A24] leading-relaxed m-0">{active.solution.text}</p>
+              </div>
             </div>
-            <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-6 sm:p-7 flex flex-col gap-2.5 text-left shadow-sm border-t-4 border-t-emerald-600">
-              <div className="text-[22px]">✅</div>
-              <h3 className="text-base font-bold text-[#1F2A24] m-0">{active.solution.title}</h3>
-              <p className="text-[14.5px] text-[#1F2A24] leading-relaxed m-0">{active.solution.text}</p>
-            </div>
-          </div>
+          </Reveal>
 
           {/* Before / After Interactive Comparison Slider */}
           {active.beforeAfter && (
-            <CaseStudyBeforeAfterSlider
-              beforeAfter={active.beforeAfter}
-              cityColor={active.color}
-            />
+            <Reveal>
+              <CaseStudyBeforeAfterSlider
+                beforeAfter={active.beforeAfter}
+                cityColor={active.color}
+              />
+            </Reveal>
           )}
 
           {/* Key Project Data */}
-          <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-6 sm:p-7 md:px-8 text-left shadow-sm">
-            <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">🏗️ Key Project Data</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {active.keyData.map((item, i) => (
-                <div key={i} className="bg-[#C8D7BC]/15 border border-[#C8D7BC]/60 rounded-xl p-4 flex flex-col gap-1 text-left">
-                  <div className="text-[11.5px] font-bold text-[#6E6455] uppercase tracking-wider">{item.label}</div>
-                  <div className="text-sm font-semibold text-[#1F2A24] leading-snug">{item.value}</div>
-                </div>
-              ))}
+          <Reveal>
+            <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-6 sm:p-7 md:px-8 text-left shadow-sm">
+              <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">🏗️ Key Project Data</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {active.keyData.map((item, i) => (
+                  <Reveal key={i} delay={i * 70} className="h-full">
+                    <div
+                      className="h-full bg-[#C8D7BC]/15 border border-[#C8D7BC]/60 rounded-xl p-4 flex flex-col gap-1 text-left transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md hover:border-[var(--c)]"
+                      style={{ '--c': active.color }}
+                    >
+                      <div className="text-[11.5px] font-bold text-[#6E6455] uppercase tracking-wider">{item.label}</div>
+                      <div className="text-sm font-semibold text-[#1F2A24] leading-snug">{item.value}</div>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Measured Outcomes Table */}
-          <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-5 sm:p-7 md:px-8 text-left shadow-sm">
-            <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">📊 Measured Outcomes</h3>
-            <div className="overflow-x-auto rounded-xl border border-[#C8D7BC]/70">
-              <table className="w-full border-collapse text-sm">
-                <thead className="bg-[#C8D7BC]/25 border-b border-[#A99E8A]/30">
-                  <tr>
-                    {active.outcomeColumns.map((col, i) => (
-                      <th key={i} className="px-4 py-3 text-left text-[12.5px] font-bold text-[#1F2A24] uppercase tracking-wider" style={i === 2 ? { color: active.color } : {}}>{col}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {active.outcomes.map((row, i) => (
-                    <tr key={i} className="border-b border-[#C8D7BC]/20 hover:bg-[#C8D7BC]/10 last:border-none">
-                      <td className="px-4 py-3.5 text-[#1F2A24] leading-relaxed text-left"><strong>{row.col1}</strong></td>
-                      <td className="px-4 py-3.5 text-[#1F2A24] leading-relaxed text-left">{row.col2}</td>
-                      <td className="px-4 py-3.5 leading-relaxed text-left font-bold" style={{ color: active.color }}>{row.col3}</td>
+          <Reveal>
+            <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-5 sm:p-7 md:px-8 text-left shadow-sm">
+              <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">📊 Measured Outcomes</h3>
+              <div className="overflow-x-auto rounded-xl border border-[#C8D7BC]/70">
+                <table className="w-full border-collapse text-sm">
+                  <thead className="bg-[#C8D7BC]/25 border-b border-[#A99E8A]/30">
+                    <tr>
+                      {active.outcomeColumns.map((col, i) => (
+                        <th key={i} className="px-4 py-3 text-left text-[12.5px] font-bold text-[#1F2A24] uppercase tracking-wider" style={i === 2 ? { color: active.color } : {}}>{col}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {active.outcomes.map((row, i) => (
+                      <tr key={i} className="border-b border-[#C8D7BC]/20 hover:bg-[#C8D7BC]/10 last:border-none">
+                        <td className="px-4 py-3.5 text-[#1F2A24] leading-relaxed text-left"><strong>{row.col1}</strong></td>
+                        <td className="px-4 py-3.5 text-[#1F2A24] leading-relaxed text-left">{row.col2}</td>
+                        <td className="px-4 py-3.5 leading-relaxed text-left font-bold" style={{ color: active.color }}>{row.col3}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Sources & References */}
-          <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-5 sm:p-7 md:px-8 flex flex-col gap-4 text-left shadow-sm">
-            <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">📚 Sources & References</h3>
-            <ul className="list-none p-0 m-0 flex flex-col gap-2 text-left">
-              {active.sources.map((src, i) => (
-                <li key={i} className="text-[13.5px] text-[#1F2A24] leading-relaxed p-2.5 bg-[#C8D7BC]/10 rounded-lg border-l-3 border-[#347745]">{src.text}</li>
-              ))}
-            </ul>
-            <a
-              href={active.sourceLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-white text-[13.5px] font-bold bg-[#3669A9] hover:bg-[#347745] transition-colors self-start no-underline shadow-sm"
-            >
-              View Primary Source →
-            </a>
-          </div>
+          <Reveal>
+            <div className="bg-white border border-[#C8D7BC]/80 rounded-2xl p-5 sm:p-7 md:px-8 flex flex-col gap-4 text-left shadow-sm">
+              <h3 className="text-base md:text-[17px] font-bold text-[#1F2A24] m-0 mb-4">📚 Sources & References</h3>
+              <ul className="list-none p-0 m-0 flex flex-col gap-2 text-left">
+                {active.sources.map((src, i) => (
+                  <li key={i} className="text-[13.5px] text-[#1F2A24] leading-relaxed p-2.5 bg-[#C8D7BC]/10 rounded-lg border-l-3 border-[#347745]">{src.text}</li>
+                ))}
+              </ul>
+              <a
+                href={active.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative overflow-hidden inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-white text-[13.5px] font-bold bg-[#3669A9] hover:bg-[#347745] transition-colors self-start no-underline shadow-sm"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-y-0 left-0 w-1/4 bg-white/30 -translate-x-[120%] group-hover:animate-[shimmer_0.9s_ease]"
+                />
+                <span className="relative">View Primary Source →</span>
+              </a>
+            </div>
+          </Reveal>
 
         </div>
       )}

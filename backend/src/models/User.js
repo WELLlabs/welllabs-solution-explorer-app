@@ -26,8 +26,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['Admin', 'Pending', 'WELL Labs1', 'WELL Labs2', 'Consultant', 'GBA', 'Donor', 'Funder', 'Citizen'],
-    default: 'Pending',
+    enum: ['Admin', 'WELL Labs1', 'WELL Labs2', 'Consultant', 'NGO', 'GBA', 'Donor', 'Funder', 'Citizen'],
+    default: 'Citizen',
     required: true,
   },
   // Core Persona selected on homepage ('govt', 'funder', 'designer', 'citizen')

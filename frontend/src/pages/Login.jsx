@@ -2,6 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PERSONAS } from '@/utils/roleFieldsConfig';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
+import LegalLinks from '@/components/LegalLinks';
 
 const Login = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -138,51 +140,24 @@ const Login = () => {
     }
   };
 
-  // Google SSO Handler
-  const handleGoogleSignIn = async () => {
+  // Google returns a signed credential; the backend verifies it and signs the user in
+  const handleGoogleCredential = async (credential) => {
     setError('');
     setGoogleLoading(true);
-
     try {
-      const promptEmail = window.prompt(
-        "Enter your Google account email to sign in with Google SSO:",
-        email || "user@gmail.com"
-      );
-
-      if (!promptEmail) {
-        setGoogleLoading(false);
-        return;
-      }
-
-      const mockGoogleName = promptEmail.split('@')[0].replace('.', ' ');
-      const capitalizedName = mockGoogleName.charAt(0).toUpperCase() + mockGoogleName.slice(1);
-
-      const googlePayload = {
-        email: promptEmail,
-        name: name || capitalizedName,
-        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(promptEmail)}`,
-        googleId: `google_${Date.now()}`,
-        persona: activeRole,
-      };
-
-      const result = await googleAuth(googlePayload);
-
-      if (result.success) {
-        if (result.isProfileComplete) {
-          // Existing user with completed profile -> straight to Map!
-          navigate('/dashboard', { replace: true });
-        } else {
-          // New user or incomplete profile -> Step 2: Complete Profile
-          setGoogleProfile(result.user);
-          setName(result.user.name || capitalizedName);
-          setEmail(result.user.email || promptEmail);
-          setMode('google_complete');
-        }
+      const result = await googleAuth({ credential, persona: activeRole });
+      if (!result.success) {
+        setError(result.message || 'Google sign-in failed');
+      } else if (result.isProfileComplete) {
+        // Returning user -> straight to the map
+        navigate('/dashboard', { replace: true });
       } else {
-        setError(result.message || 'Google authentication failed');
+        // First Google sign-in -> ask for the details Google does not provide
+        setGoogleProfile(result.user);
+        setName(result.user.name || '');
+        setEmail(result.user.email || '');
+        setMode('google_complete');
       }
-    } catch (err) {
-      setError('Could not connect to Google authentication service.');
     } finally {
       setGoogleLoading(false);
     }
@@ -699,45 +674,21 @@ const Login = () => {
             </div>
           </form>
 
-          {/* Divider: "Or sign in with" */}
-          <div className="relative my-4 flex items-center justify-center">
-            <div className="border-t border-[#A99E8A]/30 w-full"></div>
-            <span className="bg-white/90 px-3 text-[11px] font-medium text-[#6E6455] uppercase tracking-wider shrink-0">
-              Or sign in with
-            </span>
-            <div className="border-t border-[#A99E8A]/30 w-full"></div>
-          </div>
+          {mode !== 'google_complete' && (
+            <>
+              {/* Divider: "Or sign in with" */}
+              <div className="relative my-4 flex items-center justify-center">
+                <div className="border-t border-[#A99E8A]/30 w-full"></div>
+                <span className="bg-white/90 px-3 text-[11px] font-medium text-[#6E6455] uppercase tracking-wider shrink-0">
+                  Or sign in with
+                </span>
+                <div className="border-t border-[#A99E8A]/30 w-full"></div>
+              </div>
 
-          {/* Google SSO Button (Official multi-color G icon, clean rounded pill) */}
-          <div>
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-[#A99E8A]/40 bg-white hover:bg-[#C8D7BC]/15 text-[#1F2A24] font-semibold text-xs shadow-2xs hover:shadow-xs transition-all duration-200 active:scale-[0.99] cursor-pointer"
-            >
-              {/* Google SVG Brand Icon */}
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.26 21.36 7.33 24 12 24z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                />
-              </svg>
-              <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
-            </button>
-          </div>
+              <GoogleSignInButton onCredential={handleGoogleCredential} onError={setError} busy={googleLoading} />
+            </>
+          )}
+          <LegalLinks variant="agree" className="mt-3" />
 
           {/* Footer toggle: Switch between Sign in and Register */}
           <div className="mt-4 text-center text-xs text-[#6E6455] leading-relaxed">

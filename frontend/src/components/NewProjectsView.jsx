@@ -7,6 +7,7 @@ import fallbackSites from '@/data/fallbackSites.json';
 import { getProjectImage } from '@/data/projectImages';
 import { downloadFundingPdf } from '@/utils/fundingPdf';
 import { PROJECT_STAGES, statusForProject } from '@/data/projectStages';
+import ComingSoon from './ComingSoon';
 
 /* ============ helpers ============ */
 export const cr = v => '₹' + (v / 100).toFixed(2) + ' Cr';
@@ -35,7 +36,6 @@ export const initials = s => s.split(' ').filter(w => /[A-Za-z]/.test(w[0])).sli
 export const AG = {
   welllabs: {
     name: 'WELL Labs',
-    email: 'sm1407858@gmail.com',
     type: 'Research institute',
     role: 'Design & science lead',
     blurb: 'Hydrology, water-balance and DPR specialists; co-created the Lake Rejuvenation Framework and the VWBA-aligned monitoring used on this platform.',
@@ -44,7 +44,6 @@ export const AG = {
   },
   fol: {
     name: 'Friends of Lakes',
-    email: '',
     type: 'Citizen group',
     role: 'Restoration & stewardship',
     blurb: 'On-ground restoration and long-running community stewardship of Bengaluru lakes.',
@@ -53,7 +52,6 @@ export const AG = {
   },
   malligavad: {
     name: 'Malligavad Foundation',
-    email: '',
     type: 'Restoration NGO',
     role: 'Implementation at scale',
     blurb: 'Rapid, CSR-funded restoration — desilting, bunds and natural treatment — led by Anand Malligavad, “the Lake Man of India”.',
@@ -62,7 +60,6 @@ export const AG = {
   },
   biome: {
     name: 'Biome Environmental Trust',
-    email: '',
     type: 'Water trust',
     role: 'Recharge & blue-green',
     blurb: 'Groundwater recharge, open wells and rainwater systems — strengthens the blue and green assets.',
@@ -71,7 +68,6 @@ export const AG = {
   },
   unitedway: {
     name: 'United Way Bengaluru',
-    email: '',
     type: 'CSR facilitator',
     role: 'Programme & CSR management',
     blurb: 'Manages CSR funds, Schedule-VII compliance and multi-stakeholder coordination, with milestone-linked disbursement and reporting.',
@@ -80,7 +76,6 @@ export const AG = {
   },
   trust: {
     name: 'Lake committee trust',
-    email: '',
     type: 'Local trust',
     role: 'Community O&M',
     blurb: 'A residents-and-civic-body trust (a MAPSAS-style model) that holds long-term operation and maintenance after handover.',
@@ -140,7 +135,7 @@ function recordedMetres(value) {
 
 function commitmentAsset(asset, amount, timeline) {
   return {
-    name: asset?.n || 'Asset',
+    name: INT_LABEL[asset?.designType] || asset?.n || 'Asset',
     type: asset?.designType || '',
     quantity: asset?.quantity ?? null,
     lengthM: asset?.lengthM ?? null,
@@ -216,6 +211,8 @@ export function normaliseProject(site) {
       depthLabel: recordedLabel(iv.details?.depth_m ?? iv.depth),
       areaLabel: recordedLabel(iv.details?.area ?? iv.area),
       plantSpecies: recordedLabel(iv.plant_species_used ?? iv.details?.plant_species_used),
+      // Amounts arrive in rupees; asset costs on this page are in lakhs
+      funding: (iv.funding || []).map((f) => ({ funder: f.funder_name, amount: (Number(f.amount) || 0) / 1e5, status: f.status })),
     };
   });
 
@@ -282,11 +279,27 @@ export function preprocessProject(p) {
     p.total = p.assets.reduce((s, a) => s + a.cost, 0);
   }
 
-  p.fundedIdx  = new Set(p.funders.flatMap(f => f.idx || []));
   p.funders.forEach(f => {
     if (f.idx) f.amount = f.idx.reduce((s, i) => s + (p.assets[i]?.cost || 0), 0);
   });
-  p.committed    = [...p.fundedIdx].reduce((s, i) => s + (p.assets[i]?.cost || 0), 0);
+  // Recorded funding (uploaded by the admin): an asset is funded once it covers the full cost
+  const recorded = new Map();
+  p.assets.forEach((a, i) => {
+    a.fundedAmount = (a.funding || []).reduce((s, f) => s + f.amount, 0);
+    a.fullyFunded = a.fundedAmount > 0 && (a.cost <= 0 || a.fundedAmount >= a.cost - 0.001);
+    (a.funding || []).forEach(({ funder, amount }) => {
+      const f = recorded.get(funder) || { name: funder, idx: [], amount: 0 };
+      f.amount += amount;
+      if (a.fullyFunded && !f.idx.includes(i)) f.idx.push(i);
+      recorded.set(funder, f);
+    });
+  });
+  p.funders = [...p.funders, ...recorded.values()];
+  p.fundedIdx  = new Set([
+    ...p.funders.flatMap(f => f.idx || []),
+    ...p.assets.map((a, i) => (a.fullyFunded ? i : -1)).filter(i => i >= 0),
+  ]);
+  p.committed    = p.assets.reduce((s, a, i) => s + (p.fundedIdx.has(i) ? a.cost || 0 : Math.min(a.cost || 0, a.fundedAmount || 0)), 0);
   p.committedPct = p.total > 0 ? p.committed / p.total : 0;
   p.enablerIdx   = p.assets.findIndex(a => a.enabler);
   p.fullStorage  = p.assets.reduce((s, a) => s + (a.vwb || 0), 0);
@@ -337,6 +350,49 @@ const TABS = [
   ['docs', 'Docs'],
   ['status', 'Current Status']
 ];
+
+const CONSULTANT_TABS = [
+  ['overview', 'Overview'],
+  ['assets', 'Assets and Timelines'],
+  ['impact', 'Impact'],
+  ['cost', 'See Cost'],
+  ['funders', 'Match with Funders']
+];
+
+function assetTimeline(timeline) {
+  if (!timeline || timeline === '—') return 'Planning';
+  const text = String(timeline).trim();
+  if (/^\d+(\.\d+)?$/.test(text)) {
+    return `${text} ${parseFloat(text) === 1 ? 'month' : 'months'}`;
+  }
+  return text;
+}
+
+function CostTable({ project }) {
+  const thClass = "border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider";
+  return (
+    <table className="w-full border-collapse text-xs md:text-sm">
+      <thead>
+        <tr>
+          <th className={thClass}>Asset Item</th>
+          <th className={thClass}>Type</th>
+          <th className={thClass}>Cost</th>
+          <th className={thClass}>Timeline</th>
+        </tr>
+      </thead>
+      <tbody>
+        {project.assets.map((a, idx) => (
+          <tr key={idx} className="border-t border-[#C8D7BC]">
+            <td className="py-2 pr-3 text-[var(--ink-2)]">{a.n}</td>
+            <td className="py-2 pr-3 text-[var(--ink-2)]">{a.t.toUpperCase()}</td>
+            <td className="py-2 pr-3 text-[var(--ink-2)] font-mono">{a.cost > 0 ? rs(a.cost) : "TBD"}</td>
+            <td className="py-2 text-[var(--ink-2)]">{assetTimeline(a.timeline)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 function interestMessage(funder, consultantName, projectName) {
   const who = funder || "A funder";
@@ -474,6 +530,25 @@ function formatMonthCount(months) {
   return `${text} months`;
 }
 
+// What is still needed for an asset after recorded funding (lakhs)
+function openCost(asset) {
+  return Math.max(0, (asset?.cost || 0) - (asset?.fundedAmount || 0));
+}
+
+// "Funded by ..." for fully funded assets, "₹X of ₹Y funded" for partly funded ones
+function AssetFundingNote({ asset, funderName }) {
+  const names = [...new Set((asset.funding || []).map((f) => f.funder))].join(", ") || funderName;
+  if (asset.fullyFunded || funderName) {
+    return <span> · <b style={{ color: "var(--ink)" }}>Funded by {names}</b></span>;
+  }
+  if (asset.fundedAmount > 0) {
+    return (
+      <span> · <b style={{ color: "var(--ink)" }}>{rs(asset.fundedAmount)} of {rs(asset.cost)} funded by {names}</b>, {rs(openCost(asset))} still needed</span>
+    );
+  }
+  return null;
+}
+
 function allocateAcrossProjects(projects, amount) {
   let remaining = amount;
   const allocated = [];
@@ -481,7 +556,7 @@ function allocateAcrossProjects(projects, amount) {
     (project.assets || []).forEach((asset, idx) => {
       if (remaining <= 0) return;
       if (project.fundedIdx?.has(idx)) return;
-      const cost = asset.cost || 0;
+      const cost = openCost(asset);
       if (cost <= 0) return;
       if (remaining >= cost) {
         allocated.push({ projectName: project.name, name: asset.n, timeline: asset.timeline, cost, partial: false, asset });
@@ -498,6 +573,9 @@ function allocateAcrossProjects(projects, amount) {
 const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
   const location = useLocation();
   const { user } = useContext(AuthContext);
+  const isConsultant = user?.role === 'Consultant';
+  const tabs = isConsultant ? CONSULTANT_TABS : TABS;
+  const [nextTab, nextTabLabel] = isConsultant ? ['cost', 'See cost →'] : ['funding', 'Proceed to Funding →'];
 
   // ── Live data from MongoDB ──────────────────────────────────────────────
   const [rawSites, setRawSites]   = useState([]);
@@ -554,6 +632,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
   const [consultantByProject, setConsultantByProject] = useState({});
   const [sentInterest, setSentInterest] = useState({});
   const [sendingInterest, setSendingInterest] = useState({});
+  const [interestConfirm, setInterestConfirm] = useState(null);
+  const [interestNote, setInterestNote] = useState("");
   const [fundingMode, setFundingMode] = useState('assets');
   const [customAmount, setCustomAmount] = useState(0);
   const [selectedAgencyId, setSelectedAgencyId] = useState(null);
@@ -709,6 +789,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
   const totalProjects = statProjects.length;
   const totalVwb = statProjects.reduce((s, proj) => s + (proj.annualVWB || 0), 0);
   const totalCost = statProjects.reduce((s, proj) => s + (proj.total || 0), 0);
+  const totalCommitted = statProjects.reduce((s, proj) => s + (proj.committed || 0), 0);
+  const fullyFundedProjects = statProjects.filter((proj) => proj.assets.length > 0 && proj.fundedIdx.size === proj.assets.length).length;
   const totalPeople = statProjects.reduce((s, proj) => s + (proj.people || 0), 0);
 
   // Filter project rail matches
@@ -828,70 +910,44 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
     ? `${user.name}${user.organization ? `, ${user.organization}` : ""}`
     : "A funder";
 
-  const sendConsultantInterest = async (project, agencyId) => {
-    const agency = AG[agencyId];
-    if (!agency) return;
-    const key = `${project.id}::${agencyId}`;
-    if (sendingInterest[key]) return;
-    const summary = interestMessage(funderLabel, agency.name, project.name);
-    if (!agency.email) {
-      setSentInterest((current) => ({
-        ...current,
-        [key]: { text: summary, delivered: false },
-      }));
-      return;
-    }
+  // Details shown in the confirmation popup; the backend sends the same fields
+  const interestDetails = (project, agency) => [
+    ["To", agency.name],
+    ["Your name", user?.name],
+    ["Your email", user?.email],
+    ["Your role", user?.role],
+    ["Organization", user?.organization],
+    ["Funder type", user?.userType],
+    ["Phone", user?.phone],
+    ["Project", project.name],
+    ["Location", project.loc],
+    ["Cost", rs(project.total || 0)],
+  ].filter(([, value]) => value);
 
+  const askConsultantInterest = (project, agencyId) => {
+    if (!AG[agencyId] || sendingInterest[`${project.id}::${agencyId}`]) return;
+    setInterestNote("");
+    setInterestConfirm({ project, agencyId });
+  };
+
+  const sendConsultantInterest = async (project, agencyId, note) => {
+    const agency = AG[agencyId];
+    const key = `${project.id}::${agencyId}`;
     setSendingInterest((current) => ({ ...current, [key]: true }));
-    const fields = {
-      Name: user?.name || "Not signed in",
-      Email: user?.email || "Not signed in",
-      Role: user?.role || "Not signed in",
-      ...(user?.organization ? { Organization: user.organization } : {}),
-      ...(user?.userType ? { "Funder type": user.userType } : {}),
-      ...(user?.phone ? { Phone: user.phone } : {}),
-      Consultant: agency.name,
-      "Consultant role": agency.role,
-      Project: project.name,
-      ...(project.loc ? { Location: project.loc } : {}),
-      Cost: rs(project.total || 0),
-    };
-    const detail = [
-      summary,
-      ...Object.entries(fields).map(([label, value]) => `${label}: ${value}`),
-    ].join("\n");
     try {
-      const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(agency.email)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          _subject: `Funder interest in ${project.name}`,
-          _template: "table",
-          _captcha: "false",
-          ...(user?.email ? { _replyto: user.email } : {}),
-          ...fields,
-          Message: detail,
-        }),
+      const { data } = await api.post("/contact/consultant-interest", {
+        agencyId,
+        project: { id: project.id, name: project.name, location: project.loc || "", cost: rs(project.total || 0) },
+        message: note,
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || data.success === false || data.success === "false") {
-        throw new Error(data.message || "The email could not be sent.");
-      }
-      setSentInterest((current) => ({
-        ...current,
-        [key]: {
-          text: `Interest sent to ${agency.name}. The email includes your name, email, and role, and that you want to engage them on ${project.name}.`,
-          delivered: true,
-        },
-      }));
+      setSentInterest((current) => ({ ...current, [key]: { text: data.message, delivered: true } }));
     } catch (error) {
+      const noEmail = error.response?.data?.code === "NO_EMAIL";
       setSentInterest((current) => ({
         ...current,
-        [key]: {
-          text: error?.message || "The email could not be sent.",
-          delivered: false,
-          failed: true,
-        },
+        [key]: noEmail
+          ? { text: `${interestMessage(funderLabel, agency.name, project.name)} ${agency.name} has no email on file yet, so please contact them directly.`, delivered: false }
+          : { text: error.response?.data?.message || "The email could not be sent.", delivered: false, failed: true },
       }));
     } finally {
       setSendingInterest((current) => ({ ...current, [key]: false }));
@@ -909,15 +965,6 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
     setOpenAccordions(nextAcc);
   };
 
-  const assetTimeline = (timeline) => {
-    if (!timeline || timeline === '—') return 'Planning';
-    const text = String(timeline).trim();
-    if (/^\d+(\.\d+)?$/.test(text)) {
-      return `${text} ${parseFloat(text) === 1 ? 'month' : 'months'}`;
-    }
-    return text;
-  };
-
   const downloadCommitment = () => {
     if (showSelectedRail) {
       const filename = "selected-projects-funding.pdf";
@@ -927,18 +974,18 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
             .map((asset, idx) => ({ asset, idx }))
             .filter(({ idx }) => selectedAssetKeys.has(assetSelectionKey(project.id, idx)));
           if (!picks.length) return null;
-          const subtotal = picks.reduce((sum, entry) => sum + (entry.asset.cost || 0), 0);
+          const subtotal = picks.reduce((sum, entry) => sum + (openCost(entry.asset) || 0), 0);
           return commitmentProject(
             project,
             picks.map(({ asset }) => commitmentAsset(
               asset,
-              asset.cost > 0 ? rs(asset.cost) : "TBD",
+              openCost(asset) > 0 ? rs(openCost(asset)) : "TBD",
               assetTimeline(asset.timeline),
             )),
             rs(subtotal),
           );
         }).filter(Boolean);
-        const total = selectedAssetEntries.reduce((sum, entry) => sum + (entry.asset.cost || 0), 0);
+        const total = selectedAssetEntries.reduce((sum, entry) => sum + (openCost(entry.asset) || 0), 0);
         downloadFundingPdf({
           filename,
           heading: "Funding commitment",
@@ -975,7 +1022,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
     const filename = `${String(p.name || 'project').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '')}-funding.pdf`;
     if (fundingMode === 'assets') {
       const picks = Array.from(selectedPicks).map((i) => p.assets[i]).filter(Boolean);
-      const totalCost = picks.reduce((sum, asset) => sum + (asset.cost || 0), 0);
+      const totalCost = picks.reduce((sum, asset) => sum + (openCost(asset) || 0), 0);
       downloadFundingPdf({
         filename,
         heading: 'Funding commitment',
@@ -984,7 +1031,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           p,
           picks.map((asset) => commitmentAsset(
             asset,
-            asset.cost > 0 ? rs(asset.cost) : 'TBD',
+            openCost(asset) > 0 ? rs(openCost(asset)) : 'TBD',
             assetTimeline(asset.timeline),
           )),
           rs(totalCost),
@@ -1000,9 +1047,9 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
       if (remaining <= 0) return;
       const asset = p.assets[idx];
       if (!asset) return;
-      if (remaining >= asset.cost) {
-        allocated.push(commitmentAsset(asset, rs(asset.cost), assetTimeline(asset.timeline)));
-        remaining -= asset.cost;
+      if (remaining >= openCost(asset)) {
+        allocated.push(commitmentAsset(asset, rs(openCost(asset)), assetTimeline(asset.timeline)));
+        remaining -= openCost(asset);
       } else {
         allocated.push(commitmentAsset(asset, rs(remaining), `${assetTimeline(asset.timeline)} | partial`));
         remaining = 0;
@@ -1146,8 +1193,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
             <div className="flex gap-3 flex-wrap justify-end mt-6">
               <button
                 className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#3669A9] hover:bg-[#347745] text-white shadow-sm"
-                onClick={() => setActiveTab('funding')}
-              >Fund this project →</button>
+                onClick={() => setActiveTab(nextTab)}
+              >{isConsultant ? 'See cost →' : 'Fund this project →'}</button>
               <button
                 className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-white text-[#1F2A24] border border-[#C8D7BC] shadow-[0_1px_4px_rgba(0,0,0,0.05)] hover:bg-[#C8D7BC]/20"
                 onClick={() => setActiveTab('assets')}
@@ -1202,7 +1249,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           const allAssets = selectedRail.reduce((sum, project) => sum + project.assets.length, 0);
           const combinedMonths = selectedRail.reduce((sum, project) => sum + timelineMonths(project), 0);
           const combinedCost = selectedRail.reduce((sum, project) => sum + (project.total || 0), 0);
-          const pickCost = selectedAssetEntries.reduce((sum, entry) => sum + (entry.asset.cost || 0), 0);
+          const pickCost = selectedAssetEntries.reduce((sum, entry) => sum + (openCost(entry.asset) || 0), 0);
           return (
             <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
               <div className="flex flex-wrap gap-4 text-xs font-mono text-[var(--ink-2)] mb-4 text-left">
@@ -1258,8 +1305,10 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                               <b className="text-sm font-bold text-[var(--ink)] flex items-center gap-1.5 flex-wrap">
                                 {a.n}
                                 <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${a.t === "blue" ? "bg-[#E2EEF4] text-[#1D5E8C]" : a.t === "green" ? "bg-[#E7EFDF] text-[#3E6325]" : "bg-[#E5E9EB] text-[#475760]"}`}>{a.t}</span>
+                                {funded && <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#E6E0F0] text-[#5b4b8a]">funded</span>}
+                                {!funded && a.fundedAmount > 0 && <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#FBF1D6] text-[#7a5a12]">partly funded</span>}
                               </b>
-                              <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}</span>
+                              <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}<AssetFundingNote asset={a} funderName={funder?.name} /></span>
                             </div>
                             <div className="text-xs font-mono font-semibold text-slate-700 text-left md:text-right">
                               {a.timeline && a.timeline !== "—" ? (
@@ -1300,7 +1349,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
             </div>
           );
         }
-        const pickCost = [...selectedPicks].reduce((s, idx) => s + p.assets[idx].cost, 0);
+        const pickCost = [...selectedPicks].reduce((s, idx) => s + openCost(p.assets[idx]), 0);
         const funderOf = idx => p.funders.find(f => f.idx.includes(idx));
 
         return (
@@ -1354,8 +1403,9 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                         <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${a.t === 'blue' ? 'bg-[#E2EEF4] text-[#1D5E8C]' : a.t === 'green' ? 'bg-[#E7EFDF] text-[#3E6325]' : 'bg-[#E5E9EB] text-[#475760]'}`}>{a.t}</span>
                         {a.enabler && <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#E5E9EB] text-[#475760]">enabler</span>}
                         {funded && <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#E6E0F0] text-[#5b4b8a]">funded</span>}
+                        {!funded && a.fundedAmount > 0 && <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#FBF1D6] text-[#7a5a12]">partly funded</span>}
                       </b>
-                      <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}{funded && <span> · <b style={{ color: 'var(--ink)' }}>Funded by {f.name}</b></span>}</span>
+                      <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}<AssetFundingNote asset={a} funderName={f?.name} /></span>
                     </div>
                     <div className="text-xs font-mono font-semibold text-slate-700 text-left md:text-right bg-slate-100/80 px-2.5 py-1 rounded-md w-fit md:w-auto md:bg-transparent">
                       <span className="md:hidden text-[10px] text-slate-400 mr-1 uppercase">Timeline:</span>
@@ -1446,8 +1496,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
               <div className="flex gap-3 flex-wrap justify-end mt-6">
                 <button
                   className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#3669A9] hover:bg-[#347745] text-white shadow-sm"
-                  onClick={() => setActiveTab("funding")}
-                >Proceed to Funding →</button>
+                  onClick={() => setActiveTab(nextTab)}
+                >{nextTabLabel}</button>
               </div>
             </div>
           );
@@ -1486,8 +1536,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
             <div className="flex gap-3 flex-wrap justify-end mt-6">
               <button
                 className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#3669A9] hover:bg-[#347745] text-white shadow-sm"
-                onClick={() => setActiveTab('funding')}
-              >Proceed to Funding →</button>
+                onClick={() => setActiveTab(nextTab)}
+              >{nextTabLabel}</button>
             </div>
           </div>
         );
@@ -1497,7 +1547,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           const scopeTotal = selectedRail.reduce((sum, project) => sum + (project.total || 0), 0);
           const scopeCommitted = selectedRail.reduce((sum, project) => sum + (project.committed || 0), 0);
           const scopeNeeded = Math.max(0, scopeTotal - scopeCommitted);
-          const picksSum = selectedAssetEntries.reduce((sum, entry) => sum + (entry.asset.cost || 0), 0);
+          const picksSum = selectedAssetEntries.reduce((sum, entry) => sum + (openCost(entry.asset) || 0), 0);
           const currentFundedPct = scopeTotal > 0 ? scopeCommitted / scopeTotal : 0;
           const addedFundedPct = (fundingMode === "assets" ? picksSum : customAmount) / (scopeTotal || 1);
           const customAllocated = fundingMode === "custom" && customAmount > 0
@@ -1552,7 +1602,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                               {picks.map((entry) => (
                                 <div key={assetSelectionKey(project.id, entry.idx)} className="flex justify-between gap-3 text-xs text-[#6E6455] mt-0.5">
                                   <span>{entry.asset.n}</span>
-                                  <span className="font-mono">{entry.asset.cost > 0 ? rs(entry.asset.cost) : "TBD"}</span>
+                                  <span className="font-mono">{openCost(entry.asset) > 0 ? rs(openCost(entry.asset)) : "TBD"}</span>
                                 </div>
                               ))}
                             </div>
@@ -1627,7 +1677,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
         }
         const needed = p.total - p.committed;
         const currentFundedPct = p.committedPct;
-        const picksSum = [...selectedPicks].reduce((s, idx) => s + p.assets[idx].cost, 0);
+        const picksSum = [...selectedPicks].reduce((s, idx) => s + openCost(p.assets[idx]), 0);
         const addedFundedPct = (fundingMode === 'assets' ? picksSum : customAmount) / p.total;
         const tankSVG = renderTank(currentFundedPct, addedFundedPct);
 
@@ -1636,9 +1686,9 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
         if (fundingMode === 'custom' && customAmount > 0) {
           for (let idx of unfunded) {
             const asset = p.assets[idx];
-            if (tempCost >= asset.cost) {
-              customAllocated.push({ n: asset.n, cost: asset.cost, partial: false });
-              tempCost -= asset.cost;
+            if (tempCost >= openCost(asset)) {
+              customAllocated.push({ n: asset.n, cost: openCost(asset), partial: false });
+              tempCost -= openCost(asset);
             } else if (tempCost > 0) {
               customAllocated.push({ n: asset.n, cost: tempCost, partial: true });
               tempCost = 0;
@@ -1790,9 +1840,9 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
               key: assetSelectionKey(entry.project.id, entry.idx),
               name: entry.asset.n,
               meta: entry.project.name,
-              amount: entry.asset.cost > 0 ? rs(entry.asset.cost) : "TBD",
+              amount: openCost(entry.asset) > 0 ? rs(openCost(entry.asset)) : "TBD",
             }));
-            selectionTotal = selectedAssetEntries.reduce((sum, entry) => sum + (entry.asset.cost || 0), 0);
+            selectionTotal = selectedAssetEntries.reduce((sum, entry) => sum + (openCost(entry.asset) || 0), 0);
           } else {
             selectionItems = [...selectedPicks].map((idx) => {
               const asset = p.assets[idx];
@@ -1800,10 +1850,10 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                 key: String(idx),
                 name: asset?.n || "Asset",
                 meta: p.name,
-                amount: asset?.cost > 0 ? rs(asset.cost) : "TBD",
+                amount: openCost(asset) > 0 ? rs(openCost(asset)) : "TBD",
               };
             });
-            selectionTotal = [...selectedPicks].reduce((sum, idx) => sum + (p.assets[idx]?.cost || 0), 0);
+            selectionTotal = [...selectedPicks].reduce((sum, idx) => sum + (openCost(p.assets[idx]) || 0), 0);
           }
         } else if (customAmount > 0) {
           const allocated = showSelectedRail
@@ -1815,9 +1865,9 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                 if (remaining <= 0) return;
                 const asset = p.assets[idx];
                 if (!asset) return;
-                if (remaining >= asset.cost) {
-                  rows.push({ projectName: p.name, name: asset.n, cost: asset.cost, partial: false });
-                  remaining -= asset.cost;
+                if (remaining >= openCost(asset)) {
+                  rows.push({ projectName: p.name, name: asset.n, cost: openCost(asset), partial: false });
+                  remaining -= openCost(asset);
                 } else {
                   rows.push({ projectName: p.name, name: asset.n, cost: remaining, partial: true });
                   remaining = 0;
@@ -1914,7 +1964,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                               type="button"
                               className="px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap bg-[#3669A9] hover:bg-[#347745] text-white cursor-pointer disabled:opacity-70 disabled:cursor-default"
                               disabled={sending || Boolean(sentNote && !sentNote.failed)}
-                              onClick={() => sendConsultantInterest(project, id)}
+                              onClick={() => askConsultantInterest(project, id)}
                             >{interestButtonLabel(sentNote, sending)}</button>
                           </div>
                           {sentNote && <p className={`text-[11px] leading-relaxed m-0 mt-2 text-right ${sentNote.failed ? "text-red-600" : "text-[#347745]"}`}>{sentNote.text}</p>}
@@ -1928,6 +1978,52 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           </div>
         );
       }
+
+      case 'cost': {
+        const costProjects = showSelectedRail ? selectedRail : [p];
+        const costTotal = costProjects.reduce((sum, project) => sum + (project.total || 0), 0);
+        const costMonths = costProjects.reduce((sum, project) => sum + timelineMonths(project), 0);
+        const costAssets = costProjects.reduce((sum, project) => sum + project.assets.length, 0);
+        return (
+          <div className="animate-[fadeInUp_0.3s_ease-out_forwards] text-left flex flex-col gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                [rs(costTotal), 'Total cost'],
+                [formatMonthCount(costMonths), 'Tentative timeline'],
+                [String(costAssets), costAssets === 1 ? 'Intervention' : 'Interventions'],
+              ].map(([value, label]) => (
+                <div key={label} className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1">
+                  <b className="text-lg font-bold text-slate-800">{value}</b>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{label}</span>
+                </div>
+              ))}
+            </div>
+            {costProjects.map((project) => (
+              <section key={project.id}>
+                <div className="flex items-baseline justify-between gap-3 flex-wrap mb-2">
+                  <h3 className="text-base font-bold text-[#1F2A24] m-0">{project.name}</h3>
+                  <span className="text-sm font-mono font-bold text-[#1F2A24]">{rs(project.total || 0)}</span>
+                </div>
+                <CostTable project={project} />
+              </section>
+            ))}
+            <div className="flex gap-3 flex-wrap justify-end">
+              <button
+                className="px-5 py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-150 cursor-pointer bg-[#3669A9] hover:bg-[#347745] text-white shadow-sm"
+                onClick={() => setActiveTab('funders')}
+              >Match with funders →</button>
+            </div>
+          </div>
+        );
+      }
+
+      case 'funders':
+        return (
+          <ComingSoon
+            title="Match with funders"
+            description="Funders interested in projects like this one will be listed here, so you can reach out to them directly."
+          />
+        );
 
       case 'status': {
         const statusProjects = showSelectedRail ? selectedRail : [p];
@@ -2016,26 +2112,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                   {showSelectedRail ? selectedRail.map((project) => (
                     <div key={project.id} className="mt-4">
                       <h5 className="text-sm font-bold text-[var(--ink)] m-0 mb-2">{project.name}</h5>
-                      <table className="w-full border-collapse text-xs md:text-sm">
-                        <thead>
-                          <tr>
-                            <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
-                            <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
-                            <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost</th>
-                            <th className="border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Timeline</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {project.assets.map((a, idx) => (
-                            <tr key={idx} className="border-t border-[#C8D7BC]">
-                              <td className="py-2 text-[var(--ink-2)]">{a.n}</td>
-                              <td className="py-2 text-[var(--ink-2)]">{a.t.toUpperCase()}</td>
-                              <td className="py-2 text-[var(--ink-2)] font-mono">{a.cost > 0 ? rs(a.cost) : "TBD"}</td>
-                              <td className="py-2 text-[var(--ink-2)]">{assetTimeline(a.timeline)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <CostTable project={project} />
                     </div>
                   )) : (
                   <table className="w-full border-collapse text-xs md:text-sm mt-3" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
@@ -2111,18 +2188,20 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               </button>
             )}
             <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-[#C8D7BC] bg-white/10 border border-white/20 px-3 py-1 rounded-full mb-4">
-              🌊 Corporate water stewardship · Bengaluru
+              {isConsultant ? '📐 Blue-green-grey design · Bengaluru' : '🌊 Corporate water stewardship · Bengaluru'}
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-extrabold text-white tracking-tight leading-tight">
-              Fund flood-mitigation interventions,{' '}
+              {isConsultant ? 'Design flood-mitigation interventions,' : 'Fund flood-mitigation interventions,'}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F2C230] to-[#C8D7BC]">
-                asset by asset.
+                {isConsultant ? 'site by site.' : 'asset by asset.'}
               </span>
             </h1>
             <p className="text-white/80 max-w-[60ch] xl:max-w-[72ch] mt-3 text-sm md:text-base xl:text-lg leading-relaxed">
               {showSelectedRail
                 ? "The totals on the right cover only the projects you selected. Every tab below lists those same projects."
-                : "Each intervention is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it."}
+                : isConsultant
+                  ? "Each project lists its blue, green and grey interventions with dimensions, timelines, impact and cost."
+                  : "Each intervention is broken into fundable blue, green and grey assets and quantified in cubic metres with WRI VWBA. Pick a project to explore it."}
             </p>
           </div>
           <div className="grid grid-cols-2 w-full sm:w-auto sm:flex gap-3 sm:gap-4 sm:flex-wrap text-left shrink-0">
@@ -2130,6 +2209,8 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               { v: totalProjects, l: showSelectedRail ? 'Selected projects' : 'Projects listed' },
               { v: `${(totalVwb / 1e6).toFixed(2)}M m³`, l: 'Annual VWB' },
               { v: `₹${(totalCost / 100).toFixed(1)} Cr`, l: 'Total cost' },
+              { v: rs(totalCommitted), l: 'Funded so far' },
+              { v: `${fullyFundedProjects} / ${totalProjects}`, l: 'Fully funded' },
               { v: totalPeople.toLocaleString('en-IN'), l: 'People in scope' },
             ].map(({ v, l }) => (
               <div key={l} className="flex flex-col text-left bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 min-w-[100px]">
@@ -2206,7 +2287,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
 
               {/* Tab nav */}
               <nav className="flex gap-1 xl:gap-2 overflow-x-auto overflow-y-hidden pb-0">
-                {TABS.map(([k, label]) => (
+                {tabs.map(([k, label]) => (
                   <button
                     key={k}
                     className={`text-[13px] xl:text-sm font-semibold px-3 sm:px-4 xl:px-5 py-2.5 whitespace-nowrap rounded-t-xl border-b-2 -mb-[1px] cursor-pointer transition-all duration-150 bg-transparent ${
@@ -2269,6 +2350,82 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
         </div>,
         document.body
       )}
+
+      {interestConfirm && (() => {
+        const { project, agencyId } = interestConfirm;
+        const agency = AG[agencyId];
+        const close = () => setInterestConfirm(null);
+        return createPortal(
+          <div
+            className="fixed inset-0 bg-[#1F2A24]/50 backdrop-blur-md z-[3000] flex items-center justify-center p-3 sm:p-4"
+            onClick={close}
+          >
+            <div
+              className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[480px] max-h-[calc(100vh-24px)] flex flex-col overflow-hidden border border-[#C8D7BC] text-left"
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+              aria-labelledby="interest-confirm-title"
+            >
+              <div className="p-5 sm:p-7 overflow-y-auto">
+                <h3 id="interest-confirm-title" className="text-lg font-bold text-[#1F2A24] m-0">Send your interest to {agency.name}?</h3>
+                {user ? (
+                  <>
+                    <p className="text-sm text-[#6E6455] m-0 mt-2 leading-relaxed">
+                      These details will be emailed to {agency.name}. They can reply to you at {user.email}.
+                    </p>
+                    <dl className="m-0 mt-4 rounded-xl border border-[#C8D7BC] divide-y divide-[#C8D7BC]/70">
+                      {interestDetails(project, agency).map(([label, value]) => (
+                        <div key={label} className="flex gap-3 px-3 py-2 text-sm">
+                          <dt className="w-28 shrink-0 text-[#6E6455]">{label}</dt>
+                          <dd className="m-0 font-semibold text-[#1F2A24] break-words min-w-0">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <label className="block mt-4 text-xs font-semibold text-[#1F2A24]">
+                      Message (optional)
+                      <textarea
+                        rows={3}
+                        maxLength={1000}
+                        value={interestNote}
+                        onChange={(event) => setInterestNote(event.target.value)}
+                        className="mt-1.5 w-full rounded-lg border border-[#C8D7BC] px-3 py-2 text-sm font-normal text-[#1F2A24] focus:outline-none focus:ring-2 focus:ring-[#347745]/30"
+                        placeholder="Anything you want them to know"
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <p className="text-sm text-[#1F2A24] m-0 mt-3 leading-relaxed">
+                    Sign in first, so {agency.name} knows who is interested and can reply to you.
+                  </p>
+                )}
+                <div className="mt-5 flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className="px-4 py-2.5 rounded-lg text-sm font-semibold border border-[#C8D7BC] bg-white text-[#1F2A24] cursor-pointer hover:bg-[#f3f8ef]"
+                    onClick={close}
+                  >Cancel</button>
+                  {user ? (
+                    <button
+                      type="button"
+                      className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#3669A9] hover:bg-[#347745] text-white cursor-pointer"
+                      onClick={() => {
+                        close();
+                        sendConsultantInterest(project, agencyId, interestNote.trim());
+                      }}
+                    >Confirm and send</button>
+                  ) : (
+                    <a
+                      href="/login"
+                      className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#3669A9] hover:bg-[#347745] text-white no-underline"
+                    >Sign in</a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        );
+      })()}
 
       {consultantDetail && (() => {
         const detailProject = PROJECTS.find((project) => project.id === consultantDetail.projectId);

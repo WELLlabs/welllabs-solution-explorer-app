@@ -87,6 +87,8 @@ const CatchmentProjectsPanel = ({
   onClose,
   onReopen,
   onFundSelected,
+  openLabel = "Open project workspace",
+  extraActions = [],
 }) => {
   const [selectedIds, setSelectedIds] = useState(() => new Set());
 
@@ -256,15 +258,31 @@ const CatchmentProjectsPanel = ({
             )}
           </div>
 
-          {selectedIds.size > 0 && (
-            <div className="shrink-0 p-3 border-t border-[#C8D7BC]/70 bg-white">
-              <button
-                type="button"
-                onClick={fundSelected}
-                className="w-full py-2.5 px-3 rounded-xl text-xs font-bold text-white border-none bg-[#C8743C] hover:bg-[#b8602c] cursor-pointer"
-              >
-                Open project workspace
-              </button>
+          {(selectedIds.size > 0 || extraActions.length > 0) && (
+            <div className="shrink-0 p-3 border-t border-[#C8D7BC]/70 bg-white flex flex-col gap-2">
+              {selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  onClick={fundSelected}
+                  className="w-full py-2.5 px-3 rounded-xl text-xs font-bold text-white border-none bg-[#C8743C] hover:bg-[#b8602c] cursor-pointer"
+                >
+                  {openLabel}
+                </button>
+              )}
+              {extraActions.length > 0 && (
+                <div className="grid grid-cols-2 gap-2">
+                  {extraActions.map(({ label, onClick }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={onClick}
+                      className="py-2 px-2.5 rounded-xl text-[11px] font-bold text-[#1F2A24] border border-[#C8D7BC] bg-white hover:bg-[#f3f8ef] cursor-pointer"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
