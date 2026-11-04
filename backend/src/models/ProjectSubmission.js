@@ -43,7 +43,7 @@ const ProjectSubmissionSchema = new Schema(
     // Status & Approval Workflow
     status: {
       type: String,
-      enum: ['pending_review', 'approved', 'rejected'],
+      enum: ['pending_review', 'approved', 'rejected', 'changes_requested'],
       default: 'pending_review',
       index: true,
     },
@@ -56,6 +56,18 @@ const ProjectSubmissionSchema = new Schema(
     reviewedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     reviewedAt: { type: Date },
     adminNotes: { type: String, default: '' },
+    suggestion: { type: String, default: '' },
+    suggestedAt: { type: Date },
+    updatedAfterSuggestion: { type: Boolean, default: false },
+    updateNote: { type: String, default: '' },
+    suggestionsHistory: [
+      {
+        suggestion: { type: String, default: '' },
+        suggestedAt: { type: Date },
+        respondedAt: { type: Date },
+        updateNote: { type: String, default: '' },
+      },
+    ],
   },
   { timestamps: true }
 );

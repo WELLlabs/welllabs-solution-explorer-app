@@ -14,7 +14,7 @@ import BggGuidelines from '@/components/BggGuidelines';
 import DesignCalculator from '@/pages/DesignCalculator';
 import UploadProject from '@/components/UploadProject';
 
-const PAGES_WITH_BACK = ['casestudy', 'interventions', 'newprojects', 'usermanagement', 'uploadsite', 'uploadproject', 'designcalculator', 'bggguidelines'];
+const PAGES_WITH_BACK = ['casestudy', 'interventions', 'newprojects', 'usermanagement', 'uploadsite', 'uploadproject', 'registerproject', 'designcalculator', 'bggguidelines'];
 
 // The Back button row must use the same width and side padding as the page under it
 const DEFAULT_BACK_ROW = 'max-w-[1400px] mx-auto w-full px-3 sm:px-6 lg:px-8';
@@ -172,8 +172,8 @@ const Dashboard = () => {
           <NewProjectsView />
         )}
 
-        {/* 6. UPLOAD A PROJECT */}
-        {showMainViews && (activeTab === 'uploadsite' || activeTab === 'uploadproject') && (
+        {/* 6. REGISTER / UPLOAD A PROJECT */}
+        {showMainViews && (activeTab === 'uploadsite' || activeTab === 'uploadproject' || activeTab === 'registerproject') && (
           <UploadProject />
         )}
 

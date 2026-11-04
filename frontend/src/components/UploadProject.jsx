@@ -71,6 +71,12 @@ export default function UploadProject() {
   const [error, setError] = useState('');
   const [successSubmission, setSuccessSubmission] = useState(null);
 
+  // Edit / Suggestion revision state
+  const [editingProjectId, setEditingProjectId] = useState(null);
+  const [editingSuggestion, setEditingSuggestion] = useState('');
+  const [updateNote, setUpdateNote] = useState('');
+  const [viewingProject, setViewingProject] = useState(null);
+
   // My Submissions list state
   const [mySubmissions, setMySubmissions] = useState([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
@@ -202,6 +208,51 @@ export default function UploadProject() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEditProject = (sub) => {
+    // If the project was rejected, editing is blocked; show read-only details
+    if (sub.status === 'rejected') {
+      setViewingProject(sub);
+      return;
+    }
+
+    setEditingProjectId(sub._id);
+    setEditingSuggestion(sub.suggestion || '');
+    setUpdateNote(sub.updateNote || '');
+    setFormData({
+      name: sub.name || '',
+      type: sub.type || 'park',
+      latitude: sub.latitude || '',
+      longitude: sub.longitude || '',
+      ward: sub.ward || '',
+      bbmp_zone: sub.bbmp_zone || 'East',
+      watershed: sub.watershed || '',
+      implementing_agency: sub.implementing_agency || '',
+      implementation_partners: sub.implementation_partners || '',
+      project_start_year: sub.project_start_year || '',
+      project_end_year: sub.project_end_year || '',
+      current_stage: sub.current_stage || 'Proposed',
+      total_cost: sub.total_cost || '',
+      pre_intervention_issues: sub.pre_intervention_issues || '',
+      context: sub.context || '',
+      site_level_impact: sub.site_level_impact || '',
+      subcatchment_level_impact: sub.subcatchment_level_impact || '',
+      image_url: sub.image_url || '',
+    });
+    setActiveTab('form');
+    setSuccessSubmission(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProjectId(null);
+    setEditingSuggestion('');
+    setUpdateNote('');
+    setFormData({
+      ...INITIAL_FORM,
+      implementing_agency: user?.organization || user?.name || '',
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -220,15 +271,36 @@ export default function UploadProject() {
 
     setSubmitting(true);
     try {
-      const { data } = await api.post('/project-submissions', formData);
-      if (data.success) {
-        setSuccessSubmission(data.submission);
-        setFormData({
-          ...INITIAL_FORM,
-          implementing_agency: user?.organization || user?.name || '',
+      if (editingProjectId) {
+        const { data } = await api.put(`/project-submissions/${editingProjectId}`, {
+          ...formData,
+          updateNote,
         });
+        if (data.success) {
+          setSuccessSubmission(data.submission);
+          setEditingProjectId(null);
+          setEditingSuggestion('');
+          setUpdateNote('');
+          setFormData({
+            ...INITIAL_FORM,
+            implementing_agency: user?.organization || user?.name || '',
+          });
+          fetchMySubmissions();
+        } else {
+          setError(data.message || 'Failed to update project');
+        }
       } else {
-        setError(data.message || 'Failed to submit project');
+        const { data } = await api.post('/project-submissions', formData);
+        if (data.success) {
+          setSuccessSubmission(data.submission);
+          setFormData({
+            ...INITIAL_FORM,
+            implementing_agency: user?.organization || user?.name || '',
+          });
+          fetchMySubmissions();
+        } else {
+          setError(data.message || 'Failed to register project');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Error connecting to server.');
@@ -247,10 +319,10 @@ export default function UploadProject() {
               <span>📐 Consultant Portal</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1F2A24] tracking-tight">
-              Upload a Project
+              Register a Project
             </h1>
             <p className="text-sm text-[#6E6455] mt-1 max-w-2xl leading-relaxed">
-              Submit your proposed or active Blue-Green-Grey infrastructure interventions. Once submitted, the WELL Labs admin team reviews your project specifications and approves it onto the official city-wide map layer.
+              Register your proposed or active Blue-Green-Grey infrastructure interventions. Once registered, the WELL Labs admin team reviews your project specifications, provides feedback or suggestions, and accepts it onto the official city-wide map layer.
             </p>
           </div>
 
@@ -258,14 +330,17 @@ export default function UploadProject() {
           <div className="flex items-center gap-1.5 bg-[#E5ECE0] p-1.5 rounded-full border border-[#C8D7BC] self-start md:self-center shrink-0">
             <button
               type="button"
-              onClick={() => setActiveTab('form')}
+              onClick={() => {
+                if (!editingProjectId) handleCancelEdit();
+                setActiveTab('form');
+              }}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'form'
                   ? 'bg-white text-[#1F2A24] shadow-sm'
                   : 'text-[#6E6455] hover:text-[#1F2A24]'
               }`}
             >
-              + New Submission
+              {editingProjectId ? '✏️ Editing Project' : '+ Register Project'}
             </button>
             <button
               type="button"
@@ -276,7 +351,7 @@ export default function UploadProject() {
                   : 'text-[#6E6455] hover:text-[#1F2A24]'
               }`}
             >
-              <span>My Projects</span>
+              <span>My Registered Projects</span>
               {mySubmissions.length > 0 && (
                 <span className="w-4 h-4 rounded-full bg-[#3669A9] text-white text-[10px] flex items-center justify-center font-bold">
                   {mySubmissions.length}
@@ -335,6 +410,49 @@ export default function UploadProject() {
       {/* TAB 1: FORM */}
       {activeTab === 'form' && (
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
+          {/* EDITING / SUGGESTION NOTICE BANNER */}
+          {editingProjectId && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 mb-4 text-left shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">✏️</span>
+                  <h3 className="text-sm font-extrabold text-amber-950">
+                    Editing & Updating Project: {formData.name}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="text-xs font-bold text-amber-900 bg-white border border-amber-300 px-3 py-1 rounded-lg hover:bg-amber-100 transition-colors cursor-pointer"
+                >
+                  ✕ Cancel Edit
+                </button>
+              </div>
+
+              {editingSuggestion && (
+                <div className="bg-white p-3.5 rounded-xl border border-amber-200 text-xs">
+                  <div className="font-bold text-amber-900 flex items-center gap-1.5 mb-1">
+                    <span>💡 Admin's Suggestion:</span>
+                  </div>
+                  <p className="m-0 text-slate-800 leading-relaxed font-medium">{editingSuggestion}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-amber-950 mb-1">
+                  Short note for admin on changes made:
+                </label>
+                <input
+                  type="text"
+                  value={updateNote}
+                  onChange={(e) => setUpdateNote(e.target.value)}
+                  placeholder="e.g. Adjusted stormwater metrics and updated coordinates as suggested."
+                  className="w-full px-3.5 py-2 text-xs rounded-xl bg-white border border-amber-300 text-[#1F2A24] focus:outline-none focus:ring-2 focus:ring-[#347745]"
+                />
+              </div>
+            </div>
+          )}
+
           {/* SECTION 1: BASIC INFORMATION */}
           <div className="bg-white rounded-2xl border border-[#C8D7BC] p-6 shadow-sm">
             <h2 className="text-base font-bold text-[#1F2A24] mb-4 flex items-center gap-2">
@@ -668,11 +786,11 @@ export default function UploadProject() {
               {submitting ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Submitting Project…</span>
+                  <span>{editingProjectId ? 'Updating Project…' : 'Registering Project…'}</span>
                 </>
               ) : (
                 <>
-                  <span>Submit Project for Admin Review</span>
+                  <span>{editingProjectId ? 'Update & Resubmit Project' : 'Register Project for Admin Review'}</span>
                   <span>→</span>
                 </>
               )}
@@ -686,7 +804,7 @@ export default function UploadProject() {
         <div className="bg-white rounded-2xl border border-[#C8D7BC] p-6 shadow-sm text-left">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-[#1F2A24]">
-              My Project Submissions ({mySubmissions.length})
+              My Registered Projects ({mySubmissions.length})
             </h2>
             <button
               type="button"
@@ -704,14 +822,17 @@ export default function UploadProject() {
             </div>
           ) : mySubmissions.length === 0 ? (
             <div className="py-12 text-center text-sm text-[#6E6455] bg-[#F4F6F2] rounded-xl border border-dashed border-[#C8D7BC]">
-              <p className="font-semibold text-[#1F2A24]">No projects submitted yet</p>
-              <p className="text-xs text-[#6E6455] mt-1">Once you submit a project, you can track its review and layer placement status here.</p>
+              <p className="font-semibold text-[#1F2A24]">No projects registered yet</p>
+              <p className="text-xs text-[#6E6455] mt-1">Once you register a project, you can track its review, administrative suggestions, and layer placement status here.</p>
               <button
                 type="button"
-                onClick={() => setActiveTab('form')}
+                onClick={() => {
+                  handleCancelEdit();
+                  setActiveTab('form');
+                }}
                 className="mt-3 px-4 py-2 bg-[#3669A9] text-white text-xs font-bold rounded-xl cursor-pointer"
               >
-                + Submit Your First Project
+                + Register Your First Project
               </button>
             </div>
           ) : (
@@ -720,13 +841,14 @@ export default function UploadProject() {
                 const typeObj = PROJECT_TYPES.find((t) => t.id === sub.type);
                 const isApproved = sub.status === 'approved';
                 const isRejected = sub.status === 'rejected';
+                const isChangesRequested = sub.status === 'changes_requested';
                 return (
                   <div
                     key={sub._id}
                     className="p-4 rounded-xl border border-[#C8D7BC] bg-[#F4F6F2] hover:bg-white transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
                   >
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="text-base">{typeObj?.icon || '📍'}</span>
                         <h3 className="text-sm font-bold text-[#1F2A24]">{sub.name}</h3>
                         <span
@@ -735,7 +857,9 @@ export default function UploadProject() {
                               ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                               : isRejected
                               ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                              : 'bg-amber-100 text-amber-800 border border-amber-300'
+                              : isChangesRequested
+                              ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                              : 'bg-slate-100 text-slate-800 border border-slate-300'
                           }`}
                         >
                           <span
@@ -744,13 +868,19 @@ export default function UploadProject() {
                                 ? 'bg-emerald-600'
                                 : isRejected
                                 ? 'bg-rose-600'
-                                : 'bg-amber-500 animate-pulse'
+                                : isChangesRequested
+                                ? 'bg-amber-500 animate-pulse'
+                                : 'bg-slate-500'
                             }`}
                           />
                           {isApproved
                             ? 'Published & Live on Map'
                             : isRejected
-                            ? 'Not Published (Needs Revision)'
+                            ? 'Not Published (Rejected)'
+                            : isChangesRequested
+                            ? 'Suggestion Received (Needs Improvement)'
+                            : sub.updatedAfterSuggestion
+                            ? 'Not Published (Updated - Pending Review)'
                             : 'Not Published (Pending Admin Review)'}
                         </span>
                       </div>
@@ -764,10 +894,21 @@ export default function UploadProject() {
                         <span>Submitted: {new Date(sub.createdAt).toLocaleDateString()}</span>
                       </div>
 
-                      {/* Admin Notes if any */}
-                      {sub.adminNotes && (
-                        <div className="mt-2 text-xs bg-white p-2.5 rounded-lg border border-[#C8D7BC] text-[#1F2A24]">
-                          <strong className="text-slate-600">Admin feedback:</strong> {sub.adminNotes}
+                      {/* Admin Suggestion Box */}
+                      {sub.suggestion && (
+                        <div className="mt-2.5 p-3 rounded-xl bg-amber-50/90 border border-amber-300 text-xs text-amber-950">
+                          <div className="font-bold flex items-center gap-1.5 text-amber-900 mb-1">
+                            <span>💡 Admin Suggestion for Improvement:</span>
+                          </div>
+                          <p className="m-0 leading-relaxed font-medium text-slate-800">{sub.suggestion}</p>
+                        </div>
+                      )}
+
+                      {/* Consultant Update Note */}
+                      {sub.updatedAfterSuggestion && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-blue-800 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                          <span>🔄 You updated this project per suggestion:</span>
+                          <span className="font-semibold italic">"{sub.updateNote}"</span>
                         </div>
                       )}
 
@@ -784,9 +925,53 @@ export default function UploadProject() {
                           )}
                         </div>
                       )}
+
+                      {/* Actions */}
+                      <div className="mt-3 flex items-center gap-2 flex-wrap">
+                        {isRejected ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setViewingProject(sub)}
+                              className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 text-xs font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                            >
+                              <span>👁️ View Project Details</span>
+                            </button>
+                            <span className="text-[11px] text-rose-700 italic font-medium">
+                              (Project rejected by admin. Closed for editing.)
+                            </span>
+                          </>
+                        ) : !isApproved ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEditProject(sub)}
+                              className="px-3.5 py-1.5 bg-[#347745] hover:bg-[#285d35] text-white text-xs font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+                            >
+                              <span>✏️ {isChangesRequested ? 'Update Project per Suggestion' : 'Edit Project Details'}</span>
+                              <span>→</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setViewingProject(sub)}
+                              className="px-3 py-1.5 bg-white hover:bg-slate-50 text-[#1F2A24] border border-[#C8D7BC] text-xs font-semibold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1"
+                            >
+                              <span>👁️ View Details</span>
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setViewingProject(sub)}
+                            className="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                          >
+                            <span>👁️ View Published Specs</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="text-right shrink-0">
+                    <div className="text-right shrink-0 self-start md:self-center">
                       <span className="text-xs font-bold text-[#347745] bg-[#347745]/10 px-3 py-1 rounded-full border border-[#347745]/20">
                         {sub.total_cost || 'Budget TBD'}
                       </span>
@@ -796,6 +981,185 @@ export default function UploadProject() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* READ-ONLY PROJECT DETAILS MODAL */}
+      {viewingProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-[#C8D7BC] shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 text-left space-y-5">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-100">
+              <div>
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="text-xl">
+                    {PROJECT_TYPES.find((t) => t.id === viewingProject.type)?.icon || '📍'}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                    {PROJECT_TYPES.find((t) => t.id === viewingProject.type)?.label || viewingProject.type}
+                  </span>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider ${
+                      viewingProject.status === 'approved'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : viewingProject.status === 'rejected'
+                        ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                        : viewingProject.status === 'changes_requested'
+                        ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                        : 'bg-slate-100 text-slate-800 border border-slate-300'
+                    }`}
+                  >
+                    {viewingProject.status === 'approved'
+                      ? '✓ Published & Live'
+                      : viewingProject.status === 'rejected'
+                      ? '✕ Rejected (Closed for Edits)'
+                      : viewingProject.status === 'changes_requested'
+                      ? '💡 Suggestion Received'
+                      : '⏳ Pending Admin Review'}
+                  </span>
+                </div>
+                <h2 className="text-xl font-extrabold text-[#1F2A24] tracking-tight">
+                  {viewingProject.name}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingProject(null)}
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold cursor-pointer p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Rejection Notice Banner if rejected */}
+            {viewingProject.status === 'rejected' && (
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-300 text-xs text-rose-950 space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-rose-900">
+                  <span>🚫 Project Status: Rejected</span>
+                </div>
+                <p className="m-0 leading-relaxed">
+                  This project was rejected by the administrators. <strong>It cannot be edited or resubmitted.</strong> You can view all submitted project specifications below for your records.
+                </p>
+                {viewingProject.adminNotes && (
+                  <div className="mt-2 bg-white p-2.5 rounded-lg border border-rose-200 text-rose-900 font-medium">
+                    <strong>Admin Note:</strong> {viewingProject.adminNotes}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Specifications Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-[#F4F6F2] p-4 rounded-xl border border-[#C8D7BC]">
+              <div>
+                <span className="text-slate-500 block">Coordinates</span>
+                <span className="font-mono font-bold text-[#1F2A24]">
+                  {viewingProject.latitude?.toFixed(5)}° N, {viewingProject.longitude?.toFixed(5)}° E
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Location</span>
+                <span className="font-bold text-[#1F2A24]">
+                  Ward: {viewingProject.ward || '—'} ({viewingProject.bbmp_zone || 'Bengaluru'})
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Watershed</span>
+                <span className="font-bold text-[#1F2A24]">{viewingProject.watershed || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Current Stage</span>
+                <span className="font-bold text-[#1F2A24]">{viewingProject.current_stage || 'Proposed'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Estimated Budget</span>
+                <span className="font-bold text-[#347745]">{viewingProject.total_cost || 'TBD'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Timeline</span>
+                <span className="font-bold text-[#1F2A24]">
+                  {viewingProject.project_start_year} – {viewingProject.project_end_year || 'Ongoing'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Implementing Agency</span>
+                <span className="font-bold text-[#1F2A24]">{viewingProject.implementing_agency || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Partners</span>
+                <span className="font-bold text-[#1F2A24]">{viewingProject.implementation_partners || '—'}</span>
+              </div>
+            </div>
+
+            {/* Pre-intervention Challenges */}
+            {viewingProject.pre_intervention_issues && (
+              <div className="text-xs space-y-1">
+                <span className="font-bold uppercase tracking-wider text-rose-800 block text-[11px]">
+                  ⚠️ Pre-Intervention Challenges & Flooding Issues
+                </span>
+                <p className="m-0 bg-rose-50/50 p-3 rounded-xl border border-rose-200 text-[#1F2A24] leading-relaxed">
+                  {viewingProject.pre_intervention_issues}
+                </p>
+              </div>
+            )}
+
+            {/* Context & Description */}
+            {viewingProject.context && (
+              <div className="text-xs space-y-1">
+                <span className="font-bold uppercase tracking-wider text-[#1F2A24] block text-[11px]">
+                  📋 Project Description & Scope
+                </span>
+                <p className="m-0 bg-[#F4F6F2] p-3 rounded-xl border border-[#C8D7BC]/70 text-[#1F2A24] leading-relaxed whitespace-pre-wrap">
+                  {viewingProject.context}
+                </p>
+              </div>
+            )}
+
+            {/* Hydrological Impact */}
+            {(viewingProject.site_level_impact || viewingProject.subcatchment_level_impact) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                {viewingProject.site_level_impact && (
+                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-950">
+                    <span className="font-bold block mb-1">Site-Level Water Retention</span>
+                    <p className="m-0 leading-relaxed text-emerald-900">{viewingProject.site_level_impact}</p>
+                  </div>
+                )}
+                {viewingProject.subcatchment_level_impact && (
+                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-950">
+                    <span className="font-bold block mb-1">Subcatchment Runoff Reduction</span>
+                    <p className="m-0 leading-relaxed text-emerald-900">{viewingProject.subcatchment_level_impact}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Submitted Photo */}
+            {viewingProject.image_url && (
+              <div className="text-xs space-y-1">
+                <span className="font-bold uppercase tracking-wider text-[#6E6455] block text-[11px]">
+                  📷 Submitted Photo / Design Layout
+                </span>
+                <img
+                  src={viewingProject.image_url}
+                  alt={viewingProject.name}
+                  className="w-full max-h-64 object-contain rounded-xl border border-[#C8D7BC] bg-slate-50"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Modal Footer */}
+            <div className="pt-3 border-t border-slate-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewingProject(null)}
+                className="px-5 py-2 bg-[#1F2A24] hover:bg-[#2d3a33] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

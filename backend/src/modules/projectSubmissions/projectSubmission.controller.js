@@ -132,7 +132,7 @@ exports.getAdminSubmissions = async (req, res) => {
     const { status, search } = req.query;
     const filter = {};
 
-    if (status && ['pending_review', 'approved', 'rejected'].includes(status)) {
+    if (status && ['pending_review', 'approved', 'rejected', 'changes_requested'].includes(status)) {
       filter.status = status;
     }
 
@@ -145,11 +145,12 @@ exports.getAdminSubmissions = async (req, res) => {
       ];
     }
 
-    const [submissions, pendingCount, approvedCount, rejectedCount, totalCount] = await Promise.all([
+    const [submissions, pendingCount, approvedCount, rejectedCount, changesRequestedCount, totalCount] = await Promise.all([
       ProjectSubmission.find(filter).sort({ createdAt: -1 }).lean(),
       ProjectSubmission.countDocuments({ status: 'pending_review' }),
       ProjectSubmission.countDocuments({ status: 'approved' }),
       ProjectSubmission.countDocuments({ status: 'rejected' }),
+      ProjectSubmission.countDocuments({ status: 'changes_requested' }),
       ProjectSubmission.countDocuments({}),
     ]);
 
@@ -160,6 +161,7 @@ exports.getAdminSubmissions = async (req, res) => {
         pending: pendingCount,
         approved: approvedCount,
         rejected: rejectedCount,
+        changes_requested: changesRequestedCount,
         total: totalCount,
       },
     });
@@ -258,6 +260,7 @@ exports.approveSubmission = async (req, res) => {
     submission.reviewedBy = req.user._id;
     submission.reviewedAt = new Date();
     submission.adminNotes = adminNotes;
+    submission.updatedAfterSuggestion = false;
     await submission.save();
 
     await logAudit(req, {
@@ -274,18 +277,18 @@ exports.approveSubmission = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Project approved and published to ${targetLayer === 'bgg_sites' ? 'City-Wide BGG Projects' : 'Existing Interventions'}.`,
+      message: `Project accepted and published to ${targetLayer === 'bgg_sites' ? 'City-Wide BGG Projects' : 'Existing Interventions'}.`,
       submission,
     });
   } catch (err) {
     console.error('approveSubmission error:', err);
-    res.status(500).json({ message: err.message || 'Failed to approve project' });
+    res.status(500).json({ message: err.message || 'Failed to accept project' });
   }
 };
 
 /**
  * POST /api/project-submissions/:id/reject
- * Admin rejects a submission with feedback.
+ * Admin rejects a submission.
  */
 exports.rejectSubmission = async (req, res) => {
   try {
@@ -298,9 +301,10 @@ exports.rejectSubmission = async (req, res) => {
     }
 
     submission.status = 'rejected';
-    submission.adminNotes = reason;
+    submission.adminNotes = reason || 'Rejected';
     submission.reviewedBy = req.user._id;
     submission.reviewedAt = new Date();
+    submission.updatedAfterSuggestion = false;
     await submission.save();
 
     await logAudit(req, {
@@ -313,12 +317,179 @@ exports.rejectSubmission = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Project submission has been marked as rejected.',
+      message: 'Project submission has been rejected.',
       submission,
     });
   } catch (err) {
     console.error('rejectSubmission error:', err);
     res.status(500).json({ message: 'Failed to reject project' });
+  }
+};
+
+/**
+ * POST /api/project-submissions/admin/:id/suggest
+ * Admin sends a suggestion for improvement to the consultant.
+ */
+exports.suggestImprovement = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { suggestion = '' } = req.body;
+
+    if (!suggestion || !suggestion.trim()) {
+      return res.status(400).json({ message: 'Please enter a suggestion for improvement.' });
+    }
+
+    const submission = await ProjectSubmission.findById(id);
+    if (!submission) {
+      return res.status(404).json({ message: 'Submission not found' });
+    }
+
+    submission.status = 'changes_requested';
+    submission.suggestion = suggestion.trim();
+    submission.suggestedAt = new Date();
+    submission.updatedAfterSuggestion = false;
+    submission.updateNote = '';
+    submission.reviewedBy = req.user._id;
+    submission.reviewedAt = new Date();
+
+    if (!Array.isArray(submission.suggestionsHistory)) {
+      submission.suggestionsHistory = [];
+    }
+    submission.suggestionsHistory.push({
+      suggestion: suggestion.trim(),
+      suggestedAt: new Date(),
+    });
+
+    await submission.save();
+
+    await logAudit(req, {
+      action: 'project.suggest',
+      targetType: 'project',
+      targetId: String(submission._id),
+      targetLabel: submission.name,
+      changes: { suggestion: suggestion.trim() },
+    });
+
+    res.json({
+      success: true,
+      message: 'Suggestion sent to the consultant.',
+      submission,
+    });
+  } catch (err) {
+    console.error('suggestImprovement error:', err);
+    res.status(500).json({ message: err.message || 'Failed to send suggestion' });
+  }
+};
+
+/**
+ * PUT /api/project-submissions/:id
+ * Consultant updates their submitted project (e.g. following admin suggestion).
+ */
+exports.updateProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const submission = await ProjectSubmission.findById(id);
+
+    if (!submission) {
+      return res.status(404).json({ message: 'Submission not found' });
+    }
+
+    const isOwner = submission.submittedBy && submission.submittedBy.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'Admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Unauthorized to edit this project' });
+    }
+
+    if (submission.status === 'rejected') {
+      return res.status(400).json({ message: 'Rejected projects cannot be edited. You can only view details.' });
+    }
+
+    const {
+      name,
+      type,
+      latitude,
+      longitude,
+      ward,
+      bbmp_zone,
+      watershed,
+      implementing_agency,
+      implementation_partners,
+      project_start_year,
+      project_end_year,
+      current_stage,
+      total_cost,
+      pre_intervention_issues,
+      context,
+      site_level_impact,
+      subcatchment_level_impact,
+      image_url,
+      images,
+      documents,
+      updateNote,
+    } = req.body;
+
+    if (name && name.trim()) submission.name = name.trim();
+    if (type) submission.type = ['lake', 'park', 'stormdrain', 'campus', 'other'].includes(type) ? type : submission.type;
+
+    if (latitude !== undefined && longitude !== undefined) {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        submission.latitude = lat;
+        submission.longitude = lng;
+        submission.location = { type: 'Point', coordinates: [lng, lat] };
+      }
+    }
+
+    if (ward !== undefined) submission.ward = ward;
+    if (bbmp_zone !== undefined) submission.bbmp_zone = bbmp_zone;
+    if (watershed !== undefined) submission.watershed = watershed;
+    if (implementing_agency !== undefined) submission.implementing_agency = implementing_agency;
+    if (implementation_partners !== undefined) submission.implementation_partners = implementation_partners;
+    if (project_start_year !== undefined) submission.project_start_year = project_start_year;
+    if (project_end_year !== undefined) submission.project_end_year = project_end_year;
+    if (current_stage !== undefined) submission.current_stage = current_stage;
+    if (total_cost !== undefined) submission.total_cost = total_cost;
+    if (pre_intervention_issues !== undefined) submission.pre_intervention_issues = pre_intervention_issues;
+    if (context !== undefined) submission.context = context;
+    if (site_level_impact !== undefined) submission.site_level_impact = site_level_impact;
+    if (subcatchment_level_impact !== undefined) submission.subcatchment_level_impact = subcatchment_level_impact;
+    if (image_url !== undefined) submission.image_url = image_url;
+    if (Array.isArray(images)) submission.images = images;
+    if (Array.isArray(documents)) submission.documents = documents;
+
+    // Resubmitted back to pending review queue
+    submission.status = 'pending_review';
+    submission.updatedAfterSuggestion = true;
+    const noteText = updateNote && updateNote.trim() ? updateNote.trim() : 'Updated as per suggestions';
+    submission.updateNote = noteText;
+
+    if (Array.isArray(submission.suggestionsHistory) && submission.suggestionsHistory.length > 0) {
+      const last = submission.suggestionsHistory[submission.suggestionsHistory.length - 1];
+      if (last && !last.respondedAt) {
+        last.respondedAt = new Date();
+        last.updateNote = noteText;
+      }
+    }
+
+    await submission.save();
+
+    await logAudit(req, {
+      action: 'project.update',
+      targetType: 'project',
+      targetId: String(submission._id),
+      targetLabel: submission.name,
+      changes: { updateNote: noteText },
+    });
+
+    res.json({
+      success: true,
+      message: 'Project updated and resubmitted for admin review.',
+      submission,
+    });
+  } catch (err) {
+    console.error('updateProject error:', err);
+    res.status(500).json({ message: err.message || 'Failed to update project' });
   }
 };
 

@@ -2144,7 +2144,7 @@ const DataLayersView = () => {
                 <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap w-full sm:w-auto">
                   {isConsultant ? (
                     [
-                      ["Upload a project", "/uploadproject"],
+                      ["Register a Project", "/registerproject"],
                       ["Design calculator", "/designcalculator"],
                       ["BGG guidelines", "/bggguidelines"],
                     ].map(([label, path]) => (

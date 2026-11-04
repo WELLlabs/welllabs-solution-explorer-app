@@ -53,6 +53,10 @@ export default function AdminProjectApprovals() {
   const [actionNotice, setActionNotice] = useState(null);
   const [flashNotice, setFlashNotice] = useState(null);
 
+  // Suggestion Modal state
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
+  const [suggestionText, setSuggestionText] = useState('');
+
   // Leaflet map reference in full-page view
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -145,7 +149,6 @@ export default function AdminProjectApprovals() {
 
       const { data } = await api.post(`/project-submissions/admin/${selectedSubmission._id}/approve`, {
         targetLayer,
-        adminNotes,
       });
 
       if (data.success) {
@@ -155,15 +158,15 @@ export default function AdminProjectApprovals() {
         // Flash message shown on top of the list view
         setFlashNotice({
           type: 'success',
-          title: 'Project Approved & Published!',
-          text: `"${projectName}" has been successfully approved and published to the "${targetLayerLabel}" layer. It has been removed from the pending review queue.`,
+          title: 'Project Accepted & Published!',
+          text: `"${projectName}" has been accepted and published to the "${targetLayerLabel}" layer. It has been removed from the pending review queue.`,
         });
 
         // Refresh submissions list
         fetchSubmissions();
       }
     } catch (err) {
-      setActionNotice({ type: 'error', text: err.response?.data?.message || 'Approval failed' });
+      setActionNotice({ type: 'error', text: err.response?.data?.message || 'Acceptance failed' });
     } finally {
       setActionBusy(false);
     }
@@ -171,19 +174,12 @@ export default function AdminProjectApprovals() {
 
   const handleReject = async () => {
     if (!selectedSubmission) return;
-    if (!adminNotes.trim()) {
-      setActionNotice({
-        type: 'error',
-        text: 'Please provide feedback/reason for rejection so the consultant can revise.',
-      });
-      return;
-    }
     setActionBusy(true);
     setActionNotice(null);
     try {
       const projectName = selectedSubmission.name;
       const { data } = await api.post(`/project-submissions/admin/${selectedSubmission._id}/reject`, {
-        reason: adminNotes,
+        reason: 'Rejected by administrator',
       });
 
       if (data.success) {
@@ -192,8 +188,8 @@ export default function AdminProjectApprovals() {
 
         setFlashNotice({
           type: 'info',
-          title: 'Project Submission Rejected',
-          text: `"${projectName}" has been marked as rejected with feedback and removed from the pending review queue.`,
+          title: 'Project Rejected',
+          text: `"${projectName}" has been rejected and removed from the pending review queue.`,
         });
 
         fetchSubmissions();
@@ -205,12 +201,43 @@ export default function AdminProjectApprovals() {
     }
   };
 
+  const handleSendSuggestion = async () => {
+    if (!selectedSubmission || !suggestionText.trim()) return;
+    setActionBusy(true);
+    setActionNotice(null);
+    try {
+      const projectName = selectedSubmission.name;
+      const { data } = await api.post(`/project-submissions/admin/${selectedSubmission._id}/suggest`, {
+        suggestion: suggestionText.trim(),
+      });
+
+      if (data.success) {
+        setSelectedSubmission(null);
+        setShowSuggestModal(false);
+        setSuggestionText('');
+
+        setFlashNotice({
+          type: 'info',
+          title: 'Suggestion Sent',
+          text: `Suggestion sent to consultant for "${projectName}". The consultant can now update and resubmit the project.`,
+        });
+
+        fetchSubmissions();
+      }
+    } catch (err) {
+      setActionNotice({ type: 'error', text: err.response?.data?.message || 'Failed to send suggestion' });
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
   // =========================================================================
   // VIEW 1: FULL-PAGE DETAILED PROJECT REVIEW WORKSPACE (NO POPUP)
   // =========================================================================
   if (selectedSubmission) {
     const isApproved = selectedSubmission.status === 'approved';
     const isRejected = selectedSubmission.status === 'rejected';
+    const isChangesRequested = selectedSubmission.status === 'changes_requested';
     const typeInfo = TYPE_ICONS[selectedSubmission.type] || TYPE_ICONS.other;
 
     return (
@@ -232,14 +259,23 @@ export default function AdminProjectApprovals() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {selectedSubmission.updatedAfterSuggestion && (
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-900 border border-blue-300 flex items-center gap-1.5">
+                <span>🔄</span>
+                <span>Updated per suggestion</span>
+              </span>
+            )}
+
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                 isApproved
                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                   : isRejected
                   ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                  : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  : isChangesRequested
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                  : 'bg-slate-100 text-slate-800 border border-slate-300'
               }`}
             >
               <span
@@ -248,13 +284,19 @@ export default function AdminProjectApprovals() {
                     ? 'bg-emerald-600'
                     : isRejected
                     ? 'bg-rose-600'
-                    : 'bg-amber-500 animate-pulse'
+                    : isChangesRequested
+                    ? 'bg-amber-500 animate-pulse'
+                    : 'bg-slate-500'
                 }`}
               />
               {isApproved
                 ? 'Published to Map'
                 : isRejected
                 ? 'Not Published (Rejected)'
+                : isChangesRequested
+                ? 'Changes Suggested (Waiting on Consultant)'
+                : selectedSubmission.updatedAfterSuggestion
+                ? 'Updated per Suggestion (Ready for Review)'
                 : 'Not Published (Pending Review)'}
             </span>
 
@@ -283,6 +325,28 @@ export default function AdminProjectApprovals() {
             >
               Dismiss
             </button>
+          </div>
+        )}
+
+        {/* Updated per Suggestion Alert Card */}
+        {selectedSubmission.updatedAfterSuggestion && (
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-5 shadow-xs text-left space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🔄</span>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-900">
+                Project Updated as per Suggestion
+              </h3>
+            </div>
+            {selectedSubmission.suggestion && (
+              <p className="text-xs text-slate-700 m-0 leading-relaxed">
+                <strong>Admin's Previous Suggestion:</strong> "{selectedSubmission.suggestion}"
+              </p>
+            )}
+            {selectedSubmission.updateNote && (
+              <p className="text-xs text-blue-950 m-0 leading-relaxed font-semibold">
+                <strong>Consultant Note:</strong> "{selectedSubmission.updateNote}"
+              </p>
+            )}
           </div>
         )}
 
@@ -579,6 +643,62 @@ export default function AdminProjectApprovals() {
                   ← Back to Submissions List
                 </button>
               </div>
+            ) : isChangesRequested ? (
+              <div className="bg-amber-50 rounded-2xl border-2 border-amber-300 p-5 shadow-xs space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">💡</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                    Changes Suggested to Consultant
+                  </span>
+                </div>
+
+                <div className="bg-white p-4 rounded-xl border border-amber-200 space-y-2">
+                  <span className="text-[10.5px] uppercase font-bold text-amber-900 block">Current Suggestion:</span>
+                  <p className="text-xs text-slate-800 m-0 leading-relaxed font-medium">{selectedSubmission.suggestion}</p>
+                </div>
+
+                <p className="text-xs text-amber-900 m-0">
+                  Waiting for the consultant to review the suggestion, update project details, and resubmit.
+                </p>
+
+                <div className="space-y-2 pt-1">
+                  <button
+                    type="button"
+                    disabled={actionBusy}
+                    onClick={handleApprove}
+                    className="w-full py-3 px-4 rounded-xl bg-[#347745] hover:bg-[#285d35] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    Accept
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={actionBusy}
+                    onClick={() => setShowSuggestModal(true)}
+                    className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <span>💡</span>
+                    <span>Suggest an Improvement</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={actionBusy}
+                    onClick={handleReject}
+                    className="w-full py-2.5 px-4 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleBackToList}
+                    className="w-full py-2 px-4 rounded-xl bg-white border border-[#C8D7BC] text-[#1F2A24] text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
+                    ← Back to Submissions List
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="bg-[#EBF2E7] rounded-2xl border-2 border-[#347745]/30 p-5 shadow-sm space-y-4">
                 <div>
@@ -589,7 +709,7 @@ export default function AdminProjectApprovals() {
                     Assign Map Layer & Decision
                   </h3>
                   <p className="text-xs text-[#6E6455] mt-1 leading-relaxed">
-                    Choose which city layer this project will be deployed to once you approve it:
+                    Choose which city layer this project will be deployed to once you accept it:
                   </p>
                 </div>
 
@@ -630,21 +750,7 @@ export default function AdminProjectApprovals() {
                   })}
                 </div>
 
-                {/* Admin Feedback Notes */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1F2A24] mb-1.5">
-                    Admin Verification Notes / Feedback
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder="e.g. Verified coordinates and stormwater alignment with BBMP division. Approved for BGG Sites layer."
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-white border border-[#C8D7BC] text-[#1F2A24] focus:outline-none focus:ring-2 focus:ring-[#347745] shadow-2xs"
-                  />
-                </div>
-
-                {/* Action Buttons */}
+                {/* Action Buttons: Accept, Suggest an Improvement, Reject */}
                 <div className="space-y-2 pt-2">
                   <button
                     type="button"
@@ -655,11 +761,21 @@ export default function AdminProjectApprovals() {
                     {actionBusy ? (
                       <>
                         <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Publishing to Map Layer…</span>
+                        <span>Processing…</span>
                       </>
                     ) : (
-                      <span>✓ Approve & Publish to {targetLayer === 'bgg_sites' ? 'City-Wide BGG' : 'Existing'} Layer</span>
+                      <span>Accept</span>
                     )}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={actionBusy}
+                    onClick={() => setShowSuggestModal(true)}
+                    className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <span>💡</span>
+                    <span>Suggest an Improvement</span>
                   </button>
 
                   <button
@@ -668,13 +784,86 @@ export default function AdminProjectApprovals() {
                     onClick={handleReject}
                     className="w-full py-2.5 px-4 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    ✕ Reject Submission with Feedback
+                    Reject
                   </button>
                 </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Suggestion Modal Dialog */}
+        {showSuggestModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
+            <div className="bg-white rounded-2xl border border-[#C8D7BC] shadow-2xl max-w-lg w-full p-6 text-left space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">💡</span>
+                  <h3 className="text-base font-extrabold text-[#1F2A24]">
+                    Suggest an Improvement
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSuggestModal(false);
+                    setSuggestionText('');
+                  }}
+                  className="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-xs text-[#6E6455] leading-relaxed m-0">
+                Write suggestions for <strong>{selectedSubmission.name}</strong>. The consultant will receive this feedback in their portal, update the project details accordingly, and resubmit it for your review.
+              </p>
+
+              <div>
+                <label className="block text-xs font-bold text-[#1F2A24] uppercase tracking-wider mb-1.5">
+                  Improvement Suggestion *
+                </label>
+                <textarea
+                  rows={4}
+                  autoFocus
+                  value={suggestionText}
+                  onChange={(e) => setSuggestionText(e.target.value)}
+                  placeholder="e.g. Please adjust the coordinates to align with the BBMP lake boundary, and provide estimated water retention metrics..."
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F4F6F2] border border-[#C8D7BC] text-[#1F2A24] focus:outline-none focus:bg-white focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  disabled={actionBusy}
+                  onClick={() => {
+                    setShowSuggestModal(false);
+                    setSuggestionText('');
+                  }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={actionBusy || !suggestionText.trim()}
+                  onClick={handleSendSuggestion}
+                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                >
+                  {actionBusy ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Sending…</span>
+                    </>
+                  ) : (
+                    <span>Send Suggestion</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -699,8 +888,13 @@ export default function AdminProjectApprovals() {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span>{counts.pending} Not Published (Pending)</span>
+            <span>{counts.pending} Pending Review</span>
           </div>
+          {(counts.changes_requested > 0) && (
+            <div className="px-3.5 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-1.5">
+              <span>💡 {counts.changes_requested} Changes Suggested</span>
+            </div>
+          )}
           <div className="px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-600" />
             <span>✓ {counts.approved} Published</span>
@@ -741,10 +935,11 @@ export default function AdminProjectApprovals() {
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-1 bg-[#E5ECE0] p-1 rounded-xl border border-[#C8D7BC] overflow-x-auto">
           {[
-            { id: 'pending_review', label: `Pending Review (${counts.pending})` },
-            { id: 'approved', label: `Published (${counts.approved})` },
-            { id: 'rejected', label: `Rejected (${counts.rejected})` },
-            { id: 'all', label: `All Submissions (${counts.total})` },
+            { id: 'pending_review', label: `Pending Review (${counts.pending || 0})` },
+            { id: 'changes_requested', label: `Changes Suggested (${counts.changes_requested || 0})` },
+            { id: 'approved', label: `Published (${counts.approved || 0})` },
+            { id: 'rejected', label: `Rejected (${counts.rejected || 0})` },
+            { id: 'all', label: `All Submissions (${counts.total || 0})` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -813,15 +1008,29 @@ export default function AdminProjectApprovals() {
                 {submissions.map((sub) => {
                   const isApproved = sub.status === 'approved';
                   const isRejected = sub.status === 'rejected';
+                  const isChangesRequested = sub.status === 'changes_requested';
                   const typeObj = TYPE_ICONS[sub.type] || TYPE_ICONS.other;
 
                   return (
                     <tr key={sub._id} className="hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4">
-                        <div className="font-bold text-[#1F2A24] text-sm">{sub.name}</div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-[#1F2A24] text-sm">{sub.name}</span>
+                          {sub.updatedAfterSuggestion && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-300">
+                              <span>🔄</span>
+                              <span>Updated per suggestion</span>
+                            </span>
+                          )}
+                        </div>
                         <div className="inline-block mt-0.5 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-md bg-[#3669A9]/10 text-[#3669A9]">
                           {typeObj.icon} {typeObj.label}
                         </div>
+                        {sub.updatedAfterSuggestion && sub.updateNote && (
+                          <div className="text-[11px] text-blue-800 italic mt-0.5 max-w-xs truncate" title={sub.updateNote}>
+                            "{sub.updateNote}"
+                          </div>
+                        )}
                       </td>
                       <td className="py-3 px-4">
                         <div className="font-semibold text-[#1F2A24]">{sub.submitterName || 'Consultant'}</div>
@@ -862,17 +1071,27 @@ export default function AdminProjectApprovals() {
                               Not Published
                             </span>
                             <span className="text-[10.5px] text-rose-700 font-medium">
-                              Rejected (Needs Revision)
+                              Rejected
+                            </span>
+                          </div>
+                        ) : isChangesRequested ? (
+                          <div className="flex flex-col items-start gap-1">
+                            <span className="px-2.5 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 border border-amber-300">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              Changes Suggested
+                            </span>
+                            <span className="text-[10.5px] text-amber-900 font-medium">
+                              Waiting on Consultant
                             </span>
                           </div>
                         ) : (
                           <div className="flex flex-col items-start gap-1">
-                            <span className="px-2.5 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 border border-amber-300">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                            <span className="px-2.5 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 border border-slate-300">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                               Not Published
                             </span>
-                            <span className="text-[10.5px] text-[#6E6455] font-medium">
-                              Pending Review
+                            <span className={`text-[10.5px] font-medium ${sub.updatedAfterSuggestion ? 'text-blue-700 font-bold' : 'text-[#6E6455]'}`}>
+                              {sub.updatedAfterSuggestion ? 'Updated (Ready for Review)' : 'Pending Review'}
                             </span>
                           </div>
                         )}
@@ -893,7 +1112,25 @@ export default function AdminProjectApprovals() {
                             onClick={() => handleOpenDetail(sub)}
                             className="px-3.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5"
                           >
-                            <span>View Feedback</span>
+                            <span>View Details</span>
+                            <span>→</span>
+                          </button>
+                        ) : isChangesRequested ? (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(sub)}
+                            className="px-3.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                          >
+                            <span>View Suggestion</span>
+                            <span>→</span>
+                          </button>
+                        ) : sub.updatedAfterSuggestion ? (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(sub)}
+                            className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+                          >
+                            <span>Review Updated Project</span>
                             <span>→</span>
                           </button>
                         ) : (
