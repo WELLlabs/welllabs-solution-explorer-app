@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import api from '@/utils/api';
@@ -31,6 +31,147 @@ export const runoff = (P, CN) => {
   return P <= Ia ? 0 : Math.pow(P - Ia, 2) / (P - Ia + S);
 };
 export const initials = s => s.split(' ').filter(w => /[A-Za-z]/.test(w[0])).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
+/* ============ AnimatedNumber: counts up when `value` changes ============ */
+/*   <AnimatedNumber value={p.total} format={rs} />   (respects reduced-motion) */
+const AnimatedNumber = ({ value, format = (v) => Math.round(v).toLocaleString('en-IN'), duration = 900 }) => {
+  const [display, setDisplay] = useState(0);
+  const from = useRef(0);
+
+  useEffect(() => {
+    if (value == null || Number.isNaN(Number(value))) return undefined;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      from.current = value;
+      setDisplay(value);
+      return undefined;
+    }
+    const start = performance.now();
+    const a = from.current;
+    let raf;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplay(a + (value - a) * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else from.current = value;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+
+  if (value == null || Number.isNaN(Number(value))) return <>—</>;
+  return <>{format(display)}</>;
+};
+
+/* ============ ProjectsBackground: fixed tone-on-tone "watershed" backdrop ============ */
+const PB_FLOWS = [
+  { d: 'M-20 220 C 360 160, 760 300, 1460 210', stroke: '#3669A9', o: 0.2, dash: '70 46', dur: 70 },
+  { d: 'M-20 520 C 420 590, 920 440, 1460 520', stroke: '#347745', o: 0.2, dash: '54 38', dur: 90, rev: true },
+  { d: 'M-20 800 C 380 740, 1000 850, 1460 780', stroke: '#3669A9', o: 0.17, dash: '80 52', dur: 80 },
+];
+const PB_RINGS = [70, 120, 170, 220, 270];
+const PB_RIPPLES = [
+  { x: 4, y: 30, size: 170, delay: 0 },
+  { x: 96, y: 62, size: 200, delay: 3.5 },
+  { x: 6, y: 78, size: 140, delay: 6.5 },
+  { x: 94, y: 18, size: 130, delay: 2 },
+];
+const PB_DROPS = [
+  { x: 3, delay: 0, dur: 22, size: 8 },
+  { x: 8, delay: 7, dur: 28, size: 6 },
+  { x: 94, delay: 3, dur: 25, size: 9 },
+  { x: 97, delay: 11, dur: 30, size: 6 },
+  { x: 91, delay: 16, dur: 26, size: 7 },
+];
+
+const PbContours = ({ className, flip }) => (
+  <div className={`pb-contours ${className}`}>
+    <svg viewBox="-340 -260 680 520" preserveAspectRatio="xMidYMid meet">
+      {PB_RINGS.map((r, i) => (
+        <ellipse
+          key={r}
+          rx={r * 1.2}
+          ry={r * 0.82}
+          transform={`rotate(${(flip ? -1 : 1) * i * 8})`}
+          stroke="#347745"
+          strokeOpacity={0.17 - i * 0.02}
+        />
+      ))}
+    </svg>
+  </div>
+);
+
+const ProjectsBackground = () => (
+  <div className="pb-root" aria-hidden="true">
+    <style>{`
+      .pb-root { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+      .pb-dots {
+        position: absolute; inset: 0;
+        background-image: radial-gradient(rgba(52,119,69,.24) 1px, transparent 1.3px);
+        background-size: 26px 26px;
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent 22%, transparent 78%, #000 100%);
+                mask-image: linear-gradient(90deg, #000 0%, transparent 22%, transparent 78%, #000 100%);
+      }
+      .pb-flows { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .pb-flows path { fill: none; stroke-width: 1.6; stroke-linecap: round; vector-effect: non-scaling-stroke; animation: pb-flow linear infinite; }
+      @keyframes pb-flow { to { stroke-dashoffset: -1000; } }
+      .pb-contours { position: absolute; width: 620px; height: 480px; }
+      .pb-contours svg { width: 100%; height: 100%; overflow: visible; }
+      .pb-contours ellipse { fill: none; stroke-width: 1.3; vector-effect: non-scaling-stroke; }
+      .pb-c-left  { left: -300px;  top: 18%;  animation: pb-sway 52s ease-in-out infinite; }
+      .pb-c-right { right: -300px; bottom: 6%; animation: pb-sway 60s ease-in-out infinite reverse; }
+      @keyframes pb-sway { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+      .pb-ripple { position: absolute; transform: translate(-50%, -50%); }
+      .pb-ripple i { position: absolute; inset: 0; border-radius: 50%; border: 1.2px solid #3669A9; opacity: 0; transform: scale(.08); animation: pb-ripple 10s cubic-bezier(.2,.6,.3,1) infinite; }
+      .pb-ripple i:nth-child(2) { border-color: #347745; }
+      @keyframes pb-ripple { 0% { opacity: 0; transform: scale(.08); } 10% { opacity: .4; } 100% { opacity: 0; transform: scale(1); } }
+      .pb-drop { position: absolute; bottom: -20px; border-radius: 50%; border: 1.2px solid rgba(54,105,169,.45); background: rgba(109,158,201,.18); animation: pb-rise linear infinite; }
+      @keyframes pb-rise {
+        0%   { transform: translateY(0) translateX(0); opacity: 0; }
+        10%  { opacity: 1; }
+        50%  { transform: translateY(-50vh) translateX(10px); }
+        100% { transform: translateY(-110vh) translateX(-6px); opacity: 0; }
+      }
+      @media (max-width: 1023px) { .pb-ripple, .pb-drop, .pb-dots { display: none; } }
+      @media (prefers-reduced-motion: reduce) { .pb-root * { animation: none !important; } .pb-drop { display: none; } }
+    `}</style>
+
+    <div className="pb-dots" />
+
+    <svg className="pb-flows" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      {PB_FLOWS.map((f, i) => (
+        <path
+          key={i}
+          d={f.d}
+          stroke={f.stroke}
+          strokeOpacity={f.o}
+          strokeDasharray={f.dash}
+          style={{ animationDuration: `${f.dur}s`, animationDirection: f.rev ? 'reverse' : 'normal' }}
+        />
+      ))}
+    </svg>
+
+    <PbContours className="pb-c-left" />
+    <PbContours className="pb-c-right" flip />
+
+    {PB_RIPPLES.map((r, i) => (
+      <div key={i} className="pb-ripple" style={{ left: `${r.x}%`, top: `${r.y}%`, width: r.size, height: r.size }}>
+        {[0, 1].map((n) => (
+          <i key={n} style={{ animationDelay: `${r.delay + n * 1.2}s` }} />
+        ))}
+      </div>
+    ))}
+
+    {PB_DROPS.map((d, i) => (
+      <span
+        key={i}
+        className="pb-drop"
+        style={{ left: `${d.x}%`, width: d.size, height: d.size, animationDuration: `${d.dur}s`, animationDelay: `${d.delay}s` }}
+      />
+    ))}
+  </div>
+);
 
 /* ============ implementing agencies ============ */
 export const AG = {
@@ -369,7 +510,7 @@ function assetTimeline(timeline) {
 }
 
 function CostTable({ project }) {
-  const thClass = "border-b border-slate-200 pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider";
+  const thClass = "border-b border-[#C8D7BC] pb-2 text-left text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider";
   return (
     <table className="w-full border-collapse text-xs md:text-sm">
       <thead>
@@ -438,7 +579,7 @@ function ProjectStatusList({ project }) {
         >
           <div className="pointer-events-none absolute left-[4%] right-[4%] top-1/2 h-[3px] -translate-y-1/2 bg-[#1F2A24]" aria-hidden="true" />
           <div
-            className="pointer-events-none absolute left-[4%] top-1/2 h-[3px] -translate-y-1/2 bg-[#347745]"
+            className="pointer-events-none absolute left-[4%] top-1/2 h-[3px] -translate-y-1/2 bg-[#347745] pv-grow"
             style={{ width: `${(current / last) * 92}%` }}
             aria-hidden="true"
           />
@@ -458,11 +599,12 @@ function ProjectStatusList({ project }) {
               <li key={stage.id} className="relative flex flex-col items-center">
                 <div className="flex h-[108px] w-full items-end justify-center pb-3">{above ? card : null}</div>
                 <span
-                  className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-[11px] font-bold"
+                  className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-[11px] font-bold ${isCurrent ? "pv-pulse" : ""}`}
                   style={{
                     borderColor: color,
                     background: isCurrent ? color : "#fff",
                     color: isCurrent ? "#fff" : "#1F2A24",
+                    "--pv-c": color,
                   }}
                 >{String(stage.id + 1).padStart(2, "0")}</span>
                 <div className="flex h-[108px] w-full items-start justify-center pt-3">{above ? null : card}</div>
@@ -714,8 +856,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
   if (loading) {
     return (
       <div className="w-full min-h-screen bg-[var(--bg-page)] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4 text-slate-500">
-          <svg className="animate-spin w-8 h-8 text-teal-600" viewBox="0 0 24 24" fill="none">
+        <div className="flex flex-col items-center gap-4 text-[#6E6455]">
+          <svg className="animate-spin w-8 h-8 text-[#347745]" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity=".25"/>
             <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
           </svg>
@@ -732,7 +874,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           <div className="text-2xl mb-2">⚠️</div>
           <h3 className="font-bold text-red-700 mb-1">Could not load sites</h3>
           <p className="text-sm text-red-500">{fetchErr}</p>
-          <p className="text-xs text-slate-400 mt-3">Make sure the backend server is running on port 5000.</p>
+          <p className="text-xs text-[#A99E8A] mt-3">Make sure the backend server is running on port 5000.</p>
         </div>
       </div>
     );
@@ -741,7 +883,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
   if (PROJECTS.length === 0) {
     return (
       <div className="w-full min-h-screen bg-[var(--bg-page)] flex items-center justify-center">
-        <div className="text-slate-400 text-sm font-mono">No sites found in database.</div>
+        <div className="text-[#A99E8A] text-sm font-mono">No sites found in database.</div>
       </div>
     );
   }
@@ -808,29 +950,36 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
       <svg viewBox="0 0 320 118" width="100%" height="100%" preserveAspectRatio="none">
         <rect width="320" height="118" fill="#eef3f0" />
         <line x1="0" y1={104 - 81} x2="320" y2={104 - 81} stroke="#b9c2b6" strokeDasharray="5 4" />
-        <path d={`M0,${l} C60,${l - 7} 120,${l + 6} 180,${l} C240,${l - 6} 290,${l + 5} 320,${l} L320,118 L0,118 Z`} fill="#0E8C8C" opacity=".85" />
-        <path d={`M0,${l + 5} C60,${l - 2} 120,${l + 11} 180,${l + 5} C240,${l - 1} 290,${l + 10} 320,${l + 5} L320,118 L0,118 Z`} fill="#0A6A6A" opacity=".5" />
+        <path d={`M0,${l} C60,${l - 7} 120,${l + 6} 180,${l} C240,${l - 6} 290,${l + 5} 320,${l} L320,118 L0,118 Z`} fill="#3669A9" opacity=".85" />
+        <path d={`M0,${l + 5} C60,${l - 2} 120,${l + 11} 180,${l + 5} C240,${l - 1} 290,${l + 10} 320,${l + 5} L320,118 L0,118 Z`} fill="#2B5488" opacity=".5" />
       </svg>
     );
   };
 
+  // Funding tank: waves bob gently upward (pv-bob) so the water feels alive
   const renderTank = (cP, yP) => {
     const H = 300;
     const top = H * 0.1;
     const u = H - top - 1;
     const cy = H - cP * u;
     const yy = H - Math.min(1, cP + yP) * u;
-    const w = (y, o, c) => (
-      <path d={`M0,${y} C70,${y - 9} 150,${y + 8} 230,${y} C290,${y - 6} 320,${y + 6} 320,${y} L320,${H} L0,${H} Z`} fill={c} opacity={o} />
+    const w = (y, o, c, d = 0) => (
+      <path
+        className="pv-bob"
+        style={{ animationDelay: `${d}s` }}
+        d={`M0,${y} C70,${y - 9} 150,${y + 8} 230,${y} C290,${y - 6} 320,${y + 6} 320,${y} L320,${H} L0,${H} Z`}
+        fill={c}
+        opacity={o}
+      />
     );
     return (
       <svg viewBox={`0 0 320 ${H}`} width="100%" height="100%" preserveAspectRatio="none">
         <rect width="320" height={H} fill="#eef3f0" />
         <line x1="0" y1={top} x2="320" y2={top} stroke="#b9c2b6" strokeDasharray="5 4" />
         <text x="12" y={top - 7} fontFamily="IBM Plex Mono" fontSize="11" fill="#3A5256">fully funded</text>
-        {w(yy, 0.45, '#5BC8B8')}
-        {w(cy, 0.9, '#0E8C8C')}
-        {w(cy + 6, 0.5, '#0A6A6A')}
+        {w(yy, 0.45, '#6D9EC9', 0)}
+        {w(cy, 0.9, '#3669A9', 0.6)}
+        {w(cy + 6, 0.5, '#2B5488', 1.2)}
       </svg>
     );
   };
@@ -844,35 +993,35 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
         <text x="110" y="56" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#9a8f76">silted · sewage-fed</text>
       </g>,
       <g key="1">
-        <path d="M44,92 C82,152 138,152 176,92" fill="none" stroke="#0E8C8C" strokeWidth="2" strokeDasharray="6 4" />
-        <line x1="40" y1="92" x2="180" y2="92" stroke="#0E8C8C" strokeDasharray="3 4" />
+        <path d="M44,92 C82,152 138,152 176,92" fill="none" stroke="#3669A9" strokeWidth="2" strokeDasharray="6 4" />
+        <line x1="40" y1="92" x2="180" y2="92" stroke="#3669A9" strokeDasharray="3 4" />
         <path d="M52,126 C92,140 128,140 168,126 L168,134 C128,146 92,146 52,134 Z" fill="#8a8666" />
-        <text x="110" y="56" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#0A6A6A">DPR · sized to design storm</text>
+        <text x="110" y="56" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#2B5488">DPR · sized to design storm</text>
       </g>,
       <g key="2">
         <path d="M48,106 C88,152 134,152 172,106 L172,116 C134,154 88,154 48,116 Z" fill="#3f8fa8" />
         <path d="M48,106 C88,144 134,144 172,106" fill="#2A7DA3" opacity=".55" />
         <rect x="172" y="88" width="16" height="18" fill="#5C6E78" />
         <path d="M30,96 q9,-18 18,0" fill="#5E8C42" />
-        <text x="108" y="56" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#0A6A6A">bund · wetland · filling</text>
+        <text x="108" y="56" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#2B5488">bund · wetland · filling</text>
       </g>,
       <g key="3">
         <path d="M44,90 C84,152 138,152 178,90 L178,100 C138,156 84,156 44,100 Z" fill="#2A7DA3" />
-        <path d="M44,90 C84,140 138,140 178,90" fill="#5BC8B8" opacity=".5" />
+        <path d="M44,90 C84,140 138,140 178,90" fill="#6D9EC9" opacity=".5" />
         <rect x="108" y="62" width="4" height="30" fill="#0C2A2E" />
         <circle cx="110" cy="62" r="6" fill="#C8743C" />
         <path d="M26,90 q10,-20 20,0" fill="#5E8C42" />
         <path d="M174,90 q10,-20 20,0" fill="#5E8C42" />
-        <text x="110" y="48" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#0A6A6A">verified · monitored</text>
+        <text x="110" y="48" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#2B5488">verified · monitored</text>
       </g>,
       <g key="4">
         <path d="M42,86 C82,152 140,152 180,86 L180,96 C140,158 82,158 42,96 Z" fill="#1C6E8C" />
-        <path d="M42,86 C82,136 140,136 180,86" fill="#5BC8B8" opacity=".5" />
+        <path d="M42,86 C82,136 140,136 180,86" fill="#6D9EC9" opacity=".5" />
         <path d="M22,86 q11,-22 22,0" fill="#5E8C42" />
         <path d="M176,86 q11,-22 22,0" fill="#5E8C42" />
         <path d="M94,70 q5,-5 10,0" stroke="#0C2A2E" strokeWidth="1.6" fill="none" />
         <path d="M112,72 q5,-5 10,0" stroke="#0C2A2E" strokeWidth="1.6" fill="none" />
-        <text x="110" y="48" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#0A6A6A">thriving · community-run</text>
+        <text x="110" y="48" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="#2B5488">thriving · community-run</text>
       </g>
     ];
 
@@ -1087,19 +1236,19 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           return (
             <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                  <b className="text-lg font-bold text-slate-800">{rs(combinedCost)}</b>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Total cost</span>
+                <div className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 text-left pv-rise pv-lift">
+                  <b className="text-lg font-bold text-[#1F2A24]"><AnimatedNumber value={combinedCost} format={rs} /></b>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455]">Total cost</span>
                 </div>
-                <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                  <b className="text-lg font-bold text-slate-800">
+                <div className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 text-left pv-rise pv-lift" style={{ animationDelay: '70ms' }}>
+                  <b className="text-lg font-bold text-[#1F2A24]">
                     {combinedMonths > 0 ? `${combinedMonths % 1 === 0 ? combinedMonths.toFixed(0) : combinedMonths.toFixed(1)} months` : "—"}
                   </b>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Total time</span>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455]">Total time</span>
                 </div>
-                <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                  <b className="text-lg font-bold text-slate-800">{selectedRail.length}</b>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Projects</span>
+                <div className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 text-left pv-rise pv-lift" style={{ animationDelay: '140ms' }}>
+                  <b className="text-lg font-bold text-[#1F2A24]">{selectedRail.length}</b>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455]">Projects</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
@@ -1108,19 +1257,19 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                   ["Flood storage", `${formatMeasure(combinedImpact.storageKl)} KL`],
                   ["Runoff held back", `${formatMeasure(combinedImpact.runoffMm, 1)} mm`],
                   ["Extra infiltration", `${formatMeasure(combinedImpact.infiltrationMm, 1)} mm`],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-xl border border-[#C8D7BC] bg-[#f3f8ef] px-3 py-3 text-left">
+                ].map(([label, value], i) => (
+                  <div key={label} className="rounded-xl border border-[#C8D7BC] bg-[#f3f8ef] px-3 py-3 text-left pv-rise pv-lift" style={{ animationDelay: `${i * 70}ms` }}>
                     <b className="block text-base font-bold text-[#1F2A24]">{value}</b>
                     <span className="font-mono text-[10px] uppercase tracking-wider text-[#347745]">{label}</span>
                   </div>
                 ))}
               </div>
               <div className="flex flex-col gap-3">
-                {selectedRail.map((project) => {
+                {selectedRail.map((project, pi) => {
                   const figures = impactFigures(project);
                   const months = timelineMonths(project);
                   return (
-                    <article key={project.id} className="rounded-2xl border border-[#C8D7BC] bg-white p-4 text-left">
+                    <article key={project.id} className="rounded-2xl border border-[#C8D7BC] bg-white p-4 text-left pv-rise pv-lift" style={{ animationDelay: `${pi * 80}ms` }}>
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <h3 className="text-base font-bold text-[#1F2A24] m-0">{project.name}</h3>
                         <div className="text-sm font-bold text-[#1F2A24]">{rs(project.total || 0)}</div>
@@ -1146,7 +1295,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
             {p.image_url && (
-              <div className="w-full h-48 sm:h-64 rounded-2xl overflow-hidden mb-6 bg-slate-100 border border-slate-200 shadow-sm relative">
+              <div className="w-full h-48 sm:h-64 rounded-2xl overflow-hidden mb-6 bg-[#f7faf4] border border-[#C8D7BC] shadow-sm relative">
                 <img
                   src={p.image_url}
                   alt={p.name}
@@ -1156,27 +1305,27 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-lg font-bold text-slate-800">{rs(p.total)}</b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Total Cost</span>
+              <div className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 text-left pv-rise pv-lift">
+                <b className="text-lg font-bold text-[#1F2A24]"><AnimatedNumber value={p.total} format={rs} /></b>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455]">Total Cost</span>
               </div>
-              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-lg font-bold text-slate-800">
+              <div className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 text-left pv-rise pv-lift" style={{ animationDelay: '70ms' }}>
+                <b className="text-lg font-bold text-[#1F2A24]">
                   {totalMonths > 0 ? `${totalMonths % 1 === 0 ? totalMonths.toFixed(0) : totalMonths.toFixed(1)} Months` : '—'}
                 </b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Tentative Timeline</span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455]">Tentative Timeline</span>
               </div>
-              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-xs font-bold text-slate-800 line-clamp-3" title={p.site_level_impact || p._raw?.site_level_impact}>
+              <div className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 text-left pv-rise pv-lift" style={{ animationDelay: '140ms' }}>
+                <b className="text-xs font-bold text-[#1F2A24] line-clamp-3" title={p.site_level_impact || p._raw?.site_level_impact}>
                   {p.site_level_impact || p._raw?.site_level_impact || '—'}
                 </b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 mt-auto pt-1">Site Level Impact</span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455] mt-auto pt-1">Site Level Impact</span>
               </div>
-              <div className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1 text-left">
-                <b className="text-xs font-bold text-slate-800 line-clamp-3" title={p.subcatchment_level_impact || p._raw?.subcatchment_level_impact}>
+              <div className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 text-left pv-rise pv-lift" style={{ animationDelay: '210ms' }}>
+                <b className="text-xs font-bold text-[#1F2A24] line-clamp-3" title={p.subcatchment_level_impact || p._raw?.subcatchment_level_impact}>
                   {p.subcatchment_level_impact || p._raw?.subcatchment_level_impact || '—'}
                 </b>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 mt-auto pt-1">Subcatchment Level Impact</span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455] mt-auto pt-1">Subcatchment Level Impact</span>
               </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-8 items-center text-left">
@@ -1206,42 +1355,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
       /* 
       // Timeline tab code commented out as per request
       case 'timeline':
-        const i = activePhase;
-        const built = i >= 2;
-        const cum = i < 2 ? p.assets.filter(a => a.phase === 1).reduce((s, a) => s + a.cost, 0) : p.total;
-        return (
-          <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
-            <div className="flex flex-col md:flex-row gap-1.5 border border-slate-200 rounded-2xl p-1.5 bg-slate-50 mb-6">
-              {PHASES.map((ph, k) => (
-                <button
-                  key={k}
-                  className={`flex-1 flex flex-col items-center md:items-start p-3 rounded-xl border transition-all duration-150 cursor-pointer text-center md:text-left ${
-                    k === i
-                      ? 'bg-white border-slate-200 shadow-sm'
-                      : 'border-transparent bg-slate-100/60 hover:bg-white/80'
-                  }`}
-                  onClick={() => setActivePhase(k)}
-                >
-                  <span className={`font-mono text-[10.5px] uppercase tracking-wider ${k === i ? 'text-teal-600' : 'text-slate-500'}`}>{MONTHS[p.scale][k]} · P{k + 1}</span>
-                  <span className={`text-sm font-bold mt-0.5 ${k === i ? 'text-slate-900' : 'text-slate-500'}`}>{ph.t}</span>
-                </button>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 items-start text-left">
-              <div className="w-full aspect-[220/190] rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.06)] shrink-0">{renderPhaseArt(i)}</div>
-              <div>
-                <div className="font-mono text-xs uppercase tracking-wider text-[var(--teal)] font-bold mb-1">{MONTHS[p.scale][i]} · Phase {i + 1}</div>
-                <h4 className="text-base font-bold text-[var(--ink)] mb-3">{PHASES[i].t}</h4>
-                <ul className="pl-[18px] margin-0 flex flex-col gap-2 list-disc mb-5 text-[14.5px] text-[var(--ink-2)] leading-relaxed">
-                  {PHASES[i].b.map((x, idx) => <li key={idx} className="text-left">{x}</li>)}
-                </ul>
-                <div className="bg-teal-50/60 rounded-xl p-4 text-xs font-mono text-teal-700 text-left">
-                  By end of this phase: <b>{rs(cum)}</b> deployed · {built ? <span><b>{m3(impactOf(p, p.assets.map((_, j) => j)).storage)}</b> flood storage live</span> : 'planning, no works yet'}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+        ... (unchanged, kept disabled)
       */
 
       case 'assets':
@@ -1266,7 +1380,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                         {rs(project.total || 0)} · {formatMonthCount(timelineMonths(project))} · {project.assets.length} intervention{project.assets.length === 1 ? "" : "s"}
                       </p>
                     </div>
-                    <div className="hidden md:grid grid-cols-[auto_1fr_140px_120px] gap-4 items-center px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200 mb-2 text-left">
+                    <div className="hidden md:grid grid-cols-[auto_1fr_140px_120px] gap-4 items-center px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-[#A99E8A] border-b border-[#C8D7BC] mb-2 text-left">
                       <div className="w-5"></div>
                       <div>Intervention Type &amp; Details</div>
                       <div className="text-right">Tentative Timeline</div>
@@ -1280,23 +1394,24 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                         return (
                           <div
                             key={assetSelectionKey(project.id, idx)}
-                            className={`grid grid-cols-1 md:grid-cols-[auto_1fr_140px_120px] gap-3 md:gap-4 items-center rounded-xl p-3.5 transition-all duration-150 text-left border-2 ${
+                            className={`pv-rise pv-lift grid grid-cols-1 md:grid-cols-[auto_1fr_140px_120px] gap-3 md:gap-4 items-center rounded-xl p-3.5 text-left border-2 ${
                               funded
-                                ? "bg-slate-50 border-transparent cursor-default opacity-90"
+                                ? "bg-[#f7faf4] border-transparent cursor-default opacity-90"
                                 : pick
-                                  ? "bg-teal-50 border-teal-400/60 cursor-pointer"
-                                  : "bg-slate-50/80 border-transparent hover:border-teal-300/50 hover:bg-white cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.04)]"
+                                  ? "bg-[#dfebd5]/60 border-[#347745]/60 cursor-pointer"
+                                  : "bg-[#f7faf4] border-transparent hover:border-[#347745]/40 hover:bg-white cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.04)]"
                             }`}
+                            style={{ animationDelay: `${idx * 45}ms` }}
                             onClick={funded ? undefined : () => toggleAssetKey(project.id, idx)}
                           >
-                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-150 ${funded ? "bg-slate-400 border-slate-400" : pick ? "bg-teal-600 border-teal-600" : "border-slate-300 bg-white"}`}>
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-150 ${funded ? "bg-[#A99E8A] border-[#A99E8A]" : pick ? "bg-[#347745] border-[#347745]" : "border-[#A99E8A] bg-white"}`}>
                               {funded ? (
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
                                   <rect x="5" y="11" width="14" height="9" rx="1.5" />
                                   <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                                 </svg>
                               ) : (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6" style={{ opacity: pick ? 1 : 0 }}>
+                                <svg className={pick ? "pv-pop" : ""} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6" style={{ opacity: pick ? 1 : 0 }}>
                                   <path d="M4 12l5 5L20 6" />
                                 </svg>
                               )}
@@ -1310,15 +1425,15 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                               </b>
                               <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}<AssetFundingNote asset={a} funderName={funder?.name} /></span>
                             </div>
-                            <div className="text-xs font-mono font-semibold text-slate-700 text-left md:text-right">
+                            <div className="text-xs font-mono font-semibold text-[#1F2A24] text-left md:text-right">
                               {a.timeline && a.timeline !== "—" ? (
                                 <span>{a.timeline} {/^\d+(\.\d+)?$/.test(String(a.timeline).trim()) ? (parseFloat(a.timeline) === 1 ? "month" : "months") : ""}</span>
                               ) : (
-                                <span className="text-slate-400">—</span>
+                                <span className="text-[#A99E8A]">—</span>
                               )}
                             </div>
                             <div className="text-sm font-mono font-bold text-[var(--ink)] text-left md:text-right">
-                              {a.cost > 0 ? rs(a.cost) : <span className="text-slate-400 font-normal">TBD</span>}
+                              {a.cost > 0 ? rs(a.cost) : <span className="text-[#A99E8A] font-normal">TBD</span>}
                             </div>
                           </div>
                         );
@@ -1327,15 +1442,15 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                   </section>
                 ))}
               </div>
-              <div className="flex justify-between items-center bg-slate-100/70 rounded-xl px-5 py-3.5 mt-4 text-sm font-mono text-slate-600 flex-wrap gap-3">
-                <div>Selected assets: <b className="font-bold text-slate-800">{selectedAssetEntries.length}</b> / {allAssets}</div>
+              <div className="flex justify-between items-center bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl px-5 py-3.5 mt-4 text-sm font-mono text-[#6E6455] flex-wrap gap-3">
+                <div>Selected assets: <b className="font-bold text-[#1F2A24]">{selectedAssetEntries.length}</b> / {allAssets}</div>
                 <div className="flex items-center gap-6 flex-wrap">
-                  <div>Total Duration: <b className="font-bold text-slate-800">{formatMonthCount(combinedMonths)}</b></div>
+                  <div>Total Duration: <b className="font-bold text-[#1F2A24]">{formatMonthCount(combinedMonths)}</b></div>
                   <div>
                     {selectedAssetEntries.length > 0 ? (
-                      <span>Selected Cost: <b className="font-bold text-teal-700">{rs(pickCost)}</b> (of {rs(combinedCost)} total)</span>
+                      <span>Selected Cost: <b className="font-bold text-[#347745]">{rs(pickCost)}</b> (of {rs(combinedCost)} total)</span>
                     ) : (
-                      <span>Total Cost: <b className="font-bold text-teal-700">{rs(combinedCost)}</b></span>
+                      <span>Total Cost: <b className="font-bold text-[#347745]">{rs(combinedCost)}</b></span>
                     )}
                   </div>
                 </div>
@@ -1361,7 +1476,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
             </div>
 
             {/* Table Header */}
-            <div className="hidden md:grid grid-cols-[auto_1fr_140px_120px] gap-4 items-center px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200 mb-2 text-left">
+            <div className="hidden md:grid grid-cols-[auto_1fr_140px_120px] gap-4 items-center px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-[#A99E8A] border-b border-[#C8D7BC] mb-2 text-left">
               <div className="w-5"></div>
               <div>Intervention Type &amp; Details</div>
               <div className="text-right">Tentative Timeline</div>
@@ -1376,23 +1491,24 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                 return (
                   <div
                     key={idx}
-                    className={`grid grid-cols-1 md:grid-cols-[auto_1fr_140px_120px] gap-3 md:gap-4 items-center rounded-xl p-3.5 transition-all duration-150 text-left border-2 ${
+                    className={`pv-rise pv-lift grid grid-cols-1 md:grid-cols-[auto_1fr_140px_120px] gap-3 md:gap-4 items-center rounded-xl p-3.5 text-left border-2 ${
                       funded
-                        ? 'bg-slate-50 border-transparent cursor-default opacity-90'
+                        ? 'bg-[#f7faf4] border-transparent cursor-default opacity-90'
                         : pick
-                          ? 'bg-teal-50 border-teal-400/60 cursor-pointer'
-                          : 'bg-slate-50/80 border-transparent hover:border-teal-300/50 hover:bg-white cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.04)]'
+                          ? 'bg-[#dfebd5]/60 border-[#347745]/60 cursor-pointer'
+                          : 'bg-[#f7faf4] border-transparent hover:border-[#347745]/40 hover:bg-white cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.04)]'
                     }`}
+                    style={{ animationDelay: `${idx * 45}ms` }}
                     onClick={funded ? undefined : () => togglePick(idx)}
                   >
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-150 ${funded ? 'bg-slate-400 border-slate-400' : pick ? 'bg-teal-600 border-teal-600' : 'border-slate-300 bg-white'}`}>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-150 ${funded ? 'bg-[#A99E8A] border-[#A99E8A]' : pick ? 'bg-[#347745] border-[#347745]' : 'border-[#A99E8A] bg-white'}`}>
                       {funded ? (
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
                           <rect x="5" y="11" width="14" height="9" rx="1.5" />
                           <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                         </svg>
                       ) : (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6" style={{ opacity: pick ? 1 : 0 }}>
+                        <svg className={pick ? 'pv-pop' : ''} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6" style={{ opacity: pick ? 1 : 0 }}>
                           <path d="M4 12l5 5L20 6" />
                         </svg>
                       )}
@@ -1407,32 +1523,32 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                       </b>
                       <span className="text-xs text-[var(--ink-2)] leading-relaxed">{a.fn}<AssetFundingNote asset={a} funderName={f?.name} /></span>
                     </div>
-                    <div className="text-xs font-mono font-semibold text-slate-700 text-left md:text-right bg-slate-100/80 px-2.5 py-1 rounded-md w-fit md:w-auto md:bg-transparent">
-                      <span className="md:hidden text-[10px] text-slate-400 mr-1 uppercase">Timeline:</span>
+                    <div className="text-xs font-mono font-semibold text-[#1F2A24] text-left md:text-right bg-[#dfebd5]/50 px-2.5 py-1 rounded-md w-fit md:w-auto md:bg-transparent">
+                      <span className="md:hidden text-[10px] text-[#A99E8A] mr-1 uppercase">Timeline:</span>
                       {a.timeline && a.timeline !== '—' ? (
                         <span>{a.timeline} {/^\d+(\.\d+)?$/.test(String(a.timeline).trim()) ? (parseFloat(a.timeline) === 1 ? 'month' : 'months') : ''}</span>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-[#A99E8A]">—</span>
                       )}
                     </div>
                     <div className="text-sm font-mono font-bold text-[var(--ink)] text-left md:text-right min-w-[70px]">
-                      {a.cost > 0 ? rs(a.cost) : <span className="text-slate-400 font-normal">TBD</span>}
+                      {a.cost > 0 ? rs(a.cost) : <span className="text-[#A99E8A] font-normal">TBD</span>}
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="flex justify-between items-center bg-slate-100/70 rounded-xl px-5 py-3.5 mt-4 text-sm font-mono text-slate-600 flex-wrap gap-3">
-              <div>Selected assets: <b className="font-bold text-slate-800">{selectedPicks.size}</b> / {p.assets.length}</div>
+            <div className="flex justify-between items-center bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl px-5 py-3.5 mt-4 text-sm font-mono text-[#6E6455] flex-wrap gap-3">
+              <div>Selected assets: <b className="font-bold text-[#1F2A24]">{selectedPicks.size}</b> / {p.assets.length}</div>
               <div className="flex items-center gap-6 flex-wrap">
                 {totalMonths > 0 && (
-                  <div>Total Duration: <b className="font-bold text-slate-800 text-sm md:text-base">{totalMonths % 1 === 0 ? totalMonths.toFixed(0) : totalMonths.toFixed(1)} Months</b></div>
+                  <div>Total Duration: <b className="font-bold text-[#1F2A24] text-sm md:text-base">{totalMonths % 1 === 0 ? totalMonths.toFixed(0) : totalMonths.toFixed(1)} Months</b></div>
                 )}
                 <div>
                   {selectedPicks.size > 0 ? (
-                    <span>Selected Cost: <b className="font-bold text-teal-700 text-sm md:text-base">{rs(pickCost)}</b> (of {rs(p.total)} total)</span>
+                    <span>Selected Cost: <b className="font-bold text-[#347745] text-sm md:text-base">{rs(pickCost)}</b> (of {rs(p.total)} total)</span>
                   ) : (
-                    <span>Total Project Cost: <b className="font-bold text-teal-700 text-sm md:text-base">{rs(p.total)}</b></span>
+                    <span>Total Project Cost: <b className="font-bold text-[#347745] text-sm md:text-base">{rs(p.total)}</b></span>
                   )}
                 </div>
               </div>
@@ -1462,8 +1578,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                   ["Flood storage", `${formatMeasure(combinedImpact.storageKl)} KL`],
                   ["Runoff held back", `${formatMeasure(combinedImpact.runoffMm, 1)} mm`],
                   ["Extra infiltration", `${formatMeasure(combinedImpact.infiltrationMm, 1)} mm`],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-xl border border-[#C8D7BC] bg-[#f3f8ef] px-3 py-3 text-left">
+                ].map(([label, value], i) => (
+                  <div key={label} className="rounded-xl border border-[#C8D7BC] bg-[#f3f8ef] px-3 py-3 text-left pv-rise pv-lift" style={{ animationDelay: `${i * 70}ms` }}>
                     <b className="block text-base font-bold text-[#1F2A24]">{value}</b>
                     <span className="font-mono text-[10px] uppercase tracking-wider text-[#347745]">{label}</span>
                   </div>
@@ -1476,13 +1592,13 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                     <section key={project.id} className="text-left">
                       <h3 className="text-base font-bold text-[#1F2A24] m-0 mb-3">{project.name}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-5 shadow-sm">
+                        <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-5 shadow-sm pv-rise pv-lift">
                           <span className="font-mono text-xs uppercase tracking-wider font-bold text-[#347745]">Site Level Impact</span>
                           <p className="text-sm text-[#1F2A24] leading-relaxed m-0 mt-2 whitespace-pre-line">
                             {figures.site || "Impact figures are still being added for this project."}
                           </p>
                         </div>
-                        <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-5 shadow-sm">
+                        <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-5 shadow-sm pv-rise pv-lift" style={{ animationDelay: '90ms' }}>
                           <span className="font-mono text-xs uppercase tracking-wider font-bold text-[#3669A9]">Subcatchment Level Impact</span>
                           <p className="text-sm text-[#1F2A24] leading-relaxed m-0 mt-2 whitespace-pre-line">
                             {figures.sub || "Subcatchment impact is still being added for this project."}
@@ -1509,24 +1625,22 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
               {/* Site Level Impact Card */}
-              <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-6 shadow-sm pv-rise pv-lift">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#347745] inline-block"></span>
                   <span className="font-mono text-xs uppercase tracking-wider font-bold text-[#347745]">Site Level Impact</span>
                 </div>
-                {/* <h3 className="text-base font-bold text-slate-800 mb-2">Site Level Impact Summary</h3> */}
                 <p className="text-sm text-[#1F2A24] leading-relaxed font-normal whitespace-pre-line">
                   {siteImpact}
                 </p>
               </div>
 
               {/* Subcatchment Level Impact Card */}
-              <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-white border border-[#C8D7BC]/90 rounded-2xl p-6 shadow-sm pv-rise pv-lift" style={{ animationDelay: '90ms' }}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#3669A9] inline-block"></span>
                   <span className="font-mono text-xs uppercase tracking-wider font-bold text-[#3669A9]">Subcatchment Level Impact</span>
                 </div>
-                {/* <h3 className="text-base font-bold text-slate-800 mb-2">Subcatchment Level Impact Summary</h3> */}
                 <p className="text-sm text-[#1F2A24] leading-relaxed font-normal whitespace-pre-line">
                   {subcatchmentImpact}
                 </p>
@@ -1559,7 +1673,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           return (
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 md:gap-8 items-start text-left animate-[fadeInUp_0.3s_ease-out_forwards]">
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div className="w-full max-w-[150px] h-[210px] md:max-w-[200px] md:h-[300px] rounded-2xl overflow-hidden border border-slate-200 mx-auto shrink-0">{renderTank(currentFundedPct, addedFundedPct)}</div>
+                <div className="w-full max-w-[150px] h-[210px] md:max-w-[200px] md:h-[300px] rounded-2xl overflow-hidden border border-[#C8D7BC] mx-auto shrink-0">{renderTank(currentFundedPct, addedFundedPct)}</div>
                 <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--ink-2)", marginTop: "8px", textAlign: "center" }}>
                   <b>{Math.round(currentFundedPct * 100)}%</b> committed
                 </div>
@@ -1571,15 +1685,15 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                 </div>
                 <div className="grid grid-cols-3 gap-4 border border-[#C8D7BC]/80 rounded-2xl p-4 bg-[#C8D7BC]/10 mb-6">
                   <div className="flex flex-col text-left">
-                    <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(scopeTotal)}</b>
+                    <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1"><AnimatedNumber value={scopeTotal} format={rs} /></b>
                     <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">total cost</span>
                   </div>
                   <div className="flex flex-col text-left">
-                    <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(scopeCommitted)}</b>
+                    <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1"><AnimatedNumber value={scopeCommitted} format={rs} /></b>
                     <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">already committed</span>
                   </div>
                   <div className="flex flex-col text-left">
-                    <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(scopeNeeded)}</b>
+                    <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1"><AnimatedNumber value={scopeNeeded} format={rs} /></b>
                     <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">still needed</span>
                   </div>
                 </div>
@@ -1590,7 +1704,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                       <span className="font-mono text-[11px] text-[var(--ink-2)]">YOUR SELECTION</span>
                       <div className="flex justify-between items-baseline mt-1">
                         <strong className="text-xl">{selectedAssetEntries.length} assets selected</strong>
-                        <strong className="font-mono text-lg text-[var(--teal)]">{rs(picksSum)}</strong>
+                        <strong className="font-mono text-lg text-[var(--teal)]"><AnimatedNumber value={picksSum} format={rs} /></strong>
                       </div>
                       <div className="mt-3 flex flex-col gap-2">
                         {selectedRail.map((project) => {
@@ -1620,7 +1734,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                 ) : (
                   <div>
                     <p className="text-sm text-[var(--ink-2)] mb-3">Enter a CSR amount. It is applied across the selected projects, one unfunded asset after another.</p>
-                    <div className="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2.5 rounded-xl">
+                    <div className="flex items-center gap-2.5 bg-white border border-[#C8D7BC] px-3 py-2.5 rounded-xl">
                       <span className="font-mono text-[var(--ink-2)]">₹</span>
                       <input
                         type="number"
@@ -1636,11 +1750,11 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                       <div>
                         <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3">Your custom allocation</div>
-                        <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/50 p-2">
+                        <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto border border-[#C8D7BC] rounded-xl bg-[#f7faf4] p-2">
                           {customAllocated.length === 0 ? (
                             <div className="text-xs text-[var(--ink-2)] italic p-4 text-center">Enter an amount to see how it allocates across the selected projects.</div>
                           ) : customAllocated.map((item, idx) => (
-                            <div key={idx} className="bg-white border border-slate-200 rounded-lg p-2.5">
+                            <div key={idx} className="bg-white border border-[#C8D7BC] rounded-lg p-2.5 pv-rise" style={{ animationDelay: `${idx * 40}ms` }}>
                               <b className="block text-xs text-[var(--ink)]">{item.name}</b>
                               <span className="block text-[11px] text-[#6E6455]">{item.projectName} · {item.partial ? "Partial funding" : "Full asset funding"}</span>
                               <span className="block text-xs font-mono font-bold mt-1">{rs(item.cost)}</span>
@@ -1650,11 +1764,11 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                       </div>
                       <div>
                         <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3">Existing funders ledger</div>
-                        <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/50 p-2">
+                        <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto border border-[#C8D7BC] rounded-xl bg-[#f7faf4] p-2">
                           {allFunders.length === 0 ? (
                             <div className="text-xs text-[var(--ink-2)] italic p-4 text-center">No commitments for these projects yet.</div>
                           ) : allFunders.map((funder, idx) => (
-                            <div key={idx} className="bg-white border border-slate-200 rounded-lg p-2.5">
+                            <div key={idx} className="bg-white border border-[#C8D7BC] rounded-lg p-2.5">
                               <b className="block text-xs text-[var(--ink)]">{funder.name}</b>
                               <span className="block text-[11px] text-[#6E6455]">{funder.projectName}</span>
                               <span className="block text-xs font-mono font-bold mt-1">{rs(funder.amount)}</span>
@@ -1702,7 +1816,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
         return (
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 md:gap-8 items-start text-left animate-[fadeInUp_0.3s_ease-out_forwards]">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="w-full max-w-[150px] h-[210px] md:max-w-[200px] md:h-[300px] rounded-2xl overflow-hidden border border-slate-200 mx-auto shrink-0">{tankSVG}</div>
+              <div className="w-full max-w-[150px] h-[210px] md:max-w-[200px] md:h-[300px] rounded-2xl overflow-hidden border border-[#C8D7BC] mx-auto shrink-0">{tankSVG}</div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--ink-2)', marginTop: '8px', textAlign: 'center' }}>
                 <b>{Math.round(currentFundedPct * 100)}%</b> committed {fundingMode === 'assets' && picksSum > 0 ? <span>+ <b>{Math.round(addedFundedPct * 100)}%</b> selected</span> : ''}
               </div>
@@ -1716,15 +1830,15 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
 
               <div className="grid grid-cols-3 gap-4 border border-[#C8D7BC]/80 rounded-2xl p-4 bg-[#C8D7BC]/10 mb-6">
                 <div className="flex flex-col text-left">
-                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(p.total)}</b>
+                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1"><AnimatedNumber value={p.total} format={rs} /></b>
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">total project cost</span>
                 </div>
                 <div className="flex flex-col text-left">
-                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(p.committed)}</b>
+                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1"><AnimatedNumber value={p.committed} format={rs} /></b>
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">already committed</span>
                 </div>
                 <div className="flex flex-col text-left">
-                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1">{rs(needed)}</b>
+                  <b className="text-base md:text-lg font-bold text-[var(--ink)] leading-none mb-1"><AnimatedNumber value={needed} format={rs} /></b>
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-2)]">still needed</span>
                 </div>
               </div>
@@ -1738,7 +1852,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                     <span style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--ink-2)' }}>YOUR SELECTION</span>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '4px' }}>
                       <strong style={{ fontFamily: 'var(--disp)', fontSize: '20px' }}>{selectedPicks.size} assets selected</strong>
-                      <strong style={{ fontFamily: 'var(--mono)', fontSize: '18px', color: 'var(--teal)' }}>{rs(picksSum)}</strong>
+                      <strong style={{ fontFamily: 'var(--mono)', fontSize: '18px', color: 'var(--teal)' }}><AnimatedNumber value={picksSum} format={rs} /></strong>
                     </div>
                   </div>
                   <div className="flex gap-3 flex-wrap justify-end mt-6">
@@ -1755,7 +1869,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                   <p style={{ fontSize: '14px', color: 'var(--ink-2)', marginBottom: '12px' }}>
                     Enter your desired CSR funding amount. The system will automatically allocate it to the next pending asset in sequence.
                   </p>
-                  <div className="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2.5 rounded-xl">
+                  <div className="flex items-center gap-2.5 bg-white border border-[#C8D7BC] px-3 py-2.5 rounded-xl">
                     <span style={{ fontFamily: 'var(--mono)', color: 'var(--ink-2)' }}>₹</span>
                     <input
                       type="number"
@@ -1773,12 +1887,12 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-left">
                       <div>
                         <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3 text-left">Your custom allocation</div>
-                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/50 p-2 text-left">
+                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-[#C8D7BC] rounded-xl bg-[#f7faf4] p-2 text-left">
                           {customAllocated.length === 0 ? (
                             <div className="text-xs text-[var(--ink-2)] italic p-4 text-center w-full">Enter an amount to see how it allocates to assets.</div>
                           ) : (
                             customAllocated.map((item, idx) => (
-                              <div key={idx} className="grid grid-cols-[1fr_auto] gap-3 items-center bg-white border border-slate-200 rounded-lg p-2.5 text-left">
+                              <div key={idx} className="grid grid-cols-[1fr_auto] gap-3 items-center bg-white border border-[#C8D7BC] rounded-lg p-2.5 text-left pv-rise" style={{ animationDelay: `${idx * 40}ms` }}>
                                 <div className="flex flex-col text-left">
                                   <b className="text-xs font-bold text-[var(--ink)]">{item.n}</b>
                                   <span style={{ color: 'var(--teal-d)', fontFamily: 'var(--mono)', fontSize: '11px', display: 'block' }}>
@@ -1794,16 +1908,16 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
 
                       <div>
                         <div className="font-mono text-[10.5px] uppercase tracking-widest text-[var(--ink-2)] mb-3 text-left">Existing funders ledger</div>
-                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/50 p-2 text-left">
+                        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto border border-[#C8D7BC] rounded-xl bg-[#f7faf4] p-2 text-left">
                           {p.funders.length === 0 ? (
                             <div className="text-xs text-[var(--ink-2)] italic p-4 text-center w-full">No commitments for this project yet. Be the first!</div>
                           ) : (
                             p.funders.map((f, idx) => (
-                              <div key={idx} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center bg-white border border-slate-200 rounded-lg p-2.5 text-left">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-mono text-slate-500 border border-slate-200 shrink-0">{initials(f.name)}</div>
+                              <div key={idx} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center bg-white border border-[#C8D7BC] rounded-lg p-2.5 text-left">
+                                <div className="w-8 h-8 rounded-full bg-[#dfebd5]/50 flex items-center justify-center text-xs font-mono text-[#6E6455] border border-[#C8D7BC] shrink-0">{initials(f.name)}</div>
                                 <div className="flex flex-col text-left">
                                   <b className="text-xs font-bold text-[var(--ink)]">{f.name}</b>
-                                  <span className="text-[10px] text-slate-400 mt-0.5">{f.sector} · {f.date}</span>
+                                  <span className="text-[10px] text-[#A99E8A] mt-0.5">{f.sector} · {f.date}</span>
                                   <span className="fa" style={{ display: 'block', fontSize: '11px', fontFamily: 'var(--mono)', color: 'var(--teal-d)' }}>
                                     {f.idx.length} assets funded
                                   </span>
@@ -1936,7 +2050,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                     {showSelectedRail ? project.name : "Project restoration team"}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {agencies.map((id) => {
+                    {agencies.map((id, ai) => {
                       const ag = AG[id];
                       const isLead = project.team[0] === id;
                       const isTeam = project.team.includes(id);
@@ -1947,7 +2061,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                       return (
                         <div
                           key={id}
-                          className={`bg-white border rounded-xl p-4 text-left flex flex-col ${isOpen ? "border-[var(--teal)] ring-1 ring-[var(--teal)] bg-[#f7f9f6]" : "border-slate-200"}`}
+                          className={`pv-rise pv-lift bg-white border rounded-xl p-4 text-left flex flex-col ${isOpen ? "border-[var(--teal)] ring-1 ring-[var(--teal)] bg-[#f7f9f6]" : "border-[#C8D7BC]"}`}
+                          style={{ animationDelay: `${ai * 70}ms` }}
                         >
                           <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--ink-2)]">
                             {isLead ? "Lead Agency" : isTeam ? "Team Partner" : "Available Partner"}
@@ -1988,13 +2103,13 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards] text-left flex flex-col gap-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                [rs(costTotal), 'Total cost'],
+                [<AnimatedNumber key="c" value={costTotal} format={rs} />, 'Total cost'],
                 [formatMonthCount(costMonths), 'Tentative timeline'],
                 [String(costAssets), costAssets === 1 ? 'Intervention' : 'Interventions'],
-              ].map(([value, label]) => (
-                <div key={label} className="bg-slate-100/70 rounded-xl p-4 flex flex-col gap-1">
-                  <b className="text-lg font-bold text-slate-800">{value}</b>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">{label}</span>
+              ].map(([value, label], i) => (
+                <div key={label} className="bg-[#f3f8ef] border border-[#C8D7BC]/70 rounded-xl p-4 flex flex-col gap-1 pv-rise pv-lift" style={{ animationDelay: `${i * 70}ms` }}>
+                  <b className="text-lg font-bold text-[#1F2A24]">{value}</b>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455]">{label}</span>
                 </div>
               ))}
             </div>
@@ -2042,8 +2157,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
       case 'docs':
         return (
           <div className="animate-[fadeInUp_0.3s_ease-out_forwards] text-left">
-            <div className={`border border-slate-200 rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-vwba') ? 'open' : ''}`}>
-              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-vwba')}>
+            <div className={`border border-[#C8D7BC] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-vwba') ? 'open' : ''}`}>
+              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-[#f3f8ef] transition-colors duration-150" onClick={() => toggleAccordion('m-vwba')}>
                 <div>
                   <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Methodology</span>
                   <h4 className="text-sm font-bold text-[var(--ink)] mt-0.5">WRI Volumetric Water Benefit Accord (VWBA)</h4>
@@ -2051,7 +2166,7 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                 <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-vwba') ? 'rotate-90' : ''}`}>→</span>
               </button>
               {openAccordions.has('m-vwba') && (
-                <div className="p-4 border-t border-slate-200 bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                <div className="p-4 border-t border-[#C8D7BC] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3 pv-rise">
                   <p>
                     The Volumetric Water Benefit Accord (VWBA) provides a standard framework to quantify how water stewardship activities contribute to local water resilience.
                   </p>
@@ -2065,8 +2180,8 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
               )}
             </div>
 
-            <div className={`border border-slate-200 rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-scs') ? 'open' : ''}`}>
-              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-scs')}>
+            <div className={`border border-[#C8D7BC] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-scs') ? 'open' : ''}`}>
+              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-[#f3f8ef] transition-colors duration-150" onClick={() => toggleAccordion('m-scs')}>
                 <div>
                   <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Hydrology</span>
                   <h4 className="text-sm font-bold text-[var(--ink)] mt-0.5">Soil Conservation Service (SCS) Curve Number Model</h4>
@@ -2074,12 +2189,12 @@ const NewProjectsView = ({ initialProjectId, projectIds, onBack }) => {
                 <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-scs') ? 'rotate-90' : ''}`}>→</span>
               </button>
               {openAccordions.has('m-scs') && (
-                <div className="p-4 border-t border-slate-200 bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                <div className="p-4 border-t border-[#C8D7BC] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3 pv-rise">
                   <p>
                     The SCS Curve Number (CN) model is a widely accepted empirical method for predicting storm runoff from a catchment based on soil types, land cover, and imperviousness.
                   </p>
                   <h5 className="text-xs font-bold text-[var(--ink)] m-0 uppercase tracking-wider mt-1 text-left">Runoff Equation</h5>
-                  <pre className="bg-slate-50 border border-slate-200 rounded-lg p-3 font-mono text-xs text-[var(--ink-2)] overflow-x-auto m-0">
+                  <pre className="bg-[#f7faf4] border border-[#C8D7BC] rounded-lg p-3 font-mono text-xs text-[var(--ink-2)] overflow-x-auto m-0">
 {`S = (25400 / CN) - 254
 Ia = 0.2 * S
 Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
@@ -2096,8 +2211,8 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               )}
             </div>
 
-            <div className={`border border-slate-200 rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-dpr') ? 'open' : ''}`}>
-              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-slate-50/50 transition-colors duration-150" onClick={() => toggleAccordion('m-dpr')}>
+            <div className={`border border-[#C8D7BC] rounded-xl bg-[#FAFBF9] mb-3 overflow-hidden shadow-sm ${openAccordions.has('m-dpr') ? 'open' : ''}`}>
+              <button className="w-full flex justify-between items-center p-4 border-none text-left bg-transparent cursor-pointer hover:bg-[#f3f8ef] transition-colors duration-150" onClick={() => toggleAccordion('m-dpr')}>
                 <div>
                   <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--ink-2)]">Financials</span>
                   <h4 className="text-sm font-bold text-[var(--ink)] mt-0.5">Detailed Project Report (DPR) Costing</h4>
@@ -2105,7 +2220,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                 <span className={`text-[var(--ink-2)] font-semibold transition-transform duration-200 ${openAccordions.has('m-dpr') ? 'rotate-90' : ''}`}>→</span>
               </button>
               {openAccordions.has('m-dpr') && (
-                <div className="p-4 border-t border-slate-200 bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3">
+                <div className="p-4 border-t border-[#C8D7BC] bg-white text-sm text-[var(--ink-2)] leading-relaxed text-left flex flex-col gap-3 pv-rise">
                   <p>
                     Detailed Project Reports outline the engineering design and costed milestones for every asset.
                   </p>
@@ -2118,10 +2233,10 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                   <table className="w-full border-collapse text-xs md:text-sm mt-3" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                     <thead>
                       <tr>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
-                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-slate-200 pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Target Phase</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[#C8D7BC] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Asset Item</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[#C8D7BC] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Type</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[#C8D7BC] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Cost (Lakhs)</th>
+                        <th style={{ textAlign: 'left', padding: '8px' }} className="border-b border-[#C8D7BC] pb-2 text-[11px] font-bold text-[var(--ink-2)] uppercase tracking-wider">Target Phase</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2151,7 +2266,10 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
   const leadAg = AG[p.team[0]];
 
   return (
-    <div className="w-full min-h-screen bg-[var(--bg-page)] text-[#1F2A24] font-sans antialiased text-[15px] xl:text-base 2xl:text-[17px] leading-relaxed pb-12">
+    <div className="relative w-full min-h-screen bg-[var(--bg-page)] text-[#1F2A24] font-sans antialiased text-[15px] xl:text-base 2xl:text-[17px] leading-relaxed pb-12">
+      {/* Animated watershed backdrop (fixed, sits behind everything) */}
+      <ProjectsBackground />
+
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(12px); }
@@ -2170,10 +2288,40 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
           --grey: #A99E8A;
           --accent: #F2C230;
         }
+
+        /* ===== Motion helpers (all respect prefers-reduced-motion) ===== */
+        /* Rows / cards fade up. Stagger with style={{ animationDelay: '...ms' }} */
+        .pv-rise { animation: pv-rise .45s cubic-bezier(.2,.7,.3,1) backwards; }
+        @keyframes pv-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+        /* Gentle hover lift */
+        .pv-lift { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease; }
+        .pv-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(31,42,36,.28); }
+
+        /* Checkbox tick pops in */
+        .pv-pop { animation: pv-pop .28s cubic-bezier(.3,1.6,.5,1) both; }
+        @keyframes pv-pop { from { transform: scale(.3); } to { transform: scale(1); } }
+
+        /* Funding-tank waves bob upward only (never exposes a gap) */
+        .pv-bob { animation: pv-bob 4.2s ease-in-out infinite; }
+        @keyframes pv-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+        /* Status progress line grows from the left (uses the standalone scale property) */
+        .pv-grow { transform-origin: left center; animation: pv-grow 1.1s cubic-bezier(.2,.7,.3,1) both; }
+        @keyframes pv-grow { from { scale: 0 1; } to { scale: 1 1; } }
+
+        /* Current status step pulses (--pv-c is set inline to the step colour) */
+        .pv-pulse { animation: pv-pulse 2s ease-out infinite; }
+        @keyframes pv-pulse { 0% { box-shadow: 0 0 0 0 var(--pv-c, #347745); } 100% { box-shadow: 0 0 0 12px transparent; } }
+
+        @media (prefers-reduced-motion: reduce) {
+          .pv-rise, .pv-pop, .pv-bob, .pv-grow, .pv-pulse { animation: none !important; }
+          .pv-lift, .pv-lift:hover { transition: none; transform: none; }
+        }
       `}</style>
 
       {/* Hero header strip */}
-      <section className="bg-gradient-to-br from-[#1F2A24] via-[#264b32] to-[#347745] text-white overflow-hidden relative">
+      <section className="relative z-10 bg-gradient-to-br from-[#1F2A24] via-[#264b32] to-[#347745] text-white overflow-hidden">
         {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#C8D7BC]/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-[#F2C230]/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -2212,8 +2360,8 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               { v: rs(totalCommitted), l: 'Funded so far' },
               { v: `${fullyFundedProjects} / ${totalProjects}`, l: 'Fully funded' },
               { v: totalPeople.toLocaleString('en-IN'), l: 'People in scope' },
-            ].map(({ v, l }) => (
-              <div key={l} className="flex flex-col text-left bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 min-w-[100px]">
+            ].map(({ v, l }, i) => (
+              <div key={l} className="pv-rise flex flex-col text-left bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 min-w-[100px]" style={{ animationDelay: `${i * 70}ms` }}>
                 <b className="font-bold text-lg sm:text-xl md:text-2xl xl:text-3xl text-white tracking-tight">{v}</b>
                 <span className="font-mono text-[10px] xl:text-xs tracking-wider uppercase text-[#C8D7BC] mt-1">{l}</span>
               </div>
@@ -2223,11 +2371,11 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
       </section>
 
       {/* Main app content - full width single project details */}
-      <main className="w-full max-w-[1400px] xl:max-w-[1680px] 2xl:max-w-[2100px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-7 xl:py-8 pb-10 sm:pb-14">
+      <main className="relative z-10 w-full max-w-[1400px] xl:max-w-[1680px] 2xl:max-w-[2100px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-7 xl:py-8 pb-10 sm:pb-14">
         <div className={showSelectedRail ? "grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[360px_minmax(0,1fr)] gap-4 xl:gap-6 items-start" : "w-full"}>
           {showSelectedRail && (
             <div className="flex flex-col gap-4 lg:sticky lg:top-4">
-              <aside className="bg-white rounded-3xl border border-[#C8D7BC]/80 shadow-sm p-3 xl:p-4">
+              <aside className="bg-white/95 backdrop-blur-sm rounded-3xl border border-[#C8D7BC]/80 shadow-sm p-3 xl:p-4">
                 <div className="px-2 pt-1 pb-2">
                   <div className="text-2xl font-extrabold text-[#1F2A24] leading-none">
                     {selectedRail.length} selected project{selectedRail.length === 1 ? "" : "s"}
@@ -2237,8 +2385,8 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                   </p>
                 </div>
                 <div className="flex flex-col">
-                  {selectedRail.map((proj) => (
-                    <div key={proj.id} className="px-2 py-2.5 border-t border-[#C8D7BC]/70">
+                  {selectedRail.map((proj, i) => (
+                    <div key={proj.id} className="pv-rise px-2 py-2.5 border-t border-[#C8D7BC]/70" style={{ animationDelay: `${i * 60}ms` }}>
                       <span className="block text-sm xl:text-base font-bold text-[#1F2A24] leading-snug">{proj.name}</span>
                       <span className="block text-[11px] font-semibold text-[#6E6455] mt-0.5">{rs(proj.total || 0)}</span>
                     </div>
@@ -2248,10 +2396,10 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
             </div>
           )}
           {/* Main details panel */}
-          <section className="bg-white rounded-3xl border border-[#C8D7BC]/80 shadow-sm overflow-hidden text-left flex flex-col w-full min-w-0">
+          <section className="bg-white/95 backdrop-blur-sm rounded-3xl border border-[#C8D7BC]/80 shadow-sm overflow-hidden text-left flex flex-col w-full min-w-0">
 
             {/* Panel header */}
-            <div className="px-4 sm:px-7 xl:px-8 pt-5 sm:pt-7 xl:pt-8 pb-0 bg-white">
+            <div className="px-4 sm:px-7 xl:px-8 pt-5 sm:pt-7 xl:pt-8 pb-0">
               <div className="flex justify-between items-start flex-wrap gap-4 mb-5">
                 <div>
                   <h2 className="text-xl sm:text-2xl xl:text-3xl font-bold text-[#1F2A24] m-0 tracking-tight">
@@ -2293,7 +2441,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
                     className={`text-[13px] xl:text-sm font-semibold px-3 sm:px-4 xl:px-5 py-2.5 whitespace-nowrap rounded-t-xl border-b-2 -mb-[1px] cursor-pointer transition-all duration-150 bg-transparent ${
                       activeTab === k
                         ? 'text-[#347745] border-b-[#347745] font-bold'
-                        : 'text-[#6E6455] border-transparent hover:text-[#1F2A24]'
+                        : 'text-[#6E6455] border-transparent hover:text-[#1F2A24] hover:bg-[#dfebd5]/40'
                     }`}
                     onClick={(e) => {
                       setActiveTab(k);
@@ -2322,7 +2470,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
           onClick={() => setImpactPromptOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[440px] border border-[#C8D7BC] p-5 sm:p-7 text-left"
+            className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[440px] border border-[#C8D7BC] p-5 sm:p-7 text-left animate-[fadeInUp_0.25s_ease-out_forwards]"
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-labelledby="impact-prompt-title"
@@ -2361,7 +2509,7 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
             onClick={close}
           >
             <div
-              className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[480px] max-h-[calc(100vh-24px)] flex flex-col overflow-hidden border border-[#C8D7BC] text-left"
+              className="bg-white rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] w-full max-w-[480px] max-h-[calc(100vh-24px)] flex flex-col overflow-hidden border border-[#C8D7BC] text-left animate-[fadeInUp_0.25s_ease-out_forwards]"
               onClick={(event) => event.stopPropagation()}
               role="dialog"
               aria-labelledby="interest-confirm-title"
@@ -2453,12 +2601,12 @@ Q = (P - Ia)² / (P - Ia + S)  (for P > Ia)`}
               <div className="shrink-0 h-px bg-[#C8D7BC]/60"></div>
               <div className="p-5 sm:p-7 text-left overflow-y-auto">
                 <p className="text-xs font-semibold text-[#347745] m-0 mb-3">{detailProject.name}</p>
-                <p className="text-sm leading-relaxed text-slate-600 m-0">{detailAgency.blurb}</p>
+                <p className="text-sm leading-relaxed text-[#6E6455] m-0">{detailAgency.blurb}</p>
                 <div className="mt-4">
                   <div className="font-mono text-[10px] uppercase tracking-wider text-[#6E6455] mb-2">Core strengths</div>
                   <div className="flex flex-wrap gap-1.5">
                     {detailAgency.strengths.map((strength) => (
-                      <span key={strength} className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded px-2 py-0.5">{strength}</span>
+                      <span key={strength} className="text-[10px] font-bold text-[#6E6455] bg-[#dfebd5]/50 border border-[#C8D7BC] rounded px-2 py-0.5">{strength}</span>
                     ))}
                   </div>
                 </div>

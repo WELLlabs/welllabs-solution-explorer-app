@@ -311,12 +311,6 @@ const ManageUserModal = ({ user, onClose, onChanged, onDeleted }) => {
       setLink(data);
     });
 
-  const forceLogout = () =>
-    run('logout', async () => {
-      const { data } = await api.post(`/admin/users/${user._id}/force-logout`);
-      setMessage(data.message);
-    });
-
   const remove = () => {
     if (!window.confirm(`Delete ${user.name} (${user.email})? This cannot be undone. Consider suspending instead.`)) return;
     run('delete', async () => {
@@ -394,14 +388,6 @@ const ManageUserModal = ({ user, onClose, onChanged, onDeleted }) => {
           </button>
         )}
       </Section>
-
-      {!isAdmin && (
-        <Section title="Sessions" description={`Last login: ${formatDateTime(user.lastLoginAt)}. Sign the user out on every device.`}>
-          <button type="button" onClick={forceLogout} disabled={!!busy} className={secondaryBtn}>
-            {busy === 'logout' ? 'Signing out…' : 'Force logout'}
-          </button>
-        </Section>
-      )}
 
       {!isAdmin && (
         <Section title="Delete account" description="Permanently removes the user. This cannot be undone.">
@@ -540,7 +526,7 @@ const StatCard = ({ label, value, className }) => (
   </div>
 );
 
-const EMPTY_FILTERS = { role: '', status: '', joinedFrom: '', joinedTo: '', lastLogin: '' };
+const EMPTY_FILTERS = { role: '', status: '', lastLogin: '' };
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -573,16 +559,10 @@ const UserManagement = () => {
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const from = filters.joinedFrom ? new Date(filters.joinedFrom).getTime() : null;
-    const to = filters.joinedTo ? new Date(filters.joinedTo).getTime() + DAY_MS : null;
 
     return users.filter((u) => {
       if (filters.role && displayRole(u.role) !== filters.role) return false;
       if (filters.status && statusOf(u) !== filters.status) return false;
-
-      const joined = u.createdAt ? new Date(u.createdAt).getTime() : null;
-      if (from && (!joined || joined < from)) return false;
-      if (to && (!joined || joined >= to)) return false;
 
       const last = u.lastLoginAt ? new Date(u.lastLoginAt).getTime() : null;
       if (filters.lastLogin === 'never' && last) return false;
@@ -659,14 +639,6 @@ const UserManagement = () => {
           <option value="suspended">Suspended</option>
           <option value="invited">Invited</option>
         </select>
-        <label className="flex flex-col text-[11px] font-semibold text-muted gap-1">
-          Joined from
-          <input type="date" value={filters.joinedFrom} onChange={setFilter('joinedFrom')} className={inputClass} />
-        </label>
-        <label className="flex flex-col text-[11px] font-semibold text-muted gap-1">
-          Joined to
-          <input type="date" value={filters.joinedTo} onChange={setFilter('joinedTo')} className={inputClass} />
-        </label>
         <select value={filters.lastLogin} onChange={setFilter('lastLogin')} className={`${inputClass} cursor-pointer`} aria-label="Last login">
           {LAST_LOGIN_FILTERS.map((f) => (
             <option key={f.id} value={f.id}>

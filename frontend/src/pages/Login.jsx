@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PERSONAS } from '@/utils/roleFieldsConfig';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 import LegalLinks from '@/components/LegalLinks';
+import AuthBackground from '@/components/Authbackground';
 
 const Login = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -164,100 +165,9 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-x-hidden font-sans select-none bg-gradient-to-b from-[#C8D7BC]/40 via-[#f2f6ee] to-[#FFFFFF]">
-      <div aria-hidden="true" className="page-lines pointer-events-none absolute inset-0" />
+    <div className="relative min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-x-hidden font-sans select-none bg-gradient-to-b from-[#EBF2E8] via-[#F5F8F3] to-[#FFFFFF]">
       {/* ========================================================================= */}
-      {/* ATMOSPHERIC BACKGROUND: TOPOGRAPHICAL CONTOURS & GIS HYDROLOGY ELEMENTS */}
-      {/* ========================================================================= */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Ambient Watercolor Atmosphere */}
-        <div className="absolute -left-28 -top-20 w-[520px] h-[520px] bg-[#C8D7BC]/40 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -right-32 top-1/4 w-[600px] h-[600px] bg-[#C8D7BC]/35 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute left-1/4 -bottom-32 w-[650px] h-[500px] bg-[#6D9EC9]/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute right-10 bottom-10 w-96 h-96 bg-[#C8D7BC]/30 rounded-full blur-2xl pointer-events-none"></div>
-
-        {/* Topographical Contour SVG Waves & Stream Lines */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none opacity-45"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 1440 900"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M-50,180 C260,110 520,310 820,190 C1120,70 1280,240 1500,160"
-            fill="none"
-            stroke="#A99E8A"
-            strokeWidth="1.2"
-            strokeDasharray="4 4"
-            opacity="0.6"
-          />
-          <path
-            d="M-50,260 C280,180 560,380 860,250 C1160,120 1320,310 1500,220"
-            fill="none"
-            stroke="#347745"
-            strokeWidth="1.4"
-            opacity="0.35"
-          />
-          <path
-            d="M-50,340 C310,240 600,450 900,310 C1200,170 1350,380 1500,280"
-            fill="none"
-            stroke="#C8D7BC"
-            strokeWidth="1.8"
-            opacity="0.8"
-          />
-          <path
-            d="M-50,420 C340,300 640,520 940,370 C1240,220 1380,450 1500,340"
-            fill="none"
-            stroke="#3669A9"
-            strokeWidth="1.2"
-            opacity="0.3"
-          />
-          <path
-            d="M-50,520 C370,410 670,620 980,470 C1280,320 1410,540 1500,440"
-            fill="none"
-            stroke="#A99E8A"
-            strokeWidth="1.2"
-            strokeDasharray="6 6"
-            opacity="0.5"
-          />
-          <path
-            d="M-50,640 C400,520 710,720 1020,580 C1320,430 1430,640 1500,550"
-            fill="none"
-            stroke="#347745"
-            strokeWidth="1.6"
-            opacity="0.4"
-          />
-          <path
-            d="M-50,760 C430,640 750,830 1060,690 C1360,540 1450,750 1500,660"
-            fill="none"
-            stroke="#C8D7BC"
-            strokeWidth="2"
-            opacity="0.85"
-          />
-        </svg>
-
-        {/* Subtle GIS Architectural Grid Crosshairs & Coordinates */}
-        <div className="absolute top-12 left-12 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
-          <span className="text-base leading-none text-[#347745]/50">+</span>
-          <span>12.9716° N, 77.5946° E</span>
-        </div>
-        <div className="absolute top-16 right-16 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
-          <span className="text-base leading-none text-[#3669A9]/50">+</span>
-          <span>ELEV. 920M · BENGALURU WATERSHED</span>
-        </div>
-        <div className="absolute bottom-12 left-16 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
-          <span className="text-base leading-none text-[#347745]/50">+</span>
-          <span>BGG INFRASTRUCTURE PLATFORM</span>
-        </div>
-        <div className="absolute bottom-14 right-14 text-[#6E6455]/40 font-mono text-[11px] select-none hidden lg:flex items-center gap-1.5">
-          <span className="text-base leading-none text-[#F2C230]/70">+</span>
-          <span>CITIZEN HYDROLOGY INITIATIVE</span>
-        </div>
-
-        {/* Subtle Decorative Geometric Accents */}
-        <div className="absolute top-1/3 left-8 w-20 h-20 border-l border-t border-[#C8D7BC]/70 pointer-events-none"></div>
-        <div className="absolute bottom-1/3 right-8 w-20 h-20 border-r border-b border-[#C8D7BC]/70 pointer-events-none"></div>
-      </div>
+<AuthBackground />
 
       {/* ========================================================================= */}
       {/* MAIN FROSTED GLASS CONTAINER */}

@@ -120,6 +120,9 @@ const CatchmentProjectsPanel = ({
     });
   };
 
+  const selectAll = () => setSelectedIds(new Set(projects.map((project) => project.id)));
+  const clearAll = () => setSelectedIds(new Set());
+
   const fundSelected = () => {
     const ids = projects.map((project) => project.id).filter((id) => selectedIds.has(id));
     if (ids.length && onFundSelected) onFundSelected(ids);
@@ -128,38 +131,88 @@ const CatchmentProjectsPanel = ({
   return (
     <>
       {isOpen && (
-        <div className="order-2 lg:order-none lg:col-span-2 xl:col-span-1 bg-white border border-[#C8D7BC] rounded-2xl shadow-sm flex flex-col xl:sticky xl:top-3 xl:max-h-[calc(100vh-24px)] overflow-hidden text-left">
-          <div className="shrink-0 p-3.5 border-b border-[#fed7aa]/80 bg-[#fff7ed]">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#f97316]">
+        <div className="order-2 lg:order-none lg:col-span-2 xl:col-span-1 bg-white border border-[#C8D7BC] rounded-2xl shadow-[0_10px_30px_-12px_rgba(31,42,36,0.22)] flex flex-col xl:sticky xl:top-3 xl:max-h-[calc(100vh-24px)] overflow-hidden text-left">
+          {/* Brand accent strip */}
+          <div className="h-1 shrink-0 bg-gradient-to-r from-[#3669A9] via-[#6D9EC9] to-[#347745]" />
+
+          {/* ───────── Header ───────── */}
+          <div className="shrink-0 px-4 pt-3.5 pb-3 border-b border-[#C8D7BC]/70 bg-[#dfebd5]/40">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#347745]/10 text-[#347745]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 17c2.5-4 4.5-9 9-9s6.5 5 9 9" />
+                  <path d="M3 21h18" />
+                  <path d="M12 8V3" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#347745]">
                   Delineated catchment
                 </div>
-                <h3 className="text-sm font-extrabold text-[#1F2A24] m-0 mt-1 leading-snug">
+                <h3 className="text-[15px] font-extrabold text-[#1F2A24] m-0 mt-0.5 leading-snug">
                   {catchment.name}
                 </h3>
-                {hotspotName && (
-                  <p className="text-[11px] text-[#6E6455] m-0 mt-1">Hotspot: {hotspotName}</p>
-                )}
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {hotspotName && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[#C8D7BC] bg-white px-2 py-0.5 text-[10.5px] font-semibold text-[#6E6455]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#F2C230]" />
+                      Hotspot: {hotspotName}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center rounded-full bg-[#3669A9]/10 px-2 py-0.5 text-[10.5px] font-bold text-[#3669A9]">
+                    {projects.length} citywide project{projects.length === 1 ? "" : "s"}
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-[#6E6455] hover:text-[#1F2A24] rounded-md px-1.5 py-0.5 text-sm cursor-pointer border-none bg-transparent"
+                className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-[#6E6455] transition-colors hover:bg-[#dfebd5] hover:text-[#1F2A24]"
                 title="Close catchment projects"
+                aria-label="Close catchment projects"
               >
-                ✕
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
               </button>
             </div>
-            <p className="text-[11px] text-[#1F2A24] m-0 mt-2">
-              {projects.length} citywide project{projects.length === 1 ? "" : "s"} inside this boundary.
-            </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2 custom-scrollbar">
+          {/* ───────── Project list ───────── */}
+          {projects.length > 0 && (
+            <div className="shrink-0 flex items-center justify-between px-4 pt-3 pb-1">
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#6E6455]">
+                Select projects to compare
+              </span>
+              <div className="flex items-center gap-2 text-[11px] font-bold">
+                <button
+                  type="button"
+                  onClick={selectAll}
+                  className="cursor-pointer border-none bg-transparent p-0 text-[#3669A9] hover:text-[#347745]"
+                >
+                  Select all
+                </button>
+                <span className="text-[#C8D7BC]">|</span>
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  disabled={selectedIds.size === 0}
+                  className="cursor-pointer border-none bg-transparent p-0 text-[#6E6455] hover:text-[#1F2A24] disabled:cursor-default disabled:opacity-40"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 pt-1.5 flex flex-col gap-2 custom-scrollbar">
             {projects.length === 0 ? (
-              <div className="text-xs text-[#6E6455] border border-dashed border-[#C8D7BC] rounded-xl p-4">
-                No citywide projects fall inside this catchment yet.
+              <div className="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-[#C8D7BC] bg-[#f3f8ef]/60 px-4 py-6 text-center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6E6455" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 2.7c3.6 4.4 6 7.4 6 10.6a6 6 0 0 1-12 0c0-3.2 2.4-6.2 6-10.6Z" />
+                </svg>
+                <p className="m-0 text-xs font-semibold text-[#1F2A24]">No projects here yet</p>
+                <p className="m-0 text-[11px] text-[#6E6455]">No citywide projects fall inside this catchment.</p>
               </div>
             ) : (
               projects.map((project) => {
@@ -168,21 +221,23 @@ const CatchmentProjectsPanel = ({
                 return (
                   <label
                     key={project.id}
-                    className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 cursor-pointer ${
-                      checked ? "bg-teal-50 border-teal-400" : "bg-white border-[#C8D7BC] hover:border-teal-300"
+                    className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 cursor-pointer transition-all duration-150 ${
+                      checked
+                        ? "bg-[#dfebd5]/60 border-[#347745] shadow-sm"
+                        : "bg-white border-[#C8D7BC] hover:border-[#347745]/60 hover:bg-[#f3f8ef]"
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggleProject(project.id)}
-                      className="mt-0.5 w-4 h-4 accent-teal-700 cursor-pointer"
+                      className="mt-0.5 w-4 h-4 accent-[#347745] cursor-pointer"
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[10px] font-bold uppercase tracking-wide text-[#347745]">
+                      <span className="inline-block rounded bg-[#347745]/10 px-1.5 py-px text-[9.5px] font-bold uppercase tracking-wide text-[#347745]">
                         {type}
                       </span>
-                      <span className="block text-sm font-bold text-[#1F2A24] leading-snug">{project.name}</span>
+                      <span className="mt-1 block text-[13px] font-bold text-[#1F2A24] leading-snug">{project.name}</span>
                     </span>
                     <span className="shrink-0 text-xs font-extrabold text-[#1F2A24] tabular-nums">
                       {rs(Number(project.total) || 0)}
@@ -193,49 +248,56 @@ const CatchmentProjectsPanel = ({
             )}
           </div>
 
-          <div className="shrink-0 border-t border-[#C8D7BC]/70 bg-[#f3f8ef] p-3 text-left">
+          {/* ───────── Combined impact ───────── */}
+          <div className="shrink-0 border-t border-[#C8D7BC]/70 bg-[#f3f8ef] px-4 py-3 text-left">
             <div className="flex items-center justify-between gap-2">
-              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#347745]">
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#347745]">
                 Combined impact
               </div>
-              <div className="text-[10px] font-bold text-[#1F2A24]">
+              <div className="text-[11px] font-bold text-[#1F2A24] tabular-nums">
                 {selectedImpacts.length} of {projects.length} selected
               </div>
             </div>
             <div className="mt-2 h-1.5 rounded-full bg-[#d7e6cc] overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#347745] transition-all duration-300"
+                className="h-full rounded-full bg-gradient-to-r from-[#3669A9] to-[#347745] transition-all duration-300"
                 style={{ width: `${share}%` }}
               />
             </div>
 
             {selectedImpacts.length === 0 ? (
-              <p className="text-[11px] text-[#6E6455] m-0 mt-2 leading-relaxed">
+              <p className="text-[11.5px] text-[#6E6455] m-0 mt-2.5 leading-relaxed">
                 Select a project to see what it changes in this catchment. Each extra project adds to the total.
               </p>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-1.5 mt-2">
-                  <ImpactStat label="Total cost" value={rs(combined.cost)} wide />
-                  <ImpactStat label="Infiltration" value={`${formatAmount(combined.infiltrationKl)} KL`} />
-                  <ImpactStat label="Flood storage" value={`${formatAmount(combined.storageKl)} KL`} />
-                  <ImpactStat label="Runoff held back" value={`${formatAmount(combined.runoffMm, 1)} mm`} />
-                  <ImpactStat label="Extra infiltration" value={`${formatAmount(combined.infiltrationMm, 1)} mm`} />
+                <div className="grid grid-cols-2 gap-1.5 mt-2.5">
+                  <ImpactStat label="Total cost" value={rs(combined.cost)} tone="dark" wide />
+                  <ImpactStat label="Infiltration" value={`${formatAmount(combined.infiltrationKl)} KL`} tone="green" />
+                  <ImpactStat label="Flood storage" value={`${formatAmount(combined.storageKl)} KL`} tone="blue" />
+                  <ImpactStat label="Runoff held back" value={`${formatAmount(combined.runoffMm, 1)} mm`} tone="blue" />
+                  <ImpactStat label="Extra infiltration" value={`${formatAmount(combined.infiltrationMm, 1)} mm`} tone="green" />
                   <ImpactStat
                     label="Interventions"
                     value={String(selectedImpacts.reduce((total, item) => total + item.interventions, 0))}
+                    tone="neutral"
+                    wide={combined.designedKl == null}
                   />
                   {combined.designedKl != null && (
                     <ImpactStat
                       label="Designed capacity"
                       value={`${formatAmount(combined.designedKl, 0)} KL`}
-                      wide
+                      tone="neutral"
                     />
                   )}
                 </div>
-                <div className="mt-2 flex flex-col gap-1.5 max-h-36 overflow-y-auto custom-scrollbar">
+
+                <div className="mt-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6E6455]">
+                  Project breakdown
+                </div>
+                <div className="mt-1.5 flex flex-col gap-1.5 max-h-36 overflow-y-auto custom-scrollbar">
                   {selectedImpacts.map((item) => (
-                    <div key={item.id} className="rounded-lg bg-white border border-[#C8D7BC] px-2.5 py-2">
+                    <div key={item.id} className="rounded-lg bg-white border border-[#C8D7BC] border-l-[3px] border-l-[#347745] px-2.5 py-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <div className="text-[10px] font-bold uppercase tracking-wide text-[#347745]">{item.type}</div>
@@ -258,15 +320,16 @@ const CatchmentProjectsPanel = ({
             )}
           </div>
 
+          {/* ───────── Actions ───────── */}
           {(selectedIds.size > 0 || extraActions.length > 0) && (
-            <div className="shrink-0 p-3 border-t border-[#C8D7BC]/70 bg-white flex flex-col gap-2">
+            <div className="shrink-0 px-4 py-3 border-t border-[#C8D7BC]/70 bg-white flex flex-col gap-2">
               {selectedIds.size > 0 && (
                 <button
                   type="button"
                   onClick={fundSelected}
-                  className="w-full py-2.5 px-3 rounded-xl text-xs font-bold text-white border-none bg-[#C8743C] hover:bg-[#b8602c] cursor-pointer"
+                  className="w-full py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide text-white border-none bg-[#3669A9] hover:bg-[#347745] active:scale-[0.99] shadow-md shadow-[#3669A9]/25 transition-all cursor-pointer"
                 >
-                  {openLabel}
+                  {openLabel} →
                 </button>
               )}
               {extraActions.length > 0 && (
@@ -276,7 +339,7 @@ const CatchmentProjectsPanel = ({
                       key={label}
                       type="button"
                       onClick={onClick}
-                      className="py-2 px-2.5 rounded-xl text-[11px] font-bold text-[#1F2A24] border border-[#C8D7BC] bg-white hover:bg-[#f3f8ef] cursor-pointer"
+                      className="py-2 px-2.5 rounded-xl text-[11px] font-bold text-[#1F2A24] border border-[#C8D7BC] bg-white hover:bg-[#f3f8ef] hover:border-[#347745]/60 transition-colors cursor-pointer"
                     >
                       {label}
                     </button>
@@ -292,20 +355,31 @@ const CatchmentProjectsPanel = ({
         <button
           type="button"
           onClick={onReopen}
-          className="fixed bottom-4 right-4 z-[500] bg-[#f97316] text-white px-4 py-2.5 rounded-full font-bold text-xs shadow-lg cursor-pointer border-none"
+          className="fixed bottom-4 right-4 z-[500] inline-flex items-center gap-2 bg-[#3669A9] hover:bg-[#347745] text-white pl-3 pr-4 py-2.5 rounded-full font-bold text-xs shadow-lg shadow-[#3669A9]/30 cursor-pointer border-none transition-colors"
         >
-          {projects.length} catchment projects
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#F2C230] px-1 text-[10px] font-extrabold text-[#1F2A24]">
+            {projects.length}
+          </span>
+          catchment projects
         </button>
       )}
     </>
   );
 };
 
-function ImpactStat({ label, value, wide = false }) {
+const STAT_TONES = {
+  dark: { box: "bg-[#347745] border-[#347745]", label: "text-white/75", value: "text-white" },
+  green: { box: "bg-white border-[#C8D7BC] border-l-[3px] border-l-[#347745]", label: "text-[#6E6455]", value: "text-[#1F2A24]" },
+  blue: { box: "bg-white border-[#C8D7BC] border-l-[3px] border-l-[#3669A9]", label: "text-[#6E6455]", value: "text-[#1F2A24]" },
+  neutral: { box: "bg-white border-[#C8D7BC] border-l-[3px] border-l-[#A99E8A]", label: "text-[#6E6455]", value: "text-[#1F2A24]" },
+};
+
+function ImpactStat({ label, value, tone = "neutral", wide = false }) {
+  const t = STAT_TONES[tone] || STAT_TONES.neutral;
   return (
-    <div className={`rounded-lg bg-white border border-[#C8D7BC] px-2 py-1.5 ${wide ? "col-span-2" : ""}`}>
-      <div className="text-[9px] font-bold uppercase tracking-wide text-[#6E6455]">{label}</div>
-      <div className="text-sm font-extrabold text-[#1F2A24] tabular-nums">{value}</div>
+    <div className={`rounded-lg border px-2.5 py-1.5 ${t.box} ${wide ? "col-span-2" : ""}`}>
+      <div className={`text-[9px] font-bold uppercase tracking-wide ${t.label}`}>{label}</div>
+      <div className={`text-sm font-extrabold tabular-nums ${t.value}`}>{value}</div>
     </div>
   );
 }
