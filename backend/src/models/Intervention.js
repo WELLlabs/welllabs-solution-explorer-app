@@ -38,9 +38,10 @@ const InterventionSchema = new Schema(
     location_typology: { type: String },
     latitude: { type: Number },
     longitude: { type: Number },
+    // Left unset when there are no coordinates: a Point without coordinates breaks the 2dsphere index
     location: {
-      type: { type: String, enum: ['Point'], default: 'Point' },
-      coordinates: [Number],
+      type: { type: String, enum: ['Point'] },
+      coordinates: { type: [Number], default: undefined },
     },
     ward: { type: String },
     bbmp_zone: { type: String },

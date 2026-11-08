@@ -1,5 +1,20 @@
 const SiteProject = require('../../models/SiteProject');
 const Intervention = require('../../models/Intervention');
+const Funding = require('../../models/Funding');
+
+// Adds `funding: [{ funder_name, amount, status }]` (amount in rupees) to each intervention.
+// Funder emails and notes stay private.
+const withFunding = async (interventions) => {
+  const ids = interventions.map((iv) => iv.intervention_id);
+  const rows = await Funding.find({ intervention_id: { $in: ids } })
+    .select('intervention_id funder_name amount status')
+    .lean();
+  const byIntervention = {};
+  rows.forEach(({ intervention_id, funder_name, amount, status }) => {
+    (byIntervention[intervention_id] ||= []).push({ funder_name, amount, status });
+  });
+  return interventions.map((iv) => ({ ...iv, funding: byIntervention[iv.intervention_id] || [] }));
+};
 
 /**
  * GET /api/sites
@@ -11,7 +26,7 @@ const getAllSites = async (req, res) => {
 
     // Embed interventions for each site
     const siteIds = sites.map(s => s.site_id);
-    const interventions = await Intervention.find({ site_id: { $in: siteIds } }).lean();
+    const interventions = await withFunding(await Intervention.find({ site_id: { $in: siteIds } }).lean());
 
     // Group interventions by site_id
     const bySite = {};
@@ -41,7 +56,7 @@ const getSiteById = async (req, res) => {
     const site = await SiteProject.findOne({ site_id: req.params.site_id }).lean();
     if (!site) return res.status(404).json({ error: 'Site not found' });
 
-    const interventions = await Intervention.find({ site_id: req.params.site_id }).lean();
+    const interventions = await withFunding(await Intervention.find({ site_id: req.params.site_id }).lean());
     res.json({ ...site, interventions });
   } catch (err) {
     console.error('GET /api/sites/:site_id error:', err);

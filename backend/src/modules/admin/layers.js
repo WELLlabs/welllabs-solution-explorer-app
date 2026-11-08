@@ -3,6 +3,7 @@ const Well = require('../../models/Well');
 const SiteProject = require('../../models/SiteProject');
 const Intervention = require('../../models/Intervention');
 const FloodHotspot = require('../../models/FloodHotspot');
+const Funding = require('../../models/Funding');
 
 const LAT = { key: 'latitude', label: 'Latitude', type: 'number', required: true, aliases: ['lat', 'y'] };
 const LNG = { key: 'longitude', label: 'Longitude', type: 'number', required: true, aliases: ['lng', 'lon', 'long', 'x'] };
@@ -137,6 +138,35 @@ const LAYERS = {
       { key: 'remarks', label: 'Remarks', type: 'string' },
     ],
   },
+  funding: {
+    label: 'Funding commitments',
+    description: 'Funding received for BGG interventions, usually reported by the consultant. Each row is one commitment for one intervention. The project pages show how much is funded, and fully funded assets can no longer be selected.',
+    model: Funding,
+    uniqueKey: 'commitment_id',
+    fields: [
+      { key: 'commitment_id', label: 'Commitment ID', type: 'string', required: true, aliases: ['id', 'commitment'] },
+      { key: 'intervention_id', label: 'Intervention ID', type: 'string', required: true, aliases: ['intervention', 'asset_id'] },
+      { key: 'funder_name', label: 'Funder name', type: 'string', required: true, aliases: ['funder'] },
+      { key: 'amount', label: 'Amount (₹)', type: 'number', required: true, aliases: ['amount_inr', 'amount_rs'] },
+      { key: 'status', label: 'Status', type: 'enum', options: ['committed', 'received', 'completed'] },
+      { key: 'date', label: 'Date', type: 'string', aliases: ['commitment_date'] },
+      { key: 'funder_email', label: 'Funder email', type: 'string', aliases: ['email'] },
+      { key: 'source', label: 'Reported by', type: 'string', aliases: ['consultant', 'reported_by'] },
+      { key: 'notes', label: 'Notes', type: 'string' },
+    ],
+    // Every row must point at an intervention that exists; its site_id is filled in from it
+    resolve: async (items) => {
+      const ids = [...new Set(items.map(({ doc }) => doc.intervention_id))];
+      const found = await Intervention.find({ intervention_id: { $in: ids } }).select('intervention_id site_id').lean();
+      const siteOf = new Map(found.map((iv) => [iv.intervention_id, iv.site_id || null]));
+      return items.map(({ doc }) => {
+        if (!siteOf.has(doc.intervention_id)) return `Intervention ID "${doc.intervention_id}" does not exist`;
+        if (!(doc.amount > 0)) return 'Amount must be more than 0';
+        doc.site_id = siteOf.get(doc.intervention_id);
+        return null;
+      });
+    },
+  },
 };
 
 const normKey = (k) => String(k).toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -159,7 +189,7 @@ const normalizeRecord = (layer, raw) => {
     }
 
     if (field.type === 'number') {
-      const num = Number(value);
+      const num = typeof value === 'number' ? value : Number(String(value).replace(/[₹,\s]/g, ''));
       if (Number.isNaN(num)) {
         errors.push(`${field.label} must be a number`);
         continue;

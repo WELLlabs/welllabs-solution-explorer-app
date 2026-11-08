@@ -40,6 +40,35 @@ const downloadTemplate = (layer) => {
   URL.revokeObjectURL(url);
 };
 
+const csvCell = (value) => {
+  const text = String(value ?? '');
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
+// Every BGG intervention with its ID, so consultants can fill in funding rows next to the right asset
+const downloadInterventionList = async () => {
+  const { data: sites } = await api.get('/sites');
+  const header = ['intervention_id', 'site_id', 'site_name', 'intervention_type', 'quantity', 'tentative_cost_lakh', 'funded_so_far_rs'];
+  const rows = sites.flatMap((site) =>
+    (site.interventions || []).map((iv) => [
+      iv.intervention_id,
+      site.site_id,
+      site.name,
+      iv.type,
+      iv.quantity ?? '',
+      iv.details?.tentative_cost ?? '',
+      (iv.funding || []).reduce((sum, f) => sum + (f.amount || 0), 0) || '',
+    ])
+  );
+  const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\n');
+  const url = URL.createObjectURL(new Blob([`${csv}\n`], { type: 'text/csv' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'bgg_interventions_list.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 const FieldGuide = ({ layer }) => (
   <div className="flex flex-wrap gap-1.5">
     {layer.fields.map((f) => (
@@ -254,8 +283,11 @@ const AdminDataImport = () => {
     }
   };
 
-  const summarise = (data) =>
-    `${data.inserted} added, ${data.updated} updated${data.invalid?.length ? `, ${data.invalid.length} skipped` : ''}. Refresh the map to see the changes.`;
+  const summarise = (data) => {
+    const notSaved = (data.invalid || []).filter((r) => r.errors.some((e) => e.startsWith('Could not be saved')));
+    const reasons = notSaved.slice(0, 3).map((r) => `row ${r.row}: ${r.errors.join('; ')}`).join(' | ');
+    return `${data.inserted} added, ${data.updated} updated${data.invalid?.length ? `, ${data.invalid.length} skipped` : ''}.${reasons ? ` Not saved: ${reasons}.` : ''} Refresh the map to see the changes.`;
+  };
 
   const runImport = async () => {
     setBusy('import');
@@ -379,6 +411,15 @@ const AdminDataImport = () => {
                 <button type="button" onClick={() => downloadTemplate(layer)} className={secondaryBtn}>
                   Download CSV template
                 </button>
+                {layer.id === 'funding' && (
+                  <button
+                    type="button"
+                    onClick={() => downloadInterventionList().catch(() => setNotice({ type: 'error', text: 'Could not load the intervention list' }))}
+                    className={secondaryBtn}
+                  >
+                    Download intervention list
+                  </button>
+                )}
               </div>
               <p className="text-xs text-muted mt-3">
                 CSV: first row must be column names. GeoJSON: Point features; coordinates fill latitude and longitude, properties fill the other fields. Up to {MAX_ROWS} rows. Nothing is saved until you confirm.

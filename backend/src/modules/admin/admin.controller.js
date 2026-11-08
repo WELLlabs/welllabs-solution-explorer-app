@@ -4,7 +4,8 @@ const AuditLog = require('../../models/AuditLog');
 const FailedLogin = require('../../models/FailedLogin');
 const FloodHotspot = require('../../models/FloodHotspot');
 const { logAudit } = require('../../utils/audit');
-const { roleForRegistration, hashToken } = require('../auth/auth.controller');
+const { roleForRegistration, hashToken, frontendOrigin } = require('../auth/auth.controller');
+const { sendEmail } = require('../../utils/mailer');
 const { LAYERS, normalizeRecord, describeLayers } = require('./layers');
 
 const RESET_LINK_HOURS = 24;
@@ -18,6 +19,26 @@ const issuePasswordToken = (user, purpose, ttlMs) => {
   user.passwordTokenPurpose = purpose;
   user.passwordTokenExpires = new Date(Date.now() + ttlMs);
   return token;
+};
+
+// Emails an invite or reset link to the user. The admin still sees the link, so a failed email is not fatal.
+const emailPasswordLink = async (req, user, token, purpose) => {
+  const link = `${frontendOrigin(req.headers.origin)}/set-password?token=${token}`;
+  const invite = purpose === 'invite';
+  const sent = await sendEmail({
+    to: user.email,
+    subject: invite ? 'You are invited to Climate Solutions' : 'Reset your Climate Solutions password',
+    content: {
+      heading: invite ? `Welcome, ${user.name}` : 'Reset your password',
+      intro: invite
+        ? 'An administrator has created a Climate Solutions account for you. Open the link below to choose your password and sign in.'
+        : 'An administrator has sent you a link to choose a new password for your Climate Solutions account.',
+      rows: [['Account', user.email]],
+      button: { label: invite ? 'Set your password' : 'Choose a new password', url: link },
+      footer: `The link expires on ${user.passwordTokenExpires.toUTCString()} and works once.`,
+    },
+  });
+  return { emailed: sent.ok, emailError: sent.ok ? undefined : sent.message };
 };
 
 const findTargetUser = async (req, res) => {
@@ -108,7 +129,8 @@ const createResetLink = async (req, res) => {
       targetId: user._id,
       targetLabel: user.email,
     });
-    res.json({ token, purpose, expiresAt: user.passwordTokenExpires });
+    const delivery = await emailPasswordLink(req, user, token, purpose);
+    res.json({ token, purpose, expiresAt: user.passwordTokenExpires, ...delivery });
   } catch (error) {
     console.error('Reset link error:', error);
     res.status(500).json({ message: 'Server error creating reset link' });
@@ -175,7 +197,8 @@ const inviteUser = async (req, res) => {
       targetLabel: user.email,
       changes: { name: user.name, persona, userType, role },
     });
-    res.status(201).json({ user: publicUser(user), token, expiresAt: user.passwordTokenExpires });
+    const delivery = await emailPasswordLink(req, user, token, 'invite');
+    res.status(201).json({ user: publicUser(user), token, expiresAt: user.passwordTokenExpires, ...delivery });
   } catch (error) {
     console.error('Invite user error:', error);
     res.status(500).json({ message: 'Server error inviting user' });
@@ -250,6 +273,7 @@ const importLayer = async (req, res) => {
     }
 
     const valid = [];
+    const validRows = [];
     const invalid = [];
     const seenKeys = new Set();
     records.forEach((raw, i) => {
@@ -259,8 +283,25 @@ const importLayer = async (req, res) => {
         seenKeys.add(doc[layer.uniqueKey]);
       }
       if (errors.length) invalid.push({ row: i + 1, errors });
-      else valid.push(doc);
+      else {
+        valid.push(doc);
+        validRows.push(i + 1);
+      }
     });
+
+    // Layer-specific checks that need the database (e.g. funding must point at a real intervention)
+    if (layer.resolve && valid.length) {
+      const problems = await layer.resolve(valid.map((doc, i) => ({ doc, row: validRows[i] })));
+      const keep = problems.map((problem, i) => {
+        if (problem) invalid.push({ row: validRows[i], errors: [problem] });
+        return !problem;
+      });
+      const keptDocs = valid.filter((_, i) => keep[i]);
+      const keptRows = validRows.filter((_, i) => keep[i]);
+      valid.splice(0, valid.length, ...keptDocs);
+      validRows.splice(0, validRows.length, ...keptRows);
+      invalid.sort((a, b) => a.row - b.row);
+    }
 
     if (dryRun) {
       let existing = 0;
@@ -277,23 +318,41 @@ const importLayer = async (req, res) => {
 
     let inserted = 0;
     let updated = 0;
-    const keyed = layer.uniqueKey ? valid.filter((d) => d[layer.uniqueKey]) : [];
-    const unkeyed = layer.uniqueKey ? valid.filter((d) => !d[layer.uniqueKey]) : valid;
+    const items = valid.map((doc, i) => ({ doc, row: validRows[i] }));
+    const keyed = layer.uniqueKey ? items.filter((it) => it.doc[layer.uniqueKey]) : [];
+    const unkeyed = layer.uniqueKey ? items.filter((it) => !it.doc[layer.uniqueKey]) : items;
+    // With ordered: false the database saves every row it can; rows it rejects are reported, not fatal
+    const rejected = (err, batch) => {
+      if (!Array.isArray(err?.writeErrors)) throw err;
+      err.writeErrors.forEach((we) => {
+        invalid.push({ row: batch[we.index]?.row, errors: [`Could not be saved: ${we.errmsg || we.err?.errmsg || 'database error'}`] });
+      });
+    };
 
     if (keyed.length) {
-      const result = await layer.model.bulkWrite(
-        keyed.map((doc) => ({
-          updateOne: { filter: { [layer.uniqueKey]: doc[layer.uniqueKey] }, update: { $set: doc }, upsert: true },
-        })),
-        { ordered: false }
-      );
+      const ops = keyed.map(({ doc }) => ({
+        updateOne: { filter: { [layer.uniqueKey]: doc[layer.uniqueKey] }, update: { $set: doc }, upsert: true },
+      }));
+      let result;
+      try {
+        result = await layer.model.bulkWrite(ops, { ordered: false });
+      } catch (err) {
+        rejected(err, keyed);
+        result = err.result || {};
+      }
       inserted += result.upsertedCount || 0;
       updated += result.matchedCount || 0;
     }
     if (unkeyed.length) {
-      const docs = await layer.model.insertMany(unkeyed, { ordered: false });
-      inserted += docs.length;
+      try {
+        const docs = await layer.model.insertMany(unkeyed.map((it) => it.doc), { ordered: false });
+        inserted += docs.length;
+      } catch (err) {
+        rejected(err, unkeyed);
+        inserted += err.insertedDocs?.length || 0;
+      }
     }
+    invalid.sort((a, b) => a.row - b.row);
 
     await logAudit(req, {
       action: records.length === 1 ? 'layer.add_record' : 'layer.import',
@@ -307,6 +366,7 @@ const importLayer = async (req, res) => {
         updated,
         failed: invalid.length,
         sample: valid.slice(0, 3).map((d) => d[layer.uniqueKey] || d.name || d.projName || d.wellName || d.location),
+        ...(req.params.layer === 'funding' ? { totalAmount: valid.reduce((sum, d) => sum + (d.amount || 0), 0) } : {}),
       },
     });
 

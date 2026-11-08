@@ -47,6 +47,7 @@ const LayerControlSidebar = ({
   showNewProjects,
   setShowNewProjects,
   loading,
+  showGroundwaterSection = true,
 }) => {
   return (
     <div className="order-3 lg:order-none min-w-0 bg-white border border-[#C8D7BC]/80 rounded-[20px] p-4 sm:p-5 flex flex-col gap-4 shadow-sm h-auto">
@@ -415,6 +416,7 @@ const LayerControlSidebar = ({
       </div>
 
       {/* Section 3: Ground water risk in the city? */}
+      {showGroundwaterSection && (
       <div data-tour="groundwater-risk-section" className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
         <button
           type="button"
@@ -494,6 +496,7 @@ const LayerControlSidebar = ({
           </div>
         )}
       </div>
+      )}
 
       {/* Section 4: What can we do about it ? */}
       <div data-tour="explore-projects" className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">

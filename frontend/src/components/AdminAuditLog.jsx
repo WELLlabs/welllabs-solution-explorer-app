@@ -15,11 +15,13 @@ const ACTION_LABELS = {
   'user.invite': 'Invited user',
   'layer.import': 'Bulk import',
   'layer.add_record': 'Added record',
+  'consultant.interest': 'Funder interest emailed',
 };
 
 const TYPE_STYLES = {
   user: 'bg-sky-50 text-sky-700 border-sky-200',
   layer: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  consultant: 'bg-amber-50 text-amber-800 border-amber-200',
 };
 
 const formatValue = (v) => {
@@ -110,6 +112,7 @@ const AdminAuditLog = () => {
           <option value="">All types</option>
           <option value="user">Users</option>
           <option value="layer">Data layers</option>
+          <option value="consultant">Consultant emails</option>
         </select>
         <select value={action} onChange={(e) => setAction(e.target.value)} className={`${inputClass} cursor-pointer`} aria-label="Action">
           <option value="">All actions</option>

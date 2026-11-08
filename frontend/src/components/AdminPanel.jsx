@@ -1,12 +1,14 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import UserManagement from '@/components/UserManagement';
+import AdminProjectApprovals from '@/components/AdminProjectApprovals';
 import AdminDataImport from '@/components/AdminDataImport';
 import AdminAuditLog from '@/components/AdminAuditLog';
 import AdminFailedLogins from '@/components/AdminFailedLogins';
 
 const SECTIONS = [
   { id: 'users', label: 'Users', component: UserManagement },
+  { id: 'approvals', label: 'Project Approvals', component: AdminProjectApprovals },
   { id: 'import', label: 'Data Import', component: AdminDataImport },
   { id: 'audit', label: 'Audit Trail', component: AdminAuditLog },
   { id: 'security', label: 'Failed Logins', component: AdminFailedLogins },

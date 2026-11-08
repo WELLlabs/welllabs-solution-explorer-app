@@ -2,15 +2,43 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/context/AuthContext';
 import Header from '@/components/Header';
-import PendingApproval from '@/components/PendingApproval';
 import BggIntroduction from '@/components/BggIntroduction';
 import CaseStudies from '@/components/CaseStudies';
 import Interventions from '@/components/Interventions';
 import DataLayersView from '@/components/DataLayersView';
 import NewProjectsView from '@/components/NewProjectsView';
 import AdminPanel from '@/components/AdminPanel';
+import RoleScreen from '@/components/RoleScreen';
+import ComingSoon from '@/components/ComingSoon';
+import BggGuidelines from '@/components/BggGuidelines';
+import DesignCalculator from '@/pages/DesignCalculator';
+import UploadProject from '@/components/UploadProject';
 
-const PAGES_WITH_BACK = ['casestudy', 'interventions', 'newprojects', 'usermanagement'];
+const PAGES_WITH_BACK = ['casestudy', 'interventions', 'newprojects', 'usermanagement', 'uploadsite', 'uploadproject', 'registerproject', 'designcalculator', 'bggguidelines'];
+
+// The Back button row must use the same width and side padding as the page under it
+const DEFAULT_BACK_ROW = 'max-w-[1400px] mx-auto w-full px-3 sm:px-6 lg:px-8';
+const BACK_ROW_CLASS = {
+  casestudy: 'w-full px-4 sm:px-6 lg:px-10 xl:px-12',
+  newprojects: 'w-full max-w-[1400px] xl:max-w-[1680px] 2xl:max-w-[2100px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10',
+  usermanagement: 'max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8',
+  designcalculator: 'mx-auto w-full px-6 sm:px-10',
+};
+
+const UPLOAD_SITE_STEPS = [
+  'Upload your project or site boundary',
+  'Run the design calculator for that site',
+  'Get intervention impact, dimensions and design specifications',
+  'See the interventions proposed for your uploaded site',
+  'View details: overview, assets and timelines, impacts, cost, and matching funders',
+];
+
+// Roles that get their own screen instead of the map views
+const ROLE_SCREEN_TITLES = {
+  GBA: 'Govt Screen',
+  NGO: 'NGO Screen',
+  Citizen: 'Citizen Screen',
+};
 
 const spinnerClass = 'w-10 h-10 border-[3px] border-slate-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4';
 export const FIELD_PERMISSIONS = {
@@ -64,6 +92,9 @@ const Dashboard = () => {
     );
   }
 
+  const roleScreenTitle = ROLE_SCREEN_TITLES[user?.role];
+  const showMainViews = !roleScreenTitle;
+
   const handleBack = () => {
     // react-router keeps the in-app history position in history.state.idx
     if ((window.history.state?.idx ?? 0) > 0) {
@@ -89,13 +120,13 @@ const Dashboard = () => {
       <Header user={user} onLogout={handleLogout} />
 
       <main>
-        {/* PENDING VIEW */}
-        {user?.role === 'Pending' && (
-          <PendingApproval />
+        {/* ROLE-SPECIFIC SCREEN (Govt, NGO, Citizen) */}
+        {roleScreenTitle && (
+          <RoleScreen title={roleScreenTitle} />
         )}
 
-        {user?.role !== 'Pending' && PAGES_WITH_BACK.includes(activeTab) && (
-          <div className="max-w-[1400px] mx-auto w-full px-3 sm:px-6 lg:px-8 pt-4 text-left">
+        {showMainViews && PAGES_WITH_BACK.includes(activeTab) && (
+          <div className={`${BACK_ROW_CLASS[activeTab] || DEFAULT_BACK_ROW} pt-4 text-left`}>
             <button
               type="button"
               onClick={handleBack}
@@ -111,7 +142,7 @@ const Dashboard = () => {
         )}
 
         {/* 1. HOME VIEW */}
-        {user?.role !== 'Pending' && activeTab === 'home' && (
+        {showMainViews && activeTab === 'home' && (
           <BggIntroduction
             onNavigateToCase={handleNavigateToCase}
             onSetActiveTab={(tab) => navigate('/' + tab)}
@@ -119,12 +150,12 @@ const Dashboard = () => {
         )}
 
         {/* 2. DASHBOARD VIEW (consists of DataLayersView as the main map interface) */}
-        {user?.role !== 'Pending' && activeTab === 'dashboard' && (
+        {showMainViews && activeTab === 'dashboard' && (
           <DataLayersView />
         )}
 
         {/* 3. CASE STUDY VIEW */}
-        {user?.role !== 'Pending' && activeTab === 'casestudy' && (
+        {showMainViews && activeTab === 'casestudy' && (
           <CaseStudies
             highlightedCaseTitle={highlightedCaseTitle}
             clearHighlight={() => setHighlightedCaseTitle(null)}
@@ -132,16 +163,37 @@ const Dashboard = () => {
         )}
 
         {/* 4. INTERVENTIONS VIEW */}
-        {user?.role !== 'Pending' && activeTab === 'interventions' && (
+        {showMainViews && activeTab === 'interventions' && (
           <Interventions />
         )}
 
         {/* 5. NEW PROJECTS VIEW */}
-        {user?.role !== 'Pending' && activeTab === 'newprojects' && (
+        {showMainViews && activeTab === 'newprojects' && (
           <NewProjectsView />
         )}
 
-        {/* 8. ADMIN PANEL */}
+        {/* 6. REGISTER / UPLOAD A PROJECT */}
+        {showMainViews && (activeTab === 'uploadsite' || activeTab === 'uploadproject' || activeTab === 'registerproject') && (
+          <UploadProject />
+        )}
+
+        {/* 7. DESIGN CALCULATOR */}
+        {showMainViews && activeTab === 'designcalculator' && (
+          <DesignCalculator>
+            <ComingSoon
+              compact
+              title="Intervention impact, dimensions and design specifications"
+              description="Next, the calculator will size blue, green and grey interventions to hold this runoff, and show their impact and design specifications."
+            />
+          </DesignCalculator>
+        )}
+
+        {/* 8. BGG GUIDELINES */}
+        {showMainViews && activeTab === 'bggguidelines' && (
+          <BggGuidelines />
+        )}
+
+        {/* 9. ADMIN PANEL */}
         {user?.role === 'Admin' && activeTab === 'usermanagement' && (
           <AdminPanel />
         )}

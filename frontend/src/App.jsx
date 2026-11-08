@@ -7,6 +7,7 @@ import AdminLogin from '@/pages/AdminLogin';
 import SetPassword from '@/pages/SetPassword';
 import DesignCalculator from '@/pages/DesignCalculator';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import LegalPage from '@/pages/LegalPage';
 
 const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH || '/welllabs-admin-portal';
 
@@ -21,6 +22,8 @@ function App() {
             <Route path={ADMIN_PATH} element={<AdminLogin />} />
             <Route path="/set-password" element={<SetPassword />} />
             <Route path="/design-calculator" element={<DesignCalculator />} />
+            <Route path="/privacy-policy" element={<LegalPage kind="privacy" />} />
+            <Route path="/terms" element={<LegalPage kind="terms" />} />
             <Route path="/:activeTab?" element={<Dashboard />} />
           </Routes>
         </AuthProvider>

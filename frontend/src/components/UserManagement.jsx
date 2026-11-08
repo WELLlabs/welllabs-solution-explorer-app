@@ -17,10 +17,10 @@ import { formatDateTime, passwordLink } from '@/utils/adminHelpers';
 
 const ROLE_STYLES = {
   Admin: 'bg-purple-50 text-purple-700 border-purple-200',
-  Pending: 'bg-amber-50 text-amber-800 border-amber-200',
   'WELL Labs1': 'bg-turf-green/10 text-turf-green border-turf-green/25',
   'WELL Labs2': 'bg-turf-green/10 text-turf-green border-turf-green/25',
   Consultant: 'bg-sky-50 text-sky-700 border-sky-200',
+  NGO: 'bg-teal-50 text-teal-700 border-teal-200',
   GBA: 'bg-slate-100 text-slate-700 border-slate-200',
   Funder: 'bg-orange-50 text-orange-700 border-orange-200',
   Citizen: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -311,12 +311,6 @@ const ManageUserModal = ({ user, onClose, onChanged, onDeleted }) => {
       setLink(data);
     });
 
-  const forceLogout = () =>
-    run('logout', async () => {
-      const { data } = await api.post(`/admin/users/${user._id}/force-logout`);
-      setMessage(data.message);
-    });
-
   const remove = () => {
     if (!window.confirm(`Delete ${user.name} (${user.email})? This cannot be undone. Consider suspending instead.`)) return;
     run('delete', async () => {
@@ -380,25 +374,20 @@ const ManageUserModal = ({ user, onClose, onChanged, onDeleted }) => {
         }
       >
         {link ? (
-          <CopyLinkBox
-            url={passwordLink(link.token)}
-            expiresAt={link.expiresAt}
-            note="Send this to the user by email or chat. Any older link stops working."
-          />
+          <>
+            <EmailStatus result={link} email={user.email} />
+            <CopyLinkBox
+              url={passwordLink(link.token)}
+              expiresAt={link.expiresAt}
+              note={link.emailed ? 'You can also copy it. Any older link stops working.' : 'Send this to the user by email or chat. Any older link stops working.'}
+            />
+          </>
         ) : (
           <button type="button" onClick={createLink} disabled={!!busy} className={secondaryBtn}>
             {busy === 'link' ? 'Generating…' : status === 'invited' ? 'Generate invite link' : 'Generate reset link'}
           </button>
         )}
       </Section>
-
-      {!isAdmin && (
-        <Section title="Sessions" description={`Last login: ${formatDateTime(user.lastLoginAt)}. Sign the user out on every device.`}>
-          <button type="button" onClick={forceLogout} disabled={!!busy} className={secondaryBtn}>
-            {busy === 'logout' ? 'Signing out…' : 'Force logout'}
-          </button>
-        </Section>
-      )}
 
       {!isAdmin && (
         <Section title="Delete account" description="Permanently removes the user. This cannot be undone.">
@@ -415,6 +404,17 @@ const ManageUserModal = ({ user, onClose, onChanged, onDeleted }) => {
     </Modal>
   );
 };
+
+const EmailStatus = ({ result, email }) =>
+  result.emailed ? (
+    <p className="mb-3 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+      Emailed the link to <strong>{email}</strong>.
+    </p>
+  ) : (
+    <p className="mb-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+      The link was not emailed{result.emailError ? `: ${result.emailError}` : '.'} Copy it below and send it yourself.
+    </p>
+  );
 
 const INVITE_PERSONAS = ['govt', 'funder', 'designer', 'citizen'];
 
@@ -455,9 +455,10 @@ const InviteUserModal = ({ onClose, onInvited }) => {
   if (result) {
     return (
       <Modal title="Invite created" onClose={onClose} footer={<button type="button" onClick={onClose} className={primaryBtn}>Done</button>}>
+        <EmailStatus result={result} email={result.user.email} />
         <p className="text-sm text-ink mb-3">
-          Send this link to <strong>{result.user.email}</strong>. They will choose a password and can then sign in as{' '}
-          {PERSONAS[result.user.persona]?.label || result.user.persona}.
+          {result.emailed ? 'The invite link is below as well.' : <>Send this link to <strong>{result.user.email}</strong>.</>} They will choose a
+          password and can then sign in as {PERSONAS[result.user.persona]?.label || result.user.persona}.
         </p>
         <CopyLinkBox url={passwordLink(result.token)} expiresAt={result.expiresAt} />
       </Modal>
@@ -525,7 +526,7 @@ const StatCard = ({ label, value, className }) => (
   </div>
 );
 
-const EMPTY_FILTERS = { role: '', status: '', joinedFrom: '', joinedTo: '', lastLogin: '' };
+const EMPTY_FILTERS = { role: '', status: '', lastLogin: '' };
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -558,16 +559,10 @@ const UserManagement = () => {
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const from = filters.joinedFrom ? new Date(filters.joinedFrom).getTime() : null;
-    const to = filters.joinedTo ? new Date(filters.joinedTo).getTime() + DAY_MS : null;
 
     return users.filter((u) => {
       if (filters.role && displayRole(u.role) !== filters.role) return false;
       if (filters.status && statusOf(u) !== filters.status) return false;
-
-      const joined = u.createdAt ? new Date(u.createdAt).getTime() : null;
-      if (from && (!joined || joined < from)) return false;
-      if (to && (!joined || joined >= to)) return false;
 
       const last = u.lastLoginAt ? new Date(u.lastLoginAt).getTime() : null;
       if (filters.lastLogin === 'never' && last) return false;
@@ -644,14 +639,6 @@ const UserManagement = () => {
           <option value="suspended">Suspended</option>
           <option value="invited">Invited</option>
         </select>
-        <label className="flex flex-col text-[11px] font-semibold text-muted gap-1">
-          Joined from
-          <input type="date" value={filters.joinedFrom} onChange={setFilter('joinedFrom')} className={inputClass} />
-        </label>
-        <label className="flex flex-col text-[11px] font-semibold text-muted gap-1">
-          Joined to
-          <input type="date" value={filters.joinedTo} onChange={setFilter('joinedTo')} className={inputClass} />
-        </label>
         <select value={filters.lastLogin} onChange={setFilter('lastLogin')} className={`${inputClass} cursor-pointer`} aria-label="Last login">
           {LAST_LOGIN_FILTERS.map((f) => (
             <option key={f.id} value={f.id}>

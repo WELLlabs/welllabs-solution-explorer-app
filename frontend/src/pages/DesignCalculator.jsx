@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api, { getBaseURL } from '@/utils/api';
 import catchments from '@/data/subcatchments2km.json';
+import { isPointInGeometry } from '@/utils/geoUtils';
 
 const RAIN_OPTIONS = [
   { id: '1in', label: '1 Inch Rain' },
@@ -30,7 +32,12 @@ const catchmentByFid = new Map(
   catchments.features.map((feature) => [feature.properties.fid, feature.properties]),
 );
 
-export default function DesignCalculator() {
+export default function DesignCalculator({ children }) {
+  const [searchParams] = useSearchParams();
+  const startLat = parseFloat(searchParams.get('lat'));
+  const startLng = parseFloat(searchParams.get('lng'));
+  const startPoint = Number.isFinite(startLat) && Number.isFinite(startLng) ? [startLat, startLng] : null;
+  const startPointRef = useRef(startPoint);
   const mapNode = useRef(null);
   const mapRef = useRef(null);
   const selectedShape = useRef(null);
@@ -95,13 +102,29 @@ export default function DesignCalculator() {
     }).addTo(map);
 
     map.on('click', () => clearRef.current());
+
+    let startShape = null;
+    if (startPointRef.current) {
+      const [lat, lng] = startPointRef.current;
+      layer.eachLayer((shape) => {
+        if (!startShape && isPointInGeometry(lat, lng, shape.feature.geometry)) startShape = shape;
+      });
+      if (startShape) {
+        selectedShape.current = startShape;
+        startShape.setStyle(selectedStyle);
+        startShape.bringToFront();
+        onSelectRef.current(startShape.feature.properties.fid);
+      }
+    }
+    const focusBounds = startShape ? startShape.getBounds().pad(2) : layer.getBounds();
+
     const fitMap = () => {
       map.invalidateSize();
-      if (layer.getBounds().isValid()) {
-        map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+      if (focusBounds.isValid()) {
+        map.fitBounds(focusBounds, { padding: [20, 20] });
       }
     };
-    map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+    map.fitBounds(focusBounds, { padding: [20, 20] });
     mapRef.current = map;
     const frame = requestAnimationFrame(fitMap);
     const timer = window.setTimeout(fitMap, 200);
@@ -228,6 +251,11 @@ export default function DesignCalculator() {
           </div>
         </section>
       </div>
+      {children && (
+        <div className="mx-auto w-full max-w-[1200px] pb-8" onClick={(event) => event.stopPropagation()}>
+          {children}
+        </div>
+      )}
       </div>
     </div>
   );
