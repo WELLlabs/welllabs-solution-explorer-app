@@ -6,6 +6,7 @@ import Dashboard from '@/pages/Dashboard';
 import AdminLogin from '@/pages/AdminLogin';
 import SetPassword from '@/pages/SetPassword';
 import DesignCalculator from '@/pages/DesignCalculator';
+import DataStory from '@/pages/DataStory';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import LegalPage from '@/pages/LegalPage';
 
@@ -22,6 +23,7 @@ function App() {
             <Route path={ADMIN_PATH} element={<AdminLogin />} />
             <Route path="/set-password" element={<SetPassword />} />
             <Route path="/design-calculator" element={<DesignCalculator />} />
+            <Route path="/data-story" element={<DataStory />} />
             <Route path="/privacy-policy" element={<LegalPage kind="privacy" />} />
             <Route path="/terms" element={<LegalPage kind="terms" />} />
             <Route path="/:activeTab?" element={<Dashboard />} />

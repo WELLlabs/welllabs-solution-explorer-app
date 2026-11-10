@@ -3,7 +3,7 @@
 // Each address can be overridden with an env var, e.g. CONSULTANT_EMAIL_WELLLABS.
 const CONSULTANTS = {
   // welllabs: { name: 'WELL Labs', email: 'welllabs.jaltol@ifmr.ac.in' },
-  welllabs: { name: 'WELL Labs', email: 'shaikmansoor1200@gmail.com' },
+  welllabs: { name: 'WELL Labs', email: 'welllabs.jaltol@ifmr.ac.in' },
   fol: { name: 'Friends of Lakes', email: '' },
   malligavad: { name: 'Malligavad Foundation', email: '' },
   biome: { name: 'Biome Environmental Trust', email: '' },
